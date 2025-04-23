@@ -33,7 +33,7 @@ const config: Config = {
           800: "#ccefda",
           900: "#e5f7ed",
         },
-        "anti-flash_white": {
+        mywhite: {
           DEFAULT: "#f7f9fc",
           100: "#1b2d48",
           200: "#375b91",

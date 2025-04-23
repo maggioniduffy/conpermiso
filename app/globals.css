@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-chefchaouen-blue: #4a90e2;
+  --color-chefchaouen-blue-100: #081d34;
+  --color-chefchaouen-blue-200: #113968;
+  --color-chefchaouen-blue-300: #19569b;
+  --color-chefchaouen-blue-400: #2273cf;
+  --color-chefchaouen-blue-500: #4a90e2;
+  --color-chefchaouen-blue-600: #6fa7e8;
+  --color-chefchaouen-blue-700: #93bded;
+  --color-chefchaouen-blue-800: #b7d3f3;
+  --color-chefchaouen-blue-900: #dbe9f9;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* celadon */
+  --color-celadon: #7ed6a3;
+  --color-celadon-100: #10341f;
+  --color-celadon-200: #21683e;
+  --color-celadon-300: #319c5e;
+  --color-celadon-400: #4bc67e;
+  --color-celadon-500: #7ed6a3;
+  --color-celadon-600: #99dfb6;
+  --color-celadon-700: #b2e7c8;
+  --color-celadon-800: #ccefda;
+  --color-celadon-900: #e5f7ed;
+
+  /* mywhite */
+  --color-mywhite: #f7f9fc;
+  --color-mywhite-100: #1b2d48;
+  --color-mywhite-200: #375b91;
+  --color-mywhite-300: #678cc5;
+  --color-mywhite-400: #afc3e1;
+  --color-mywhite-500: #f7f9fc;
+  --color-mywhite-600: #f9fbfd;
+  --color-mywhite-700: #fbfcfd;
+  --color-mywhite-800: #fcfdfe;
+  --color-mywhite-900: #fefefe;
+
+  /* jet */
+  --color-jet: #333333;
+  --color-jet-100: #0a0a0a;
+  --color-jet-200: #141414;
+  --color-jet-300: #1f1f1f;
+  --color-jet-400: #292929;
+  --color-jet-500: #333333;
+  --color-jet-600: #5c5c5c;
+  --color-jet-700: #858585;
+  --color-jet-800: #adadad;
+  --color-jet-900: #d6d6d6;
+
+  /* charcoal */
+  --color-charcoal: #2c3e50;
+  --color-charcoal-100: #090c10;
+  --color-charcoal-200: #111820;
+  --color-charcoal-300: #1a252f;
+  --color-charcoal-400: #23313f;
+  --color-charcoal-500: #2c3e50;
+  --color-charcoal-600: #476481;
+  --color-charcoal-700: #698bac;
+  --color-charcoal-800: #9bb1c8;
+  --color-charcoal-900: #cdd8e3;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #f7f9fc;
     --foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Montserrat;
 }
