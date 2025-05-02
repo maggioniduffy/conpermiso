@@ -4,7 +4,7 @@ import "./globals.css";
 
 export default function NotFound() {
   return (
-    <div className="bg-mywhite flex p-4 gap-5 flex-col place-items-center justify-center -h-screen w-screen">
+    <div className="bg-mywhite flex p-4 gap-5 flex-col place-items-center justify-center h-screen w-screen">
       <h1 className="text-3xl font-semibold text-center">
         {" "}
         <b className="text-principal"> 404 </b> | Página no encontrada

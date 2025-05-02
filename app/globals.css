@@ -15,17 +15,17 @@
   --color-principal-800: #b7d3f3;
   --color-principal-900: #dbe9f9;
 
-  /* celadon */
-  --color-celadon: #7ed6a3;
-  --color-celadon-100: #10341f;
-  --color-celadon-200: #21683e;
-  --color-celadon-300: #319c5e;
-  --color-celadon-400: #4bc67e;
-  --color-celadon-500: #7ed6a3;
-  --color-celadon-600: #99dfb6;
-  --color-celadon-700: #b2e7c8;
-  --color-celadon-800: #ccefda;
-  --color-celadon-900: #e5f7ed;
+  /* accent */
+  --color-accent: #7ed6a3;
+  --color-accent-100: #10341f;
+  --color-accent-200: #21683e;
+  --color-accent-300: #319c5e;
+  --color-accent-400: #4bc67e;
+  --color-accent-500: #7ed6a3;
+  --color-accent-600: #99dfb6;
+  --color-accent-700: #b2e7c8;
+  --color-accent-800: #ccefda;
+  --color-accent-900: #e5f7ed;
 
   /* mywhite */
   --color-mywhite: #f7f9fc;
