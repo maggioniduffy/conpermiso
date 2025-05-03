@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DropdownMenu from "./DropdownMenu";
-import { sections } from "@/utils/constants";
+import { pages } from "@/utils/constants";
 import ProfileCard from "./ProfileCard";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,23 +11,6 @@ interface Props {
 }
 
 const NavMenu = ({ open, toggle }: Props) => {
-  const [hash, setHash] = useState("#mi-ubicacion");
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setHash(window.location.hash); // includes the '#' symbol
-    };
-
-    console.log("hash", hash);
-
-    handleHashChange(); // get it on first load
-    window.addEventListener("hashchange", handleHashChange); // listen for changes
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
-
   return (
     <div className="flex">
       <span
@@ -44,18 +27,15 @@ const NavMenu = ({ open, toggle }: Props) => {
       >
         <div className="flex justify-between w-full h-full">
           <ul className="w-full">
-            {sections.map((section, index) => (
+            {pages.map(({ name, href }, index) => (
               <li className="w-full" key={index}>
-                <a
+                <Link
                   key={index}
-                  href={`#${section.toLowerCase().replace(/\s+/g, "-")}`}
-                  className={`block py-2 text-sm text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium ${
-                    hash === `#${section.toLowerCase().replace(/\s+/g, "-")}` &&
-                    "font-semibold text-principal"
-                  }`}
+                  href={href}
+                  className={`block py-2 text-sm text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium`}
                 >
-                  {section}
-                </a>
+                  {name}
+                </Link>
               </li>
             ))}
           </ul>

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import DropdownMenu from "./DropdownMenu";
 import { useState } from "react";
-import { sections } from "@/utils/constants";
 import NavMenu from "./NavMenu";
 
 const Navbar = () => {

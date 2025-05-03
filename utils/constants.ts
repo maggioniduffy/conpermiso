@@ -1,1 +1,10 @@
-export const sections = ["Mi Ubicacion", "Mis Guardados"];
+export const pages = [
+  {
+    name: "Mi Ubicacion",
+    href: "/",
+  },
+  {
+    name: "Mis Guardados",
+    href: "/profile/mis-guardados",
+  },
+];

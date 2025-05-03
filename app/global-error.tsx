@@ -13,7 +13,7 @@ export default function GlobalError({
   return (
     // global-error must include html and body tags
     <html>
-      <body className="w-screen h-screen bg-jet">
+      <body className="w-screen h-screen bg-mywhite flex flex-col justify-center place-items-center">
         <h2 className="text-3xl text-principal font-semibold">
           {" "}
           Ocurrio un error inesperado!{" "}

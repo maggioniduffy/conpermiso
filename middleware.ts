@@ -1,17 +1,20 @@
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
-export default auth((req) => {
-  if (!req.auth) {
-    const signInUrl = new URL("/auth/signin", req.url);
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req });
+  if (!token) {
+    const signInUrl = new URL("/sign-in", req.url);
     signInUrl.searchParams.set("callbackUrl", req.url);
     return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
-});
+}
 
-// Apply middleware only to /profile and its subpaths
 export const config = {
-  matcher: ["/profile/:path*", "/edit"],
+  matcher: [
+    //"/profile/:path*",
+    "/edit",
+  ],
 };
