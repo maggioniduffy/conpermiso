@@ -18,6 +18,8 @@ const NavMenu = ({ open, toggle }: Props) => {
       setHash(window.location.hash); // includes the '#' symbol
     };
 
+    console.log("hash", hash);
+
     handleHashChange(); // get it on first load
     window.addEventListener("hashchange", handleHashChange); // listen for changes
 

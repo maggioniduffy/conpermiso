@@ -13,5 +13,5 @@ export default auth((req) => {
 
 // Apply middleware only to /profile and its subpaths
 export const config = {
-  matcher: ["/profile/:path*"],
+  matcher: ["/profile/:path*", "/edit"],
 };
