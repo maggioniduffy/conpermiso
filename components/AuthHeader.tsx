@@ -44,7 +44,7 @@ const AuthHeader = ({ authCase }: Case) => {
         src="/longlogo_white.png"
         width={450}
         height={250}
-        className="mx-auto"
+        className="mx-auto hover:scale-105"
         alt="logo"
       />
       <div className="mt-5 space-y-2">

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DropdownMenu from "./DropdownMenu";
 import { pages } from "@/utils/constants";
 import ProfileCard from "./ProfileCard";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 interface Props {
   open: boolean;
@@ -11,6 +12,11 @@ interface Props {
 }
 
 const NavMenu = ({ open, toggle }: Props) => {
+  const navigate = (href: string) => {
+    toggle();
+    redirect(href);
+  };
+
   return (
     <div className="flex">
       <span
@@ -29,13 +35,13 @@ const NavMenu = ({ open, toggle }: Props) => {
           <ul className="w-full">
             {pages.map(({ name, href }, index) => (
               <li className="w-full" key={index}>
-                <Link
+                <button
                   key={index}
-                  href={href}
-                  className={`block py-2 text-sm text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium`}
+                  onClick={() => navigate(href)}
+                  className={`block py-2 text-sm text-left text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium`}
                 >
                   {name}
-                </Link>
+                </button>
               </li>
             ))}
           </ul>

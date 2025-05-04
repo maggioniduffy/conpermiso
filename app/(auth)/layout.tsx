@@ -1,5 +1,10 @@
 import React from "react";
 import Image from "next/image";
+
+export const metadata = {
+  title: "Auth | MyApp",
+};
+
 const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <main className="flex">

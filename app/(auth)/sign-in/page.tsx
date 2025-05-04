@@ -8,8 +8,8 @@ const page = () => {
     "use server";
 
     const email = formData.get("email")?.toString();
-    console.log("Email:", email); // útil para debug
-    await signIn("resend", formData); // o pasa el email si tu signIn lo necesita
+    console.log("Email:", email);
+    await signIn("resend", formData);
   }
 
   return (

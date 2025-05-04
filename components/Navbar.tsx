@@ -2,14 +2,26 @@
 
 import Image from "next/image";
 import DropdownMenu from "./DropdownMenu";
-import { useState } from "react";
+import { use, useState } from "react";
 import NavMenu from "./NavMenu";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const Navbar = () => {
   const [open, setOpen] = useState<boolean>(false);
+  const [authOptions, setAuthOptions] = useState(false);
 
   const toggle = () => {
     setOpen((prevState) => !prevState);
+  };
+
+  const toggleAuth = () => {
+    setAuthOptions((prevState) => !prevState);
+  };
+
+  const navigate = (href: string) => {
+    toggleAuth();
+    redirect(href);
   };
 
   return (
@@ -17,17 +29,34 @@ const Navbar = () => {
       {" "}
       <div className="sticky top-0 rounded-xl md:rounded-none mx-4 md:mx-0 w-full shadow-md md:shadow-lg bg-mywhite flex justify-between items-center px-2">
         <DropdownMenu open={open} toggle={toggle} />
-        <Image
-          src={"/longlogo_white.png"}
-          alt="Logo"
-          width={200}
-          height={150}
-        />
+
+        <Link href={"/"}>
+          <Image
+            src={"/longlogo_white.png"}
+            alt="Logo"
+            width={200}
+            height={150}
+          />
+        </Link>
+        {authOptions && (
+          <ul className="h-fit shadow w-20 z-99 absolute right-0 top-10 bg-mywhite rounded">
+            <li className="text-jet text-sm p-2 text-center  ">
+              <button
+                onClick={() => navigate("/sign-in")}
+                className="hover:text-principal hover:font-semibold"
+              >
+                {" "}
+                Sign In
+              </button>
+            </li>
+          </ul>
+        )}
         <Image
           src={"/icons/cool_avatar.png"}
           alt="Account"
-          width={25}
+          width={35}
           height={25}
+          onClick={toggleAuth}
         />
       </div>
       {open && <NavMenu open={open} toggle={toggle} />}

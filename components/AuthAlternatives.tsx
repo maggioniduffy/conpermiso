@@ -1,4 +1,5 @@
 import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 
@@ -15,12 +16,14 @@ const AuthAlternatives = () => {
         className="space-y-4 text-sm font-medium"
         action={async () => {
           "use server";
-          await signIn("google");
+          await signIn("google", {
+            redirectTo: "/",
+          });
         }}
       >
         <button
           type="submit"
-          className="w-full bg-white flex hover:bg-gray-200 items-center justify-center gap-x-3 py-2.5 border shadow-lg rounded-lg hover:bg-gray-50 duration-150 active:bg-gray-100"
+          className="w-full bg-white flex hover:bg-gray-300 hover:font-semibold items-center justify-center gap-x-3 py-2.5 border shadow-lg rounded-lg duration-150 active:bg-gray-100"
         >
           <svg
             className="w-5 h-5"
