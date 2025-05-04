@@ -1,7 +1,13 @@
 import SpotCard from "@/components/SpotCard";
 import React from "react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-const page = () => {
+const page = async () => {
+  const session = await auth();
+
+  if (!session?.user) return redirect("/");
+
   return (
     <div className="w-full h-full p-8 flex flex-col gap-5">
       <h3 className="font-semibold text-2xl drop-shadow-xl"> Mis Guardados </h3>

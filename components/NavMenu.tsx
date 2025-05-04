@@ -1,10 +1,20 @@
 import React from "react";
 import DropdownMenu from "./DropdownMenu";
-import { pages } from "@/utils/constants";
-import ProfileCard from "./ProfileCard";
-import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import NavMenuFooter from "./NavMenuFooter";
+
+import { useSession } from "next-auth/react";
+
+const pages = [
+  {
+    name: "Mi Ubicacion",
+    href: "/",
+  },
+  {
+    name: "Mis Guardados",
+    href: "/profile/mis-guardados",
+  },
+];
 
 interface Props {
   open: boolean;
@@ -12,7 +22,9 @@ interface Props {
 }
 
 const NavMenu = ({ open, toggle }: Props) => {
-  const navigate = (href: string) => {
+  const { data: session } = useSession();
+
+  const navigate = async (href: string) => {
     toggle();
     redirect(href);
   };
@@ -33,32 +45,31 @@ const NavMenu = ({ open, toggle }: Props) => {
       >
         <div className="flex justify-between w-full h-full">
           <ul className="w-full">
-            {pages.map(({ name, href }, index) => (
-              <li className="w-full" key={index}>
+            <li className="w-full" key={pages[0].href}>
+              <button
+                key={pages[0].href}
+                onClick={() => navigate(pages[0].href)}
+                className={`block py-2 text-sm text-left text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium`}
+              >
+                {pages[0].name}
+              </button>
+            </li>
+            {session?.user && (
+              <li className="w-full" key={pages[1].href}>
                 <button
-                  key={index}
-                  onClick={() => navigate(href)}
+                  key={pages[1].href}
+                  onClick={() => navigate(pages[1].href)}
                   className={`block py-2 text-sm text-left text-gray-700 hover:bg-gray-100 w-full rounded-md font-medium`}
                 >
-                  {name}
+                  {pages[1].name}
                 </button>
               </li>
-            ))}
+            )}
           </ul>
           <DropdownMenu open={open} toggle={toggle} />
         </div>
 
-        <div className="flex flex-row justify-between gap-4 place-items-center">
-          <ProfileCard />
-          <Link href="/logout">
-            <Image
-              src={"/icons/logout.png"}
-              alt="log out"
-              width={30}
-              height={30}
-            />
-          </Link>
-        </div>
+        <NavMenuFooter session={session} />
       </div>
     </div>
   );
