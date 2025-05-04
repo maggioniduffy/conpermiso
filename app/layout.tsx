@@ -65,10 +65,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable}`}>
-        <Navbar />
-        {children}
-      </body>
+      <body className={`${montserrat.variable}`}>{children}</body>
     </html>
   );
 }

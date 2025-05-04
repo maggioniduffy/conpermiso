@@ -1,37 +1,45 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 interface Props {
   title?: string;
   image?: string;
+  href?: string;
 }
 
 const SpotCard = ({
   title = "Lo de pepe",
   image = "/biglogo_blue.png",
+  href = "/",
 }: Props) => {
+  const removeFromFavorites = () => {
+    alert("delete");
+  };
+
   return (
-    <div className="rounded-xl shadow-xl h-56 w-56 bg-mywhite border-3 relative my-2">
-      <div className="z-30 absolute bg-mywhite top-0 w-full h-8 p-1">
-        <Link href="/" className="font-medium hover:underline">
-          {" "}
-          {title}{" "}
-        </Link>
+    <article className="shadow-lg border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative">
+      <a href={href}>
+        <img src={image} alt={title} className="w-56 md:h-48 md:w-48" />
+      </a>
+      <div className="flex flex-row place-items-center justify-between w-full ">
+        <div className="p-2 rounded-b-lg flex justify-between">
+          <h3 className="text-lg text-gray-900 font-medium">{title}</h3>
+        </div>
+        <button
+          className="bg-gray-300 rounded-full h-full p-1 mx-2"
+          onClick={removeFromFavorites}
+        >
+          <Image
+            src={"/icons/trash.png"}
+            alt="eliminar de favoritos"
+            width={15}
+            height={20}
+          />
+        </button>
       </div>
-      <Link
-        href={"/"}
-        className="bg-gray-800 bg-opacity-50 absolute top-6 z-8 w-full h-full rounded-b-lg"
-      />
-      <Image
-        alt={title}
-        src={image}
-        width={100}
-        height={100}
-        quality={100}
-        className="absolute top-6 z-1 w-full h-full rounded-b-xl"
-      />
-    </div>
+    </article>
   );
 };
 

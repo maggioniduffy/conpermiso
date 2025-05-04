@@ -13,8 +13,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
     Resend({
-      apiKey: AUTH_RESEND_KEY,
-      from: "noreply@authjs.dev",
+      server: process.env.EMAIL_SERVER,
+      from: process.env.EMAIL_FROM,
+      sendVerificationRequest({
+        identifier: email,
+        url,
+        provider: { server, from },
+      }) {
+        // your function
+      },
     }),
   ],
   adapter: MongoDBAdapter(client),
