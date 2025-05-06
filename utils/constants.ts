@@ -5,6 +5,6 @@ export const pages = [
   },
   {
     name: "Mis Guardados",
-    href: "/profile/mis-guardados",
+    href: "/user/my-list",
   },
 ];
