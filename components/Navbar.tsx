@@ -25,9 +25,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full bg-transparent flex justify-start items-center h-fit">
+    <nav className="w-full bg-transparent flex justify-start items-center h-fit fixed top-0">
       {" "}
-      <div className="sticky top-0 rounded-xl md:rounded-none mx-4 md:mx-0 w-full shadow-md md:shadow-lg bg-mywhite flex justify-between items-center px-2">
+      <div className="rounded-xl md:rounded-none mx-4 md:mx-0 w-full shadow-md md:shadow-lg bg-mywhite flex justify-between items-center px-2">
         <DropdownMenu open={open} toggle={toggle} />
 
         <Link href={"/"}>

@@ -19,9 +19,13 @@ const SpotCard = ({
   };
 
   return (
-    <article className="shadow-lg border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative">
+    <article className="-z-10 shadow-2xl border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative rounded-xl">
       <a href={href}>
-        <img src={image} alt={title} className="w-56 md:h-48 md:w-48" />
+        <img
+          src={image}
+          alt={title}
+          className="w-56 md:h-48 md:w-48 rounded-t-xl"
+        />
       </a>
       <div className="flex flex-row place-items-center justify-between w-full ">
         <div className="p-2 rounded-b-lg flex justify-between">

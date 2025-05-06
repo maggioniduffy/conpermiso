@@ -1,7 +1,6 @@
 import { signOut } from "next-auth/react";
 import ProfileCard from "./ProfileCard";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Session } from "next-auth";
 
