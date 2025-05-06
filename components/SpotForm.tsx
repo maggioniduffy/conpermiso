@@ -6,26 +6,20 @@ import { formSchema } from "@/lib/validation";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { Bold, Italic, Send, Underline } from "lucide-react";
+import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Cost, Shift } from "@/utils/models";
 
-import React from "react";
-import { Cost } from "@/utils/models";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@radix-ui/react-select";
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group";
+import Shifts from "./Shifts";
 
 type CostType = Exclude<Cost, number> | "Precio";
 
 const SpotForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [costType, setCostType] = useState<CostType>("Sin cargo");
+
   const router = useRouter();
 
   const handleFormSubmit = async (prevState: any, formData: FormData) => {
@@ -94,7 +88,7 @@ const SpotForm = () => {
       action={formAction}
       className="w-full h-full md:h-fit md:w-2xl shadow-xl py-4 px-8 border-principal border-3 rounded-xl flex flex-col gap-3 bg-gray-200"
     >
-      <h1 className="text-jet text-3xl font-semibold text-center md:text-left bg-mywhite">
+      <h1 className="text-jet text-3xl font-semibold text-center md:text-left">
         {" "}
         Nuevo Spot{" "}
       </h1>
@@ -106,7 +100,7 @@ const SpotForm = () => {
         <Input
           id="title"
           name="title"
-          className="border-r-3 border-b-3 border-r-principal border-b-principal"
+          className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
           required
           placeholder="Spot Title"
         />
@@ -122,7 +116,7 @@ const SpotForm = () => {
         <Textarea
           id="description"
           name="description"
-          className="border-r-3 border-b-3 border-r-principal border-b-principal"
+          className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
           required
           placeholder="Spot Description"
         />
@@ -142,13 +136,13 @@ const SpotForm = () => {
           onValueChange={(value) => {
             if (value) setCostType(value as CostType);
           }}
-          className="flex gap-2"
+          className="flex gap-2 flex-wrap"
         >
           {["Sin cargo", "Con consumicion", "Precio"].map((label) => (
             <ToggleGroupItem
               key={label}
               value={label}
-              className="px-4 py-2 rounded-md border text-jet transition-all
+              className="px-4 bg-mywhite py-2 rounded-md border text-jet transition-all border border-principal
                  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:shadow-lg data-[state=on]:font-semibold"
             >
               {label}
@@ -161,7 +155,7 @@ const SpotForm = () => {
             type="number"
             id="customCost"
             name="cost"
-            className="border-r-3 border-b-3 border-r-principal border-b-principal mt-2 w-[220px]"
+            className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal mt-2 w-[220px]"
             placeholder="Ingresá el precio"
             min={0}
             step="any"
@@ -170,6 +164,13 @@ const SpotForm = () => {
         )}
 
         {errors.cost && <p className="Spot-form_error">{errors.cost}</p>}
+      </div>
+      <div>
+        <label htmlFor="shifts" className="font-semibold text-jet">
+          {" "}
+          Horarios{" "}
+        </label>
+        <Shifts />
       </div>
       <div>
         <label htmlFor="link" className="font-semibold text-jet">
