@@ -61,7 +61,7 @@ const Shifts = () => {
           </div>
 
           {!shift.allDay && (
-            <div className="flex gap-4 items-center mt-2">
+            <div className="flex gap-4 items-center mt-2 flex-wrap">
               <div>
                 <label className="block text-xs font-semibold text-jet">
                   Desde
@@ -71,8 +71,8 @@ const Shifts = () => {
                     type="number"
                     min="0"
                     max="23"
-                    placeholder="HH"
-                    className="w-16"
+                    placeholder="hh"
+                    className="w-16 text-sm"
                     value={shift.from.hour}
                     onChange={(e) =>
                       updateShift(index, {
@@ -84,8 +84,8 @@ const Shifts = () => {
                     type="number"
                     min="0"
                     max="59"
-                    placeholder="MM"
-                    className="w-16"
+                    placeholder="mm"
+                    className="w-16 text-sm"
                     value={shift.from.minute}
                     onChange={(e) =>
                       updateShift(index, {
@@ -104,8 +104,8 @@ const Shifts = () => {
                     type="number"
                     min="0"
                     max="23"
-                    placeholder="HH"
-                    className="w-16"
+                    placeholder="hh"
+                    className="w-16 text-sm"
                     value={shift.to.hour}
                     onChange={(e) =>
                       updateShift(index, {
@@ -117,8 +117,8 @@ const Shifts = () => {
                     type="number"
                     min="0"
                     max="59"
-                    placeholder="MM"
-                    className="w-16"
+                    placeholder="mm"
+                    className="w-16 text-sm"
                     value={shift.to.minute}
                     onChange={(e) =>
                       updateShift(index, {

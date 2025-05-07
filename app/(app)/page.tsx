@@ -1,9 +1,32 @@
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { PlusIcon, Terminal } from "lucide-react";
 import { SessionProvider } from "next-auth/react";
+import Link from "next/link";
+import { auth } from "@/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  const user = session?.user;
   return (
     <SessionProvider>
-      <div className="w-full h-screen bg-jet"></div>;
+      <div className="w-full h-screen bg-jet">
+        {user && (
+          <div className="group">
+            <Link
+              href={"/spot/create"}
+              className="bg-principal rounded-full h-fit fixed bottom-10 right-5 shadow-2xl hover:scale-105"
+            >
+              <PlusIcon width={40} height={40} />
+            </Link>
+
+            <Alert className="hidden group-hover:flex place-items-center w-fit fixed bottom-22 right-5">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Agregar Spot!</AlertTitle>
+            </Alert>
+          </div>
+        )}
+      </div>
+      ;
     </SessionProvider>
   );
 }

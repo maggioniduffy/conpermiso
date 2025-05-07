@@ -42,26 +42,38 @@ const horarioSchema = z.object({
   horario: timeRangeObject,
 });
 
+const imageUrlSchema = z
+  .string()
+  .url()
+  .refine(
+    async (url) => {
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        const contentType = res.headers.get("content-type");
+        return contentType?.startsWith("image/");
+      } catch {
+        return false;
+      }
+    },
+    { message: "URL must point to a valid image." }
+  );
+
+const imageFileSchema = z
+  .instanceof(File)
+  .refine((file) => file.type.startsWith("image/"), {
+    message: "Uploaded file must be an image.",
+  });
+
 export const formSchema = z.object({
   title: z.string().min(3).max(100),
   description: z.string().min(20).max(500),
   cost: cost,
   lat: z.number().min(-90).max(90),
   long: z.number().min(-180).max(180),
-  link: z
-    .string()
-    .url()
-    .refine(async (url) => {
-      try {
-        const res = await fetch(url, { method: "HEAD" });
-        const contentType = res.headers.get("content-type");
-
-        return contentType?.startsWith("image/");
-      } catch (error) {
-        return false;
-      }
-    })
-    .optional(),
+  image: z.object({
+    link: z.union([imageUrlSchema, imageFileSchema]).optional(),
+    // ...other fields
+  }),
   shifts: z.array(horarioSchema),
   address: z.string().min(3).max(50).optional(),
 });

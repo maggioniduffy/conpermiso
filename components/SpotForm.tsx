@@ -24,11 +24,13 @@ const SpotForm = () => {
 
   const handleFormSubmit = async (prevState: any, formData: FormData) => {
     try {
+      const rawLink = formData.get("image");
       const formValues = {
         title: formData.get("title") as string,
         description: formData.get("description") as string,
         category: formData.get("category") as string,
-        link: formData.get("link") as string,
+        image:
+          rawLink instanceof File && rawLink.size === 0 ? undefined : rawLink,
         lat: formData.get("lat"),
         long: formData.get("long"),
         address: formData.get("address") as string,
@@ -54,7 +56,7 @@ const SpotForm = () => {
         const fieldErros = error.flatten().fieldErrors;
         setErrors(fieldErros as unknown as Record<string, string>);
         toast("Error", {
-          description: "Please check your inputs and try again",
+          description: "Chequea los campos ingresados e intenta de vuelta",
         });
         return { ...prevState, error: "Validation failed", status: "ERROR" };
       }
@@ -173,19 +175,30 @@ const SpotForm = () => {
         <Shifts />
       </div>
       <div>
-        <label htmlFor="link" className="font-semibold text-jet">
+        <label htmlFor="image" className="font-semibold text-jet">
           {" "}
           Image URL
         </label>
         <Input
-          id="link"
-          name="link"
-          className="border-r-3 border-b-3 border-r-principal border-b-principal"
+          id="image"
+          name="image"
+          className="border-r-3 border-b-3 border-r-principal border-b-principal bg-mywhite"
           required
-          placeholder="Spot Image URL"
+          placeholder="Paste image URL here"
         />
 
-        {errors.link && <p className="Spot-form_error"> {errors.link} </p>}
+        <p className="text-center mt-1 text-gray-600 text-sm"> Or </p>
+        <Input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          className="mt-2 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
+               file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100"
+        />
+
+        {errors.image && <p className="Spot-form_error"> {errors.image} </p>}
       </div>
 
       <Button
