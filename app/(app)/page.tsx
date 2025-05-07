@@ -3,13 +3,14 @@ import { PlusIcon, Terminal } from "lucide-react";
 import { SessionProvider } from "next-auth/react";
 import Link from "next/link";
 import { auth } from "@/auth";
+import SpotModal from "@/components/SpotModal";
 
 export default async function Home() {
   const session = await auth();
   const user = session?.user;
   return (
     <SessionProvider>
-      <div className="w-full h-screen bg-jet">
+      <div className="w-full h-screen bg-jet py-20 place-items-center">
         {user && (
           <div className="group">
             <Link
@@ -25,6 +26,7 @@ export default async function Home() {
             </Alert>
           </div>
         )}
+        <SpotModal />
       </div>
       ;
     </SessionProvider>
