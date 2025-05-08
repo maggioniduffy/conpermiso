@@ -22,4 +22,9 @@ export const daysNames = [
   "Domingo",
 ];
 
+export const daysKeys = ["L", "M", "X", "J", "V", "Sábado", "Domingo"];
+
 export const daysMap = new Map(days.map((day, i) => [day, daysNames[i]]));
+export const reverseDaysMap = new Map(
+  daysNames.map((name, i) => [name, days[i]])
+);

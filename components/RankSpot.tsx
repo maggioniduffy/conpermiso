@@ -1,37 +1,41 @@
-import { StarIcon } from "lucide-react";
-import React from "react";
-import { Button } from "./ui/button";
+"use client";
 
-const RankSpot = () => {
+import { useState } from "react";
+
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "./ui/button";
+import { Send } from "lucide-react";
+
+export default function RankSpot() {
+  const [value, setValue] = useState([3]);
+
+  const emojis = ["😡", "🙁", "😐", "🙂", "😍"];
+  const labels = ["Mala", "Regular", "Bien", "Muy Bien", "Excelente"];
+
   return (
-    <div className="flex w-full flex-col place-items-center gap-2 mt-5">
-      <p className="text-gray-500 text-center text-sm">
-        {" "}
-        Fuiste? Valoramos tu opinion.{" "}
-      </p>
-      <div className="flex gap-1">
-        <Button variant={"outline"}>
-          <StarIcon />
-        </Button>
-        <Button variant={"outline"}>
-          <StarIcon />
-        </Button>
-        <Button variant={"outline"}>
-          <StarIcon />
-        </Button>
-        <Button variant={"outline"}>
-          <StarIcon />
-        </Button>
-        <Button variant={"outline"}>
-          <StarIcon />
-        </Button>
+    <div className="*:not-first:mt-3 flex place-items-center flex-col">
+      <Label className="text-gray-500">Fuiste? Valoramos tu opinion</Label>
+      <div className="flex flex-row w-full items-center gap-2">
+        <Slider
+          value={value}
+          onValueChange={setValue}
+          min={1}
+          max={5}
+          className="opacity-80"
+          showTooltip
+          tooltipContent={(value) => labels[value - 1]}
+          aria-label="Fuiste? Valoramos tu opinion"
+        />
+        <span className="text-2xl">{emojis[value[0] - 1]}</span>
       </div>
-      <Button variant={"link"} className="text-principal">
+      <Button className="p-2 h-fit text-mywhite hover:bg-principal-300 bg-principal flex shadow-2xl">
+        <p className="text-[10px]"> Enviar </p> <Send className="" />{" "}
+      </Button>
+      <Button variant={"link"} className="text-accent-100">
         {" "}
         Sugerir ediciones{" "}
       </Button>
     </div>
   );
-};
-
-export default RankSpot;
+}

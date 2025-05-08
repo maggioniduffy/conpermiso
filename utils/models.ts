@@ -1,8 +1,8 @@
 export type Cost = "Sin cargo" | "Con consumicion" | number;
 
 export type Time = {
-  hour: number;
-  minute: number;
+  hour?: string;
+  minute?: string;
 };
 
 export type Day = 1 | 2 | 3 | 4 | 5 | 6 | 7;

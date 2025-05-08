@@ -13,6 +13,7 @@ import { Cost } from "@/utils/models";
 
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group";
 import ShiftsInput from "./ShiftsInput";
+import Uploader from "./Uploader";
 
 type CostType = Exclude<Cost, number> | "Precio";
 
@@ -78,17 +79,10 @@ const SpotForm = () => {
     status: "INITIAL",
   });
 
-  const updateCostType = (value: string) => {
-    try {
-      const newValue = value as CostType;
-      setCostType(newValue);
-    } catch (error) {}
-  };
-
   return (
     <form
       action={formAction}
-      className="w-full h-full md:h-fit md:w-2xl shadow-xl py-4 px-8 border-principal border-3 rounded-xl flex flex-col gap-3 bg-gray-200"
+      className="w-full h-full md:h-fit md:w-2xl shadow-xl py-4 px-8 border-principal border-3 rounded-xl flex flex-col gap-3 bg-gray-100"
     >
       <h1 className="text-jet text-3xl font-semibold text-center md:text-left">
         {" "}
@@ -188,15 +182,7 @@ const SpotForm = () => {
         />
 
         <p className="text-center mt-1 text-gray-600 text-sm"> Or </p>
-        <Input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          className="mt-2 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-               file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700
-               hover:file:bg-blue-100"
-        />
+        <Uploader />
 
         {errors.image && <p className="Spot-form_error"> {errors.image} </p>}
       </div>

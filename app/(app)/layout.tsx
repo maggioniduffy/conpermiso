@@ -9,7 +9,7 @@ export default function RootLayout({
 }>) {
   return (
     <SessionProvider>
-      <main>
+      <main className="bg-jet h-screen max-h-screen">
         <Navbar />
         {children}
       </main>

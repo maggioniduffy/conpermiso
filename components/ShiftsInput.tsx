@@ -2,15 +2,15 @@ import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Shift } from "@/utils/models";
+import { Day, Shift } from "@/utils/models";
 import { Checkbox } from "@/components/ui/checkbox";
-import { days, daysNames } from "@/utils/constants";
+import { days, daysMap, daysNames, reverseDaysMap } from "@/utils/constants";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const initial: Shift = {
   days: [],
-  from: { hour: "", minute: "" },
-  to: { hour: "", minute: "" },
+  from: {},
+  to: {},
   allDay: false,
 };
 
@@ -28,7 +28,9 @@ const ShiftsInput = () => {
   const toggleDay = (i: number, updatedDays: string[]) => {
     setShifts((prev) => {
       const updated = [...prev];
-      updated[i].days = updatedDays;
+      updated[i].days = updatedDays
+        .map((u) => reverseDaysMap.get(u))
+        .filter((d): d is Day => d !== undefined);
       return updated;
     });
   };
@@ -38,12 +40,14 @@ const ShiftsInput = () => {
       {shifts.map((shift, index) => (
         <div
           key={index}
-          className="w-full p-4 border-2 border-principal rounded-lg space-y-2 mb-3 shadow-sm bg-mywhite"
+          className="w-full p-4 border-r-3 border-b-3 border-r-principal border-b-principal rounded-lg space-y-2 mb-3 bg-mywhite"
         >
           <div className="flex gap-2 flex-wrap w-full">
             <ToggleGroup
               type="multiple"
-              value={shift.days}
+              value={shift.days
+                .map((d) => daysMap.get(d))
+                .filter((v): v is string => v !== undefined)}
               onValueChange={(value) => toggleDay(index, value)}
               className="w-full flex gap-1"
             >
@@ -54,7 +58,7 @@ const ShiftsInput = () => {
                   className="h-8 border border-principal text-jet font-bold
                     data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:shadow-md"
                 >
-                  {label}
+                  {daysMap.get(label)?.substring(0, 1)}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
@@ -73,12 +77,16 @@ const ShiftsInput = () => {
                     max="23"
                     placeholder="hh"
                     className="w-16 text-sm"
-                    value={shift.from.hour}
-                    onChange={(e) =>
+                    value={shift.from?.hour}
+                    onChange={(e) => {
+                      const value = Math.max(
+                        0,
+                        Math.min(23, Number(e.target.value))
+                      );
                       updateShift(index, {
-                        from: { ...shift.from, hour: e.target.value },
-                      })
-                    }
+                        from: { ...shift.from, hour: value + "" },
+                      });
+                    }}
                   />
                   <Input
                     type="number"
@@ -86,12 +94,16 @@ const ShiftsInput = () => {
                     max="59"
                     placeholder="mm"
                     className="w-16 text-sm"
-                    value={shift.from.minute}
-                    onChange={(e) =>
+                    value={shift.from?.minute}
+                    onChange={(e) => {
+                      const value = Math.max(
+                        0,
+                        Math.min(59, Number(e.target.value))
+                      );
                       updateShift(index, {
-                        from: { ...shift.from, minute: e.target.value },
-                      })
-                    }
+                        from: { ...shift.from, minute: value + "" },
+                      });
+                    }}
                   />
                 </div>
               </div>
@@ -106,12 +118,16 @@ const ShiftsInput = () => {
                     max="23"
                     placeholder="hh"
                     className="w-16 text-sm"
-                    value={shift.to.hour}
-                    onChange={(e) =>
+                    value={shift.to?.hour}
+                    onChange={(e) => {
+                      const value = Math.max(
+                        0,
+                        Math.min(23, Number(e.target.value))
+                      );
                       updateShift(index, {
-                        to: { ...shift.to, hour: e.target.value },
-                      })
-                    }
+                        to: { ...shift.to, hour: value + "" },
+                      });
+                    }}
                   />
                   <Input
                     type="number"
@@ -119,12 +135,16 @@ const ShiftsInput = () => {
                     max="59"
                     placeholder="mm"
                     className="w-16 text-sm"
-                    value={shift.to.minute}
-                    onChange={(e) =>
+                    value={shift.to?.minute}
+                    onChange={(e) => {
+                      const value = Math.max(
+                        0,
+                        Math.min(59, Number(e.target.value))
+                      );
                       updateShift(index, {
-                        to: { ...shift.to, minute: e.target.value },
-                      })
-                    }
+                        to: { ...shift.to, minute: value + "" },
+                      });
+                    }}
                   />
                 </div>
               </div>

@@ -2,7 +2,7 @@ import { Cost, Shift } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import RankSpot from "./RankSpot";
-import { daysMap } from "@/utils/constants";
+import { auth } from "@/auth";
 
 interface Props {
   title?: string;
@@ -13,15 +13,15 @@ interface Props {
   image?: string;
 }
 
-const SpotModal = ({
+const SpotModal = async ({
   title = "Lo de Pepe",
   description = " Default DescriptionDefault DescriptionDefault Description Default DescriptionDefault Description",
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
   shifts = [
     {
-      from: { hour: 12, minute: 30 },
-      to: { hour: 19, minute: 30 },
+      from: { hour: "12", minute: "30" },
+      to: { hour: "19", minute: "30" },
       days: [1, 4, 5],
       allDay: false,
     },
@@ -32,6 +32,9 @@ const SpotModal = ({
   ],
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8",
 }: Props) => {
+  const session = await auth();
+  const user = session?.user;
+
   return (
     <div className="bg-mywhite mx-10 md:w-2xl md:mx-1 rounded-xl border-3 border-principal min-h-72 max-h-full overflow-y-auto p-4 flex flex-col gap-5">
       <h2 className="font-medium text-4xl text-center ">{title}</h2>
@@ -67,8 +70,12 @@ const SpotModal = ({
           />
         </div>
       </div>
-      <hr className="border border-gray-300" />
-      <RankSpot />
+      {!user && (
+        <>
+          <hr className="border border-gray-300" />
+          <RankSpot />
+        </>
+      )}
     </div>
   );
 };

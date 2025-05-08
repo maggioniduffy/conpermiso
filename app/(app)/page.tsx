@@ -10,7 +10,7 @@ export default async function Home() {
   const user = session?.user;
   return (
     <SessionProvider>
-      <div className="w-full h-screen bg-jet py-20 place-items-center">
+      <div className="w-full h-full py-20 place-items-center">
         {user && (
           <div className="group">
             <Link
