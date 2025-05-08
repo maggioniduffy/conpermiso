@@ -9,10 +9,10 @@ import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Cost, Shift } from "@/utils/models";
+import { Cost } from "@/utils/models";
 
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group";
-import Shifts from "./Shifts";
+import ShiftsInput from "./ShiftsInput";
 
 type CostType = Exclude<Cost, number> | "Precio";
 
@@ -172,7 +172,7 @@ const SpotForm = () => {
           {" "}
           Horarios{" "}
         </label>
-        <Shifts />
+        <ShiftsInput />
       </div>
       <div>
         <label htmlFor="image" className="font-semibold text-jet">

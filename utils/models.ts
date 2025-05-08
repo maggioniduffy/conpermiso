@@ -1,13 +1,15 @@
 export type Cost = "Sin cargo" | "Con consumicion" | number;
 
 export type Time = {
-  hour: string;
-  minute: string;
+  hour: number;
+  minute: number;
 };
 
+export type Day = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
 export type Shift = {
-  days: string[];
-  from: Time;
-  to: Time;
+  days: Day[];
+  from?: Time;
+  to?: Time;
   allDay: boolean;
 };

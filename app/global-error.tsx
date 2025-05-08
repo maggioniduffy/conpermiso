@@ -19,7 +19,12 @@ export default function GlobalError({
           Ocurrio un error inesperado!{" "}
         </h2>
         <Image src={"/error.jpg"} width={300} height={300} alt="error" />
-        <Link href={"/"}>Volver a inicio </Link>
+        <Link
+          href={"/"}
+          className="underline text-principal font-semibold hover:scale-105"
+        >
+          Volver a inicio{" "}
+        </Link>
       </body>
     </html>
   );

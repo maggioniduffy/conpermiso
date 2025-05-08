@@ -14,7 +14,7 @@ const initial: Shift = {
   allDay: false,
 };
 
-const Shifts = () => {
+const ShiftsInput = () => {
   const [shifts, setShifts] = useState<Shift[]>([initial]);
 
   const updateShift = (i: number, field: Partial<Shift>) => {
@@ -166,4 +166,4 @@ const Shifts = () => {
   );
 };
 
-export default Shifts;
+export default ShiftsInput;

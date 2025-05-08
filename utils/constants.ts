@@ -1,3 +1,5 @@
+import { Day } from "./models";
+
 export const pages = [
   {
     name: "Mi Ubicacion",
@@ -9,15 +11,15 @@ export const pages = [
   },
 ];
 
-export const days = ["L", "M", "M", "J", "V", "S", "D"];
+export const days: Day[] = [1, 2, 3, 4, 5, 6, 7];
 export const daysNames = [
-  "lunes",
-  "martes",
-  "miércoles",
-  "jueves",
-  "viernes",
-  "sábado",
-  "domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo",
 ];
 
 export const daysMap = new Map(days.map((day, i) => [day, daysNames[i]]));
