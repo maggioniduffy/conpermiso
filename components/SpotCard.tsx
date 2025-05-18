@@ -19,7 +19,7 @@ const SpotCard = ({
   };
 
   return (
-    <article className="-z-10 shadow-2xl border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative rounded-xl">
+    <article className="shadow-2xl border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative rounded-xl">
       <a href={href}>
         <img
           src={image}

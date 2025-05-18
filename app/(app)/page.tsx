@@ -4,15 +4,16 @@ import { SessionProvider } from "next-auth/react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import SpotModal from "@/components/SpotModal";
-
+import MyMapContainer from "@/components/MapContainer";
 export default async function Home() {
   const session = await auth();
   const user = session?.user;
+
   return (
     <SessionProvider>
-      <div className="w-full h-full grid place-items-center relative">
+      <div className="w-full h-screen grid place-items-center relative overflow-hidden">
         {user && (
-          <div className="group fixed bottom-10 right-5  bg-principal rounded-full  ">
+          <div className="group fixed bottom-10 right-5 z-90 bg-principal rounded-full">
             <Link
               href={"/spot/create"}
               className="h-fit shadow-2xl hover:scale-105"
@@ -26,7 +27,7 @@ export default async function Home() {
             </Alert>
           </div>
         )}
-        <SpotModal />
+        <MyMapContainer />
       </div>
       ;
     </SessionProvider>

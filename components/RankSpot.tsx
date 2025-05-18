@@ -14,9 +14,9 @@ export default function RankSpot() {
   const labels = ["Mala", "Regular", "Bien", "Muy Bien", "Excelente"];
 
   return (
-    <div className="*:not-first:mt-3 flex place-items-center flex-col">
+    <div className="*:not-first:mt-3 flex place-items-center flex-col mt-2">
       <Label className="text-gray-500">Fuiste? Valoramos tu opinion</Label>
-      <div className="flex flex-row w-full items-center gap-2">
+      <div className="flex flex-row w-full items-center gap-1">
         <Slider
           value={value}
           onValueChange={setValue}
@@ -29,7 +29,7 @@ export default function RankSpot() {
         />
         <span className="text-2xl">{emojis[value[0] - 1]}</span>
       </div>
-      <Button className="p-2 h-fit text-mywhite hover:bg-principal-300 bg-principal flex shadow-2xl">
+      <Button className="p-1 h-fit text-mywhite hover:bg-principal-300 bg-principal flex shadow-2xl">
         <p className="text-[10px]"> Enviar </p> <Send className="" />{" "}
       </Button>
       <Button variant={"link"} className="text-accent-100">

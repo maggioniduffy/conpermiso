@@ -10,14 +10,14 @@ const page = async () => {
   if (!session?.user) return redirect("/");
 
   return (
-    <div className="w-full h-screen flex gap-5 pt-10 -z-1">
+    <div className="w-full h-screen flex gap-5 pt-10 bg-mywhite">
       <div className="hidden lg:flex w-1/4 p-3 profile-bg shadow-xl h-full border-r-3 border-principal p-8 flex-col gap-4">
         <h3 className="text-3xl font-semibold bg-mywhite">
           {" "}
           Faustino Maggioni Duffy
         </h3>
         <Image
-          className="rounded-full drop-shadow-lg -z-8"
+          className="rounded-full drop-shadow-lg"
           src={"/icons/cool_avatar.png"}
           width={50}
           height={50}
@@ -27,8 +27,8 @@ const page = async () => {
         <p className="text-gray-500 bg-mywhite"> fausmaggioni5@gmail.com </p>
         <p className="bg-mywhite"> Neuquen </p>
       </div>
-      <div className="flex flex-col w-full md:w-3xl p-8 gap-5 -z-10">
-        <h3 className="font-semibold text-2xl drop-shadow-xl -z-9">
+      <div className="flex flex-col w-full md:w-3xl p-8 gap-5">
+        <h3 className="font-semibold text-2xl drop-shadow-xl">
           {" "}
           Mis Guardados{" "}
         </h3>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useSession } from "next-auth/react";
 import { Cost, Shift } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
@@ -13,7 +16,7 @@ interface Props {
   image?: string;
 }
 
-const SpotModal = async ({
+const SpotModal = ({
   title = "Lo de Pepe",
   description = " Default DescriptionDefault DescriptionDefault Description Default DescriptionDefault Description",
   cost = "Sin cargo",
@@ -32,26 +35,26 @@ const SpotModal = async ({
   ],
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8",
 }: Props) => {
-  const session = await auth();
+  const { data: session } = useSession();
   const user = session?.user;
 
   return (
-    <div className="h-4/5 md:h-fit bg-mywhite mx-10 md:w-2xl md:mx-1 rounded-2xl md:rounded-xl border-3 border-principal overflow-y-auto p-4 flex flex-col gap-5">
-      <h2 className="font-medium text-4xl text-center ">{title}</h2>
+    <div className="h-full w-full bg-mywhite overflow-y-auto p-1 flex flex-col gap-1">
+      <h2 className="font-medium text-2xl text-center ">{title}</h2>
       <hr className="border border-gray-300" />
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:w-1/2 flex flex-col gap-4">
-          <p className="bg-mywhite-700 py-2 max-w-xl text-sm">
+      <div className="flex flex-col">
+        <div className="flex flex-col">
+          <p className="bg-mywhite-700 py-1 max-w-xl text-sm">
             {" "}
             {description}{" "}
           </p>
           <div>
             <h4 className="font-semibold"> Direccion </h4>
-            <p className="text-sm px-2"> {address}</p>
+            <p className="text-sm"> {address}</p>
           </div>
           <div>
             <h4 className="font-semibold"> Precio </h4>
-            <p className="text-sm px-2"> {cost}</p>
+            <p className="text-sm"> {cost}</p>
           </div>
           <div className="">
             <h4 className="font-semibold"> Horarios </h4>
@@ -60,7 +63,7 @@ const SpotModal = async ({
             ))}
           </div>
         </div>
-        <div className="md:w-1/2 flex place-items-center justify-center">
+        <div className="flex place-items-center justify-center">
           <Image
             src={image}
             width={500}

@@ -12,7 +12,6 @@ export default function RootLayout({
       <main className="bg-jet h-full flex flex-col">
         <Navbar />
         {children}
-        {/* <div className="flex-1 overflow-hidden">{children}</div> */}
       </main>
       <Toaster />
     </SessionProvider>
