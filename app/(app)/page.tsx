@@ -10,12 +10,12 @@ export default async function Home() {
   const user = session?.user;
   return (
     <SessionProvider>
-      <div className="w-full h-full py-20 place-items-center">
+      <div className="w-full h-full grid place-items-center relative">
         {user && (
-          <div className="group">
+          <div className="group fixed bottom-10 right-5  bg-principal rounded-full  ">
             <Link
               href={"/spot/create"}
-              className="bg-principal rounded-full h-fit fixed bottom-10 right-5 shadow-2xl hover:scale-105"
+              className="h-fit shadow-2xl hover:scale-105"
             >
               <PlusIcon width={40} height={40} />
             </Link>

@@ -36,7 +36,7 @@ const SpotModal = async ({
   const user = session?.user;
 
   return (
-    <div className="bg-mywhite mx-10 md:w-2xl md:mx-1 rounded-xl border-3 border-principal min-h-72 max-h-full overflow-y-auto p-4 flex flex-col gap-5">
+    <div className="h-4/5 md:h-fit bg-mywhite mx-10 md:w-2xl md:mx-1 rounded-2xl md:rounded-xl border-3 border-principal overflow-y-auto p-4 flex flex-col gap-5">
       <h2 className="font-medium text-4xl text-center ">{title}</h2>
       <hr className="border border-gray-300" />
       <div className="flex flex-col md:flex-row gap-4">
@@ -70,7 +70,7 @@ const SpotModal = async ({
           />
         </div>
       </div>
-      {!user && (
+      {user && (
         <>
           <hr className="border border-gray-300" />
           <RankSpot />
