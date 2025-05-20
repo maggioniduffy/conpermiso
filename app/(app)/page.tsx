@@ -3,30 +3,44 @@ import { PlusIcon, Terminal } from "lucide-react";
 import { SessionProvider } from "next-auth/react";
 import Link from "next/link";
 import { auth } from "@/auth";
-import SpotModal from "@/components/SpotModal";
 import MyMapContainer from "@/components/MapContainer";
-export default async function Home() {
+import SearchForm from "@/components/SearchForm";
+
+interface Params {
+  searchParams: Promise<{ query?: string }>;
+}
+
+export default async function Home({ searchParams }: Params) {
+  const query = (await searchParams).query;
+  const params = {
+    search: query || null,
+  };
+
   const session = await auth();
   const user = session?.user;
 
   return (
     <SessionProvider>
       <div className="w-full h-full grid place-items-center relative overflow-hidden">
-        {user && (
-          <div className="group fixed bottom-10 right-5 z-90 bg-principal rounded-full">
-            <Link
-              href={"/spot/create"}
-              className="h-fit shadow-2xl hover:scale-105"
-            >
-              <PlusIcon width={40} height={40} />
-            </Link>
+        <div className="fixed bottom-10 w-10/12 bg-mywhite h-12 rounded-lg shadow z-99 px-1 flex justify-between place-items-center">
+          <SearchForm query={query} />
+          {user && (
+            <div className="group w-fit z-90 bg-principal rounded-md">
+              <Link
+                href={"/spot/create"}
+                className="h-fit shadow-2xl hover:scale-105"
+              >
+                <PlusIcon width={40} height={40} />
+              </Link>
 
-            <Alert className="hidden group-hover:flex place-items-center w-fit fixed bottom-22 right-5">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>Agregar Spot!</AlertTitle>
-            </Alert>
-          </div>
-        )}
+              <Alert className="hidden group-hover:flex place-items-center w-fit fixed bottom-22 right-5">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Agregar Spot!</AlertTitle>
+              </Alert>
+            </div>
+          )}
+        </div>
+
         <MyMapContainer />
       </div>
       ;

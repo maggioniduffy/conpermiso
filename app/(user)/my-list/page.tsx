@@ -44,7 +44,7 @@ const page = async () => {
           </div>
         </div>
 
-        {user && (
+        {user && ( //filter by owner
           <div className="flex flex-col w-full md:w-3xl p-8 gap-5">
             <h3 className="font-semibold text-2xl drop-shadow-xl">
               {" "}
