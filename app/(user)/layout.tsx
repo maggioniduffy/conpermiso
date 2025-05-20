@@ -9,10 +9,8 @@ export default function RootLayout({
 }>) {
   return (
     <SessionProvider>
-      <main className="bg-trasparent h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 overflow-hidden">{children}</div>
-      </main>
+      <Navbar additionalClass="fixed z-99 top-0" />
+      <main className="bg-jet min-h-screen flex flex-col">{children}</main>
       <Toaster />
     </SessionProvider>
   );

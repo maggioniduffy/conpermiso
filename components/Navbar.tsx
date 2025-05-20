@@ -7,7 +7,11 @@ import NavMenu from "./NavMenu";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-const Navbar = () => {
+interface Props {
+  additionalClass?: string;
+}
+
+const Navbar = ({ additionalClass }: Props) => {
   const [open, setOpen] = useState<boolean>(false);
   const [authOptions, setAuthOptions] = useState(false);
 
@@ -25,9 +29,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full bg-transparent flex justify-start items-center h-fit fixed top-0 z-99">
+    <nav
+      className={`w-full bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
+    >
       {" "}
-      <div className="w-full shadow-md md:shadow-lg bg-mywhite flex justify-between items-center px-2">
+      <div className="w-full shadow-md md:shadow bg-mywhite flex justify-between items-center px-2">
         <DropdownMenu open={open} toggle={toggle} />
 
         <Link href={"/"}>

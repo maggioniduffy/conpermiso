@@ -15,7 +15,7 @@ export default function MyMapContainer() {
   );
 
   return (
-    <div className="bg-mywhite h-screen w-screen rounded-lg shadow-2xl z-80 pt-10">
+    <div className="bg-mywhite h-screen w-screen z-80">
       <Map />
     </div>
   );

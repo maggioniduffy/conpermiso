@@ -11,7 +11,7 @@ export default async function Home() {
 
   return (
     <SessionProvider>
-      <div className="w-full h-screen grid place-items-center relative overflow-hidden">
+      <div className="w-full h-full grid place-items-center relative overflow-hidden">
         {user && (
           <div className="group fixed bottom-10 right-5 z-90 bg-principal rounded-full">
             <Link

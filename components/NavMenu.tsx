@@ -12,7 +12,7 @@ const pages = [
   },
   {
     name: "Mis Guardados",
-    href: "/user/my-list",
+    href: "/my-list",
   },
 ];
 
