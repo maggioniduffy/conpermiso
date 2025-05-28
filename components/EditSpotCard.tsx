@@ -2,6 +2,7 @@ import { HoverCard } from "@/components/ui/hover-card";
 import { Delete, DeleteIcon, Edit, Trash, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Alert, AlertTitle } from "./ui/alert";
 
 interface Props {
   name?: string;
@@ -38,8 +39,19 @@ export default function ProfileCard({
           </div>
         </div>
         <div className="flex gap-2">
-          <Edit className="text-gray-500 hover:text-gray-700 cursor-pointer" />
-          <Trash2 className="text-gray-500 hover:text-gray-700 cursor-pointer" />
+          <Link href={"/spot/edit"} className="group relative">
+            <Alert className="hidden text-sm group-hover:flex place-items-center w-fit absolute right-2 bottom-5 bg-mywhite">
+              <AlertTitle>Editar</AlertTitle>
+            </Alert>
+            <Edit className="text-gray-500 hover:text-gray-700 cursor-pointer" />
+          </Link>
+          <Link href={"/spot/edit"} className="group relative">
+            <Alert className="hidden text-sm group-hover:flex place-items-center w-fit absolute right-2 bottom-5 bg-mywhite">
+              <AlertTitle>Borrar</AlertTitle>
+            </Alert>
+
+            <Trash2 className="text-gray-500 hover:text-gray-700 cursor-pointer" />
+          </Link>
         </div>
       </div>
     </HoverCard>

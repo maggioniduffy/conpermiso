@@ -17,7 +17,10 @@ import Uploader from "./Uploader";
 
 type CostType = Exclude<Cost, number> | "Precio";
 
-const SpotForm = () => {
+interface Props {
+  title?: string;
+}
+const SpotForm = ({ title = "Nuevo Spot" }: Props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [costType, setCostType] = useState<CostType>("Sin cargo");
 
@@ -85,8 +88,7 @@ const SpotForm = () => {
       className="w-full h-full md:h-fit md:w-2xl shadow-xl py-4 px-8 border-principal border-3 rounded-xl flex flex-col gap-3 bg-gray-100"
     >
       <h1 className="text-jet text-3xl font-semibold text-center md:text-left">
-        {" "}
-        Nuevo Spot{" "}
+        {title}
       </h1>
       <div>
         <label htmlFor="title" className="font-semibold text-jet">

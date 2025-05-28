@@ -22,7 +22,7 @@ export default async function Home({ searchParams }: Params) {
   return (
     <SessionProvider>
       <div className="w-full h-full grid place-items-center relative overflow-hidden">
-        <div className="fixed bottom-10 w-10/12 bg-mywhite h-12 rounded-lg shadow z-99 px-1 flex justify-between place-items-center">
+        <div className="fixed bottom-10 w-10/12 bg-mywhite h-12 rounded-lg shadow z-88 px-1 flex justify-between place-items-center">
           <SearchForm query={query} />
           {user && (
             <div className="group w-fit z-90 bg-principal rounded-md">

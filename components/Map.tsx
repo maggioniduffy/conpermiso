@@ -1,10 +1,9 @@
-import { MapContainer, Marker, Popup, TileLayer, Tooltip } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import SpotModal from "./SpotModal";
 import CurrentLocationMarker from "./CurrentLocationMarker";
-import { Navigation } from "lucide-react";
 import RecenterButton from "./RecenterButton";
 
 interface Props {
@@ -41,6 +40,7 @@ export default function MyMap({
           </Popup>
         </Marker>
       ))}
+
       <CurrentLocationMarker location={location} />
       <RecenterButton location={location} />
     </MapContainer>

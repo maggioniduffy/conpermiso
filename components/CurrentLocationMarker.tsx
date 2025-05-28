@@ -1,5 +1,6 @@
-import { Marker, Circle } from "react-leaflet";
+import { Marker, Circle, Popup } from "react-leaflet";
 import L from "leaflet";
+import SpotModal from "./SpotModal";
 
 interface Props {
   location: {
@@ -15,6 +16,11 @@ export default function CurrentLocationMarker({ location }: Props) {
 
   return (
     <>
+      <Marker position={latlng}>
+        <Popup maxHeight={500} maxWidth={250}>
+          <SpotModal />
+        </Popup>
+      </Marker>
       <Circle
         center={latlng}
         radius={30}
