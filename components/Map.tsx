@@ -6,6 +6,7 @@ import SpotModal from "./SpotModal";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
+import { customIcon } from "@/lib/map/icon";
 
 interface Props {
   location: {
@@ -38,7 +39,7 @@ export default function MyMap({
       <MapRecenter location={location} />
 
       {positions.map((position, index) => (
-        <Marker position={position} key={index + "marker"}>
+        <Marker position={position} key={index + "marker"} icon={customIcon}>
           <Popup maxHeight={500} maxWidth={250}>
             <SpotModal />
           </Popup>
