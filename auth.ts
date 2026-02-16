@@ -20,9 +20,33 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
   adapter: MongoDBAdapter(client),
   session: { strategy: "jwt" },
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/sign-in",
   },
+
+  callbacks: {
+    async jwt({ token, user, account }) {
+      if (account) {
+        token.provider = account.provider;
+      }
+
+      if (user) {
+        token.authProviderId = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
+        token.emailVerified = true;
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      session.user.id = token.authProviderId as string;
+      return session;
+    },
+  },
+
   debug: true,
 });

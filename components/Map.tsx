@@ -5,6 +5,7 @@ import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import SpotModal from "./SpotModal";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
+import MapRecenter from "./MapRecenter";
 
 interface Props {
   location: {
@@ -33,6 +34,9 @@ export default function MyMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+
+      <MapRecenter location={location} />
+
       {positions.map((position, index) => (
         <Marker position={position} key={index + "marker"}>
           <Popup maxHeight={500} maxWidth={250}>

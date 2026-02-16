@@ -8,10 +8,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
+    <>
       <Navbar additionalClass="fixed z-99 top-0" />
       <main className="bg-jet min-h-screen flex flex-col">{children}</main>
       <Toaster />
-    </SessionProvider>
+    </>
   );
 }

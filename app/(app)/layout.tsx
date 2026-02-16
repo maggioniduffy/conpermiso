@@ -8,12 +8,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
+    <>
       <main className="bg-trasparent h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 overflow-hidden">{children}</div>
       </main>
       <Toaster />
-    </SessionProvider>
+    </>
   );
 }

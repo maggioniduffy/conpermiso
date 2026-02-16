@@ -2,6 +2,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Metadata } from "next";
 import Navbar from "@/components/Navbar";
+import { Session } from "inspector/promises";
+import BackendAuthInitializer from "@/components/BackendAuthInitializer";
+import { SessionProvider } from "next-auth/react";
 
 const montserrat = localFont({
   src: [
@@ -66,7 +69,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} min-h-screen flex flex-col`}>
-        {children}
+        <SessionProvider>
+          <BackendAuthInitializer />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
