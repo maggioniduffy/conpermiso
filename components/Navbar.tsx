@@ -45,14 +45,14 @@ const Navbar = ({ additionalClass }: Props) => {
           />
         </Link>
         {authOptions && (
-          <ul className="h-fit shadow w-20 z-99 absolute right-0 top-10 bg-mywhite rounded">
+          <ul className="h-fit shadow min-w-20 z-99 absolute right-0 top-10 bg-mywhite rounded">
             <li className="text-jet text-sm p-2 text-center  ">
               <button
-                onClick={() => navigate("/sign-in")}
+                onClick={() => navigate("/auth")}
                 className="hover:text-principal hover:font-semibold"
               >
                 {" "}
-                Sign In
+                Sign In or Create Account
               </button>
             </li>
           </ul>

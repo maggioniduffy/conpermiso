@@ -7,6 +7,7 @@ import Resend from "next-auth/providers/resend";
 const AUTH_RESEND_KEY = process.env.AUTH_RESEND_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM;
 const EMAIL_SERVER = process.env.EMAIL_SERVER;
+
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
     Google({
@@ -24,7 +25,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: "/sign-in",
+    signIn: "/auth",
   },
 
   callbacks: {
@@ -46,6 +47,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
     async session({ session, token }) {
       session.user.id = token.authProviderId as string;
+      session.token = token; // Include all token data in session for debugging
       return session;
     },
   },

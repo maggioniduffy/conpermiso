@@ -20,7 +20,7 @@ const NavMenuFooter = ({ session }: { session: Session | null }) => {
           </button>
         </>
       ) : (
-        <Link className="text-sm font-medium hover:underline" href="/sign-in">
+        <Link className="text-sm font-medium hover:underline" href="/auth">
           Inicia sesion
         </Link>
       )}
