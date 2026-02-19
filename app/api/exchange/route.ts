@@ -22,7 +22,5 @@ export async function POST() {
     }),
   });
 
-  return new Response(await res.text(), {
-    status: res.status,
-  });
+  return Response.json(await res.json());
 }
