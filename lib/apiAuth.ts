@@ -7,6 +7,7 @@ export async function exchangeToken() {
 
   const { accessToken } = await res.json();
 
+  console.log("Received access token:", accessToken);
   localStorage.setItem("accessToken", accessToken);
 
   return accessToken;

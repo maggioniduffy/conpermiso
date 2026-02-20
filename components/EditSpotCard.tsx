@@ -10,7 +10,7 @@ interface Props {
   image?: string;
 }
 
-export default function ProfileCard({
+export default function EditSpotCard({
   name = "Faustino Maggioni",
   email = "fausmaggioni5@gmail.com",
   image = "/icons/cool_avatar.png",
