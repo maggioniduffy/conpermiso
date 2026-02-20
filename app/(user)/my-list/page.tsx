@@ -13,8 +13,8 @@ const page = async () => {
   const user = session.user;
   return (
     <div className="w-full pt-10 flex gap-5 min-w-screen bg-mywhite">
-      <div className="hidden lg:flex w-1/4 p-3 profile-bg shadow-xl border-r-3 border-principal p-8 flex-col gap-4">
-        <h3 className="text-3xl font-semibold bg-mywhite">
+      <div className="hidden lg:flex w-1/4 p-3 bg-principal-800 shadow-xl border-r-3 border-principal p-8 flex-col gap-4">
+        <h3 className="text-3xl font-semibold bg-mywhite p-2 rounded-lg drop-shadow-xl">
           {" "}
           Faustino Maggioni Duffy
         </h3>
@@ -26,8 +26,11 @@ const page = async () => {
           alt="Avatar"
           quality={100}
         />
-        <p className="text-gray-500 bg-mywhite"> fausmaggioni5@gmail.com </p>
-        <p className="bg-mywhite"> Neuquen </p>
+        <p className="text-gray-500 bg-mywhite p-2 rounded-lg drop-shadow-xl">
+          {" "}
+          fausmaggioni5@gmail.com{" "}
+        </p>
+        <p className="bg-mywhite p-2 rounded-lg drop-shadow-xl"> Neuquen </p>
       </div>
       <div className="flex flex-1 flex-col w-full gap-5 place-items-center">
         <div className="flex flex-col w-full md:w-3xl p-8 gap-5">

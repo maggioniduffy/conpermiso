@@ -53,7 +53,7 @@ const montserrat = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ConPermiso",
+  title: "KKapp",
   description: "Created by maggioniduffy",
   icons: [
     { rel: "icon", url: "/favicon.ico" },

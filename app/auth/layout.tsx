@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 export const metadata = {
-  title: "Auth | ConPermiso",
+  title: "Auth | KKapp",
 };
 
 const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
