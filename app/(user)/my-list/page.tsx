@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import EditSpotCard from "@/components/EditSpotCard";
 import ProfileCard from "@/components/ProfileCard";
 import FavoritesList from "@/components/FavoritesList";
+import MyOwnList from "@/components/MyOwnList";
 
 const page = async () => {
   const session = await auth();
@@ -28,13 +29,7 @@ const page = async () => {
               {" "}
               Agregados por mi{" "}
             </h3>
-            <div className="flex gap-6 flex-wrap justify-center md:justify-start">
-              <EditSpotCard />
-              <EditSpotCard />
-              <EditSpotCard />
-              <EditSpotCard />
-              <EditSpotCard />
-            </div>
+            <MyOwnList />
           </div>
         )}
       </div>

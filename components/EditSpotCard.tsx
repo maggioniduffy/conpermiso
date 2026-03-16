@@ -3,17 +3,24 @@ import { Delete, DeleteIcon, Edit, Trash, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Alert, AlertTitle } from "./ui/alert";
+import { Bath, GeoLocation, Shift } from "@/utils/models";
+import { Image as ImageType } from "@/utils/models";
 
 interface Props {
-  name?: string;
-  email?: string;
-  image?: string;
+  name: string;
+  images: ImageType[];
+  id: string;
+  description: string;
+  location: GeoLocation;
+  shifts: Shift[];
 }
-
 export default function EditSpotCard({
-  name = "Faustino Maggioni",
-  email = "fausmaggioni5@gmail.com",
-  image = "/icons/cool_avatar.png",
+  name,
+  images,
+  id,
+  shifts,
+  description,
+  location,
 }: Props) {
   return (
     <HoverCard>
@@ -21,10 +28,10 @@ export default function EditSpotCard({
         <div className="flex items-center gap-3">
           <Image
             className="shrink-0 rounded-full drop-shadow-lg"
-            src={image}
+            src={images[0].url}
             width={40}
             height={40}
-            alt="Avatar"
+            alt={images[0].url}
           />
           <div className="space-y-0.5">
             <p>
@@ -32,10 +39,10 @@ export default function EditSpotCard({
                 className="text-sm font-medium hover:underline"
                 href="/profile"
               >
-                Lo de Pepe
+                {name}
               </Link>
             </p>
-            <p className="text-muted-foreground text-xs">Descripcion</p>
+            <p className="text-muted-foreground text-xs">{description}</p>
           </div>
         </div>
         <div className="flex gap-2">

@@ -13,3 +13,35 @@ export type Shift = {
   to?: Time;
   allDay: boolean;
 };
+
+export interface Image {
+  url: string;
+  alt?: string;
+}
+
+export enum Allowed {
+  ONE = "one",
+  BOTH = "both",
+}
+
+export interface GeoLocation {
+  type: "Point";
+  coordinates: [number, number]; // [lng, lat]
+  address?: string;
+}
+
+export interface Bath {
+  _id: string;
+  name: string;
+  description: string;
+  images: Image[];
+  cost: Cost;
+  shifts: Shift[];
+  location: GeoLocation;
+  address: string;
+  allowed: Allowed;
+  reviews: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
