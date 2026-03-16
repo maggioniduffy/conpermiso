@@ -26,19 +26,12 @@ export default function ProfileCard({
       </div>
     );
 
-  if (!user)
-    return (
-      <div className="p-2 rounded-md flex items-center">
-        <p className="text-red-500 font-medium"> Error cargando perfil </p>
-      </div>
-    );
-
   return (
     <HoverCard>
       <div className="flex items-center gap-3">
         <Image
           className="shrink-0 rounded-full drop-shadow-lg"
-          src={user.image || image}
+          src={user?.image || image}
           width={40}
           height={40}
           alt="Avatar"
@@ -49,10 +42,10 @@ export default function ProfileCard({
               className="text-sm font-medium hover:underline"
               href="/profile"
             >
-              {user.name}
+              {user?.name}
             </Link>
           </p>
-          <p className="text-muted-foreground text-xs">{user.email}</p>
+          <p className="text-muted-foreground text-xs">{user?.email}</p>
         </div>
       </div>
     </HoverCard>

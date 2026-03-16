@@ -1,3 +1,5 @@
+"use client";
+
 import { PlusCircle } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
@@ -14,13 +16,18 @@ const initial: Shift = {
   allDay: false,
 };
 
-const ShiftsInput = () => {
+interface Props {
+  onChange: (shifts: Shift[]) => void;
+}
+
+const ShiftsInput = ({ onChange }: Props) => {
   const [shifts, setShifts] = useState<Shift[]>([initial]);
 
   const updateShift = (i: number, field: Partial<Shift>) => {
     setShifts((prev) => {
       const updated = [...prev];
       updated[i] = { ...updated[i], ...field };
+      onChange(updated);
       return updated;
     });
   };
@@ -31,6 +38,7 @@ const ShiftsInput = () => {
       updated[i].days = updatedDays
         .map((u) => reverseDaysMap.get(u))
         .filter((d): d is Day => d !== undefined);
+      onChange(updated);
       return updated;
     });
   };
@@ -81,7 +89,7 @@ const ShiftsInput = () => {
                     onChange={(e) => {
                       const value = Math.max(
                         0,
-                        Math.min(23, Number(e.target.value))
+                        Math.min(23, Number(e.target.value)),
                       );
                       updateShift(index, {
                         from: { ...shift.from, hour: value + "" },
@@ -98,7 +106,7 @@ const ShiftsInput = () => {
                     onChange={(e) => {
                       const value = Math.max(
                         0,
-                        Math.min(59, Number(e.target.value))
+                        Math.min(59, Number(e.target.value)),
                       );
                       updateShift(index, {
                         from: { ...shift.from, minute: value + "" },
@@ -122,7 +130,7 @@ const ShiftsInput = () => {
                     onChange={(e) => {
                       const value = Math.max(
                         0,
-                        Math.min(23, Number(e.target.value))
+                        Math.min(23, Number(e.target.value)),
                       );
                       updateShift(index, {
                         to: { ...shift.to, hour: value + "" },
@@ -139,7 +147,7 @@ const ShiftsInput = () => {
                     onChange={(e) => {
                       const value = Math.max(
                         0,
-                        Math.min(59, Number(e.target.value))
+                        Math.min(59, Number(e.target.value)),
                       );
                       updateShift(index, {
                         to: { ...shift.to, minute: value + "" },
@@ -157,7 +165,7 @@ const ShiftsInput = () => {
               onCheckedChange={(checked) =>
                 updateShift(index, { allDay: checked as boolean })
               }
-              className="rounded-full  border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
+              className="rounded-full border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
             />
             <span className="text-sm text-jet">Abierto 24 hs</span>
           </label>
@@ -167,17 +175,19 @@ const ShiftsInput = () => {
       <Button
         type="button"
         variant="outline"
-        onClick={() =>
-          setShifts((prev) => [
-            ...prev,
+        onClick={() => {
+          const newShifts = [
+            ...shifts,
             {
               days: [],
               from: { hour: "", minute: "" },
               to: { hour: "", minute: "" },
               allDay: false,
             },
-          ])
-        }
+          ];
+          setShifts(newShifts);
+          onChange(newShifts);
+        }}
         className="w-fit flex gap-2 items-center text-principal border-principal border-2 hover:scale-105"
       >
         <PlusCircle className="size-5" /> Agregar horario
