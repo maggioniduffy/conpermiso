@@ -6,12 +6,16 @@ import { use, useState } from "react";
 import NavMenu from "./NavMenu";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { useBackendUser } from "@/hooks/use-backend-user";
+import { signOut } from "next-auth/react";
 
 interface Props {
   additionalClass?: string;
 }
 
 const Navbar = ({ additionalClass }: Props) => {
+  const { user, loading } = useBackendUser();
+
   const [open, setOpen] = useState<boolean>(false);
   const [authOptions, setAuthOptions] = useState(false);
 
@@ -47,13 +51,23 @@ const Navbar = ({ additionalClass }: Props) => {
         {authOptions && (
           <ul className="h-fit shadow min-w-20 z-99 absolute right-0 top-10 bg-mywhite rounded">
             <li className="text-jet text-sm p-2 text-center  ">
-              <button
-                onClick={() => navigate("/auth")}
-                className="hover:text-principal hover:font-semibold"
-              >
-                {" "}
-                Sign In or Create Account
-              </button>
+              {!user ? (
+                <button
+                  onClick={() => navigate("/auth")}
+                  className="hover:text-principal hover:font-semibold cursor-pointer"
+                >
+                  {" "}
+                  Entra a tu cuenta o Registrate
+                </button>
+              ) : (
+                <button
+                  className="hover:text-principal hover:font-semibold cursor-pointer"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  {" "}
+                  Cerrar sesion{" "}
+                </button>
+              )}
             </li>
           </ul>
         )}

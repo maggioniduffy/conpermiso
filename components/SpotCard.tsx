@@ -2,21 +2,22 @@
 
 import React from "react";
 import { X } from "lucide-react";
+import { useFavorites } from "@/hooks/use-favorites";
 
 interface Props {
   title?: string;
   image?: string;
   href?: string;
+  id: string;
 }
 
 const SpotCard = ({
   title = "Lo de pepe",
   image = "/biglogo_blue.png",
   href = "/",
+  id,
 }: Props) => {
-  const removeFromFavorites = () => {
-    alert("delete");
-  };
+  const { removeFavorite } = useFavorites();
 
   return (
     <article className="shadow-2xl border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative rounded-xl">
@@ -33,7 +34,7 @@ const SpotCard = ({
         </div>
         <button
           className="bg-gray-300 rounded-full h-full p-1 mx-2 cursor-pointer"
-          onClick={removeFromFavorites}
+          onClick={() => removeFavorite(id)}
         >
           <X />
         </button>

@@ -19,8 +19,19 @@ export default function ProfileCard({
 }: Props) {
   const { user, loading } = useBackendUser();
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <p>Error</p>;
+  if (loading)
+    return (
+      <div className="p-2 rounded-md flex items-center">
+        <p className="text-principal font-medium">Cargando...</p>
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="p-2 rounded-md flex items-center">
+        <p className="text-red-500 font-medium"> Error cargando perfil </p>
+      </div>
+    );
 
   return (
     <HoverCard>
