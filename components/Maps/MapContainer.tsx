@@ -30,7 +30,7 @@ export default function MyMapContainer() {
         enableHighAccuracy: true,
         maximumAge: 100000, // cache position for up to 10s
         timeout: 10000, // max time before error
-      }
+      },
     );
 
     // ✅ Cleanup on unmount
@@ -39,11 +39,11 @@ export default function MyMapContainer() {
 
   const Map = useMemo(
     () =>
-      dynamic(() => import("@/components/Map"), {
+      dynamic(() => import("@/components/Maps/Map"), {
         loading: () => <Loader className="animate-spin m-auto h-full" />,
         ssr: false,
       }),
-    []
+    [],
   );
 
   return (

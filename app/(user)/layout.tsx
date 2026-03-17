@@ -1,6 +1,5 @@
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/Nav";
 import { Toaster } from "@/components/ui/sonner";
-import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
   children,

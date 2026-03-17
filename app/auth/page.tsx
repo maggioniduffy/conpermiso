@@ -1,5 +1,5 @@
-import AuthAlternatives from "@/components/AuthAlternatives";
-import AuthHeader from "@/components/AuthHeader";
+import AuthAlternatives from "@/components/Auth/AuthAlternatives";
+import AuthHeader from "@/components/Auth/AuthHeader";
 import { signIn } from "@/auth";
 
 const page = () => {

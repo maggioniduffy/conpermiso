@@ -1,6 +1,6 @@
 "use client";
 
-import { useBackendUser } from "@/hooks/use-backend-user";
+import { useBackendUser } from "@/hooks";
 
 import { HoverCard } from "@/components/ui/hover-card";
 import Image from "next/image";

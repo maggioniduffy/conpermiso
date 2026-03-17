@@ -1,9 +1,8 @@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PlusIcon, Terminal } from "lucide-react";
-import { SessionProvider } from "next-auth/react";
 import Link from "next/link";
 import { auth } from "@/auth";
-import MyMapContainer from "@/components/MapContainer";
+import MyMapContainer from "@/components/Maps/MapContainer";
 import SearchForm from "@/components/SearchForm";
 
 interface Params {

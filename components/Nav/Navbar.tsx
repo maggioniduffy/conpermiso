@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import DropdownMenu from "./DropdownMenu";
-import { use, useState } from "react";
-import NavMenu from "./NavMenu";
+import { useState } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { useBackendUser } from "@/hooks/use-backend-user";
+import { useBackendUser } from "@/hooks";
 import { signOut } from "next-auth/react";
+import DropdownMenu from "./DropdownMenu";
+import NavMenu from "./NavMenu";
 
 interface Props {
   additionalClass?: string;

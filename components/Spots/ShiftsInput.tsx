@@ -2,8 +2,8 @@
 
 import { PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { Day, Shift } from "@/utils/models";
 import { Checkbox } from "@/components/ui/checkbox";
 import { days, daysMap, daysNames, reverseDaysMap } from "@/utils/constants";

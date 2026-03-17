@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 
-import SpotForm from "@/components/SpotForm";
+import SpotForm from "@/components/Spots/SpotForm";
 import { redirect } from "next/navigation";
 
 const page = async () => {

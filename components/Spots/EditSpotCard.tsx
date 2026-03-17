@@ -2,7 +2,7 @@ import { HoverCard } from "@/components/ui/hover-card";
 import { Delete, DeleteIcon, Edit, Trash, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Alert, AlertTitle } from "./ui/alert";
+import { Alert, AlertTitle } from "../ui/alert";
 import { Bath, GeoLocation, Shift } from "@/utils/models";
 import { Image as ImageType } from "@/utils/models";
 

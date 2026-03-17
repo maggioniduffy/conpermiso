@@ -3,9 +3,9 @@
 import { useState, useActionState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Loader, Send } from "lucide-react";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -34,7 +34,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
 
   const MapPicker = useMemo(
     () =>
-      dynamic(() => import("@/components/MapPicker"), {
+      dynamic(() => import("@/components/Maps/MapPicker"), {
         loading: () => <Loader className="animate-spin" />,
         ssr: false,
       }),

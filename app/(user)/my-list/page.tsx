@@ -1,9 +1,9 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import EditSpotCard from "@/components/EditSpotCard";
-import ProfileCard from "@/components/ProfileCard";
-import FavoritesList from "@/components/FavoritesList";
-import MyOwnList from "@/components/MyOwnList";
+import EditSpotCard from "@/components/Spots/EditSpotCard";
+import ProfileCard from "@/components/User/ProfileCard";
+import FavoritesList from "@/components/User/FavoritesList";
+import MyOwnList from "@/components/User/MyOwnList";
 
 const page = async () => {
   const session = await auth();

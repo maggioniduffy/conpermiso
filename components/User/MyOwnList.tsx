@@ -1,10 +1,7 @@
 "use client";
 
-import { useFavorites } from "@/hooks/use-favorites";
-import React from "react";
-import SpotCard from "./SpotCard";
-import { useMyBaths } from "@/hooks/use-my-baths";
-import EditSpotCard from "./EditSpotCard";
+import { useFavorites, useMyBaths } from "@/hooks";
+import EditSpotCard from "../Spots/EditSpotCard";
 
 const MyOwnList = () => {
   const { baths, loading } = useMyBaths();

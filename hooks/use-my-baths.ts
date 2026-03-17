@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 // acordate de agregar esto al archivo o al componente que lo use
 
-export function useMyBaths() {
+export default function useMyBaths() {
   const [baths, setBaths] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

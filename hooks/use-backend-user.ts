@@ -23,7 +23,7 @@ function isTokenExpired(token: string): boolean {
 }
 
 // use-backend-user.ts
-export function useBackendUser() {
+export default function useBackendUser() {
   const [user, setUser] = useState<BackendUser | null>(null);
   const [loading, setLoading] = useState(true);
   const { status } = useSession(); // 👈 agregás esto

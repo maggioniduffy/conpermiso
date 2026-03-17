@@ -1,9 +1,9 @@
 import { signOut } from "next-auth/react";
-import ProfileCard from "./ProfileCard";
 import Image from "next/image";
 import Link from "next/link";
 import { Session } from "next-auth";
-import { useBackendUser } from "@/hooks/use-backend-user";
+import { useBackendUser } from "@/hooks";
+import ProfileCard from "../User/ProfileCard";
 
 const NavMenuFooter = ({ session }: { session: Session | null }) => {
   const { user, loading } = useBackendUser();

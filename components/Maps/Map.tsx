@@ -1,14 +1,16 @@
+"use client";
+
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import SpotModal from "./SpotModal";
-import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
 import { customIcon } from "@/lib/map/icon";
-import MapBoundsWatcher from "./Maps/MapBoundsWatcher";
+import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
+import CurrentLocationMarker from "./CurrentLocationMarker";
+import { Bath } from "@/utils/models";
 
 interface Props {
   location: {
@@ -42,7 +44,7 @@ export default function MyMap({
 
       <MapRecenter location={location} />
 
-      {baths.map((bath) => (
+      {baths.map((bath: Bath) => (
         <Marker
           key={bath._id}
           position={[

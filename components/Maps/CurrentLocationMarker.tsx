@@ -1,6 +1,6 @@
 import { Marker, Circle, Popup } from "react-leaflet";
 import L from "leaflet";
-import SpotModal from "./SpotModal";
+import { SpotModal } from "../Spots";
 
 interface Props {
   location: {

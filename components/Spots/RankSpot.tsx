@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 
 export default function RankSpot() {

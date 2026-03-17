@@ -2,7 +2,7 @@
 
 import React from "react";
 import { X } from "lucide-react";
-import { useFavorites } from "@/hooks/use-favorites";
+import { useFavorites } from "@/hooks";
 
 interface Props {
   title?: string;

@@ -2,7 +2,7 @@
 
 import { AlertCircleIcon, ImageUpIcon, XIcon } from "lucide-react";
 
-import { useFileUpload } from "@/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks";
 
 export default function Uploader() {
   const maxSizeMB = 5;

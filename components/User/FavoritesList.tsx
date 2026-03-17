@@ -1,8 +1,8 @@
 "use client";
 
-import { useFavorites } from "@/hooks/use-favorites";
+import { useFavorites } from "@/hooks";
 import React from "react";
-import SpotCard from "./SpotCard";
+import SpotCard from "../Spots/SpotCard";
 
 const FavoritesList = () => {
   const { favorites, loading, addFavorite } = useFavorites();

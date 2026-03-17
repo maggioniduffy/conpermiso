@@ -3,8 +3,7 @@
 import { apiFetch } from "@/lib/apiFetch";
 import { useState, useEffect } from "react";
 
-// hooks/use-favorites.ts
-export function useFavorites() {
+export default function useFavorites() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
