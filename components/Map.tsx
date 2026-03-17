@@ -7,6 +7,8 @@ import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
 import { customIcon } from "@/lib/map/icon";
+import MapBoundsWatcher from "./Maps/MapBoundsWatcher";
+import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 
 interface Props {
   location: {
@@ -22,6 +24,7 @@ export default function MyMap({
   zoom = 15,
   positions = [[-39, 0]],
 }: Props) {
+  const { baths, fetchBaths } = useBathsInBounds();
   return (
     <MapContainer
       center={
@@ -35,14 +38,20 @@ export default function MyMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      <MapBoundsWatcher onBoundsChange={fetchBaths} />
 
       <MapRecenter location={location} />
 
-      {positions.map((position, index) => (
-        <Marker position={position} key={index + "marker"} icon={customIcon}>
-          <Popup maxHeight={500} maxWidth={250}>
-            <SpotModal />
-          </Popup>
+      {baths.map((bath) => (
+        <Marker
+          key={bath._id}
+          position={[
+            bath.location.coordinates[1],
+            bath.location.coordinates[0],
+          ]}
+          icon={customIcon}
+        >
+          <Popup>{bath.name}</Popup>
         </Marker>
       ))}
 

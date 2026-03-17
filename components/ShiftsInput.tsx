@@ -1,7 +1,7 @@
 "use client";
 
 import { PlusCircle } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Day, Shift } from "@/utils/models";
@@ -27,8 +27,7 @@ const ShiftsInput = ({ onChange }: Props) => {
     setShifts((prev) => {
       const updated = [...prev];
       updated[i] = { ...updated[i], ...field };
-      onChange(updated);
-      return updated;
+      return updated; // ← solo actualizás el estado
     });
   };
 
@@ -38,10 +37,14 @@ const ShiftsInput = ({ onChange }: Props) => {
       updated[i].days = updatedDays
         .map((u) => reverseDaysMap.get(u))
         .filter((d): d is Day => d !== undefined);
-      onChange(updated);
-      return updated;
+      return updated; // ← solo actualizás el estado
     });
   };
+
+  // useEffect notifica al padre después del render
+  useEffect(() => {
+    onChange(shifts);
+  }, [shifts]);
 
   return (
     <>
@@ -176,17 +179,15 @@ const ShiftsInput = ({ onChange }: Props) => {
         type="button"
         variant="outline"
         onClick={() => {
-          const newShifts = [
-            ...shifts,
+          setShifts((prev) => [
+            ...prev,
             {
               days: [],
               from: { hour: "", minute: "" },
               to: { hour: "", minute: "" },
               allDay: false,
             },
-          ];
-          setShifts(newShifts);
-          onChange(newShifts);
+          ]);
         }}
         className="w-fit flex gap-2 items-center text-principal border-principal border-2 hover:scale-105"
       >

@@ -7,42 +7,43 @@ async function handler(
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
-
-  console.log(`Proxying request to: ${BACKEND_URL}/${path.join("/")}`);
-
+  console.log("PATH: ", path);
   const token = req.headers.get("authorization");
+  const contentType = req.headers.get("content-type") ?? "";
 
-  console.log(`Request method: ${req.method}`);
-  console.log(
-    token ? `Authorization token: ${token}` : "No authorization token provided",
-  );
-  const url = `${BACKEND_URL}/${path.join("/")}`;
+  const searchParams = req.nextUrl.searchParams.toString();
+  const url = `${BACKEND_URL}/${path.join("/")}${searchParams ? `?${searchParams}` : ""}`;
 
-  const body = req.method !== "GET" ? await req.text() : undefined;
+  let body: BodyInit | undefined;
+  if (req.method !== "GET") {
+    if (contentType.includes("multipart/form-data")) {
+      body = await req.arrayBuffer(); // 👈 lee como buffer, no como stream
+    } else {
+      body = await req.text();
+    }
+  }
 
-  console.log("Internal Secret:", process.env.INTERNAL_SECRET);
+  const headers: Record<string, string> = {
+    ...(token ? { Authorization: token } : {}),
+    "x-internal-secret": process.env.INTERNAL_SECRET!,
+    ...(!contentType.includes("multipart/form-data")
+      ? { "Content-Type": contentType || "application/json" }
+      : { "Content-Type": contentType }), // 👈 preserva el boundary
+  };
 
-  console.log("Headers sent to backend:", {
-    authorization: token,
-    internal: process.env.INTERNAL_SECRET,
-  });
-
+  console.log(body);
   const res = await fetch(url, {
     method: req.method,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: token } : {}),
-      "x-internal-secret": process.env.INTERNAL_SECRET!,
-    },
+    headers,
     body,
   });
 
   const data = await res.text();
+  console.log("BACKEND RESPONSE:", res.status, data);
 
   return new Response(data, {
     status: res.status,
     headers: { "Content-Type": "application/json" },
   });
 }
-
 export { handler as GET, handler as POST, handler as PUT, handler as DELETE };
