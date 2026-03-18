@@ -40,7 +40,7 @@ export default function ProfileCard({
           <p>
             <Link
               className="text-sm font-medium hover:underline"
-              href="/profile"
+              href="/my-list"
             >
               {user?.name}
             </Link>

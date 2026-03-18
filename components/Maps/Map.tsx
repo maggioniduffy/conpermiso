@@ -11,6 +11,7 @@ import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import { Bath } from "@/utils/models";
+import Link from "next/link";
 
 interface Props {
   location: {
@@ -53,7 +54,18 @@ export default function MyMap({
           ]}
           icon={customIcon}
         >
-          <Popup>{bath.name}</Popup>
+          <Popup>
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold">{bath.name}</span>
+              <span className="text-sm text-gray-500">{bath.address}</span>
+              <Link
+                href={`/spot/${bath._id}`}
+                className="text-principal text-sm underline"
+              >
+                Ver detalle
+              </Link>
+            </div>
+          </Popup>
         </Marker>
       ))}
 

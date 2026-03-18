@@ -29,8 +29,9 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
     null,
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const router = useRouter();
   const [allowed, setAllowed] = useState<Allowed>(Allowed.ONE);
+
+  const router = useRouter();
 
   const MapPicker = useMemo(
     () =>
@@ -52,10 +53,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
       backendForm.append("name", formData.get("name") as string);
       backendForm.append("description", formData.get("description") as string);
       backendForm.append("address", formData.get("address") as string);
-      backendForm.append(
-        "allowed",
-        (formData.get("allowed") as string) || Allowed.ONE,
-      );
+      backendForm.append("allowed", allowed);
 
       const cost =
         costType === "Precio" ? (formData.get("cost") as string) : costType;
@@ -70,9 +68,9 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
         }),
       );
 
-      const file = formData.get("image");
-      if (file instanceof File && file.size > 0) {
-        backendForm.append("file", file);
+      // en handleFormSubmit, reemplazá el bloque del file:
+      if (imageFile) {
+        backendForm.append("file", imageFile);
       }
 
       const res = await apiFetch("/baths", {
@@ -225,7 +223,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
 
       <div>
         <label className="font-semibold text-jet">Imagen</label>
-        <Uploader />
+        <Uploader onChange={setImageFile} />
       </div>
 
       <Button

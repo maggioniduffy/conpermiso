@@ -3,8 +3,13 @@
 import { AlertCircleIcon, ImageUpIcon, XIcon } from "lucide-react";
 
 import { useFileUpload } from "@/hooks";
+import { useEffect } from "react";
 
-export default function Uploader() {
+interface Props {
+  onChange?: (file: File | null) => void;
+}
+
+export default function Uploader({ onChange }: Props) {
   const maxSizeMB = 5;
   const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
 
@@ -27,6 +32,12 @@ export default function Uploader() {
 
   const previewUrl = files[0]?.preview || null;
 
+  const inputProps = getInputProps();
+
+  useEffect(() => {
+    onChange?.((files[0]?.file as File) ?? null);
+  }, [files]);
+
   return (
     <div className="flex flex-col gap-2 bg-mywhite">
       <div className="relative">
@@ -42,7 +53,11 @@ export default function Uploader() {
           className="border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none has-[input:focus]:ring-[3px]"
         >
           <input
-            {...getInputProps()}
+            {...inputProps}
+            onChange={(e) => {
+              inputProps.onChange?.(e);
+              onChange?.(e.target.files?.[0] ?? null);
+            }}
             className="sr-only"
             aria-label="Upload file"
             type="file"
