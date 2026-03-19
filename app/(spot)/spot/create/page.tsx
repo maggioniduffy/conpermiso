@@ -11,7 +11,7 @@ const page = async () => {
   // }
 
   return (
-    <div className="py-15 w-full min-h-screen bg-mywhite">
+    <div className="py-15 w-full bg-mywhite max-h-fit">
       <div className="flex place-items-center p-5 w-full justify-center">
         <SpotForm />
       </div>

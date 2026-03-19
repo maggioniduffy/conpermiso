@@ -34,7 +34,7 @@ const Navbar = ({ additionalClass }: Props) => {
 
   return (
     <nav
-      className={`w-full bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
+      className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
     >
       {" "}
       <div className="w-full shadow-md md:shadow bg-mywhite flex justify-between items-center px-2">

@@ -1,18 +1,19 @@
+// NavMenu.tsx
+"use client";
+
 import React from "react";
 import DropdownMenu from "./DropdownMenu";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
-
 import { useSession } from "next-auth/react";
+import { MapPin, Bookmark } from "lucide-react";
 
 const pages = [
-  {
-    name: "Mi Ubicacion",
-    href: "/",
-  },
+  { name: "Mi Ubicación", href: "/", icon: <MapPin className="size-4" /> },
   {
     name: "Mis Guardados",
     href: "/my-list",
+    icon: <Bookmark className="size-4" />,
   },
 ];
 
@@ -23,53 +24,60 @@ interface Props {
 
 const NavMenu = ({ open, toggle }: Props) => {
   const { data: session } = useSession();
+  const router = useRouter();
 
-  const navigate = async (href: string) => {
+  const navigate = (href: string) => {
     toggle();
-    redirect(href);
+    router.push(href);
   };
 
   return (
-    <div className="flex">
+    <div className="flex z-[1001]">
+      {/* overlay */}
       <span
-        className={`fixed top-0 left-0 w-full h-full bg-black z-89 transition-opacity duration-700 ease-in-out ${
-          open ? "opacity-50" : "opacity-0 pointer-events-none"
+        className={`fixed top-0 left-0 w-full h-full bg-black z-89 transition-opacity duration-500 ease-in-out ${
+          open ? "opacity-40" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggle}
       />
 
+      {/* drawer */}
       <div
-        className={`absolute top-0 left-0 h-screen z-90 transition-transform duration-700 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen z-90 transition-transform duration-500 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
-        } w-4/6 md:w-fit bg-white shadow-lg rounded-r-md flex flex-col justify-between pl-5 py-5 pr-2 border-r-3 border-principal`}
+        } w-72 bg-white shadow-2xl flex flex-col border-r border-gray-100`}
       >
-        <div className="flex justify-between w-full h-full text-lg font-semibold text-left text-gray-700 ">
-          <ul className="w-full">
-            <li className="w-full" key={pages[0].href}>
-              <button
-                key={pages[0].href}
-                onClick={() => navigate(pages[0].href)}
-                className={`block py-2 hover:bg-gray-100 w-full rounded-md text-left`}
-              >
-                {pages[0].name}
-              </button>
-            </li>
-            {session?.user && (
-              <li className="w-full" key={pages[1].href}>
-                <button
-                  key={pages[1].href}
-                  onClick={() => navigate(pages[1].href)}
-                  className={`block py-2 hover:bg-gray-100 w-full rounded-md text-left`}
-                >
-                  {pages[1].name}
-                </button>
-              </li>
-            )}
-          </ul>
+        {/* header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <span className="text-jet font-bold text-lg tracking-tight">
+            Menú
+          </span>
           <DropdownMenu open={open} toggle={toggle} />
         </div>
 
-        <NavMenuFooter session={session} />
+        {/* nav links */}
+        <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
+          {pages.map((page, i) => {
+            if (i === 1 && !session?.user) return null;
+            return (
+              <button
+                key={page.href}
+                onClick={() => navigate(page.href)}
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium text-left w-full group"
+              >
+                <span className="text-principal/60 group-hover:text-principal transition-colors">
+                  {page.icon}
+                </span>
+                {page.name}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* footer */}
+        <div className="border-t border-gray-100 px-4 py-4">
+          <NavMenuFooter session={session} />
+        </div>
       </div>
     </div>
   );

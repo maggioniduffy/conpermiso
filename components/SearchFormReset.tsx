@@ -1,20 +1,25 @@
+// components/SearchFormReset.tsx
 "use client";
 
 import { X } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 const SearchFormReset = () => {
+  const router = useRouter();
+
   const reset = () => {
     const form = document.querySelector("#search-form") as HTMLFormElement;
-
-    if (form) {
-      form.reset();
-    }
+    if (form) form.reset();
+    router.push("/");
   };
+
   return (
-    <button type="reset" onClick={reset}>
-      <Link href={"/"} className="text-jet">
-        <X className="size-5" />
-      </Link>
+    <button
+      type="button"
+      onClick={reset}
+      className="text-jet-800 hover:text-jet transition-colors shrink-0"
+    >
+      <X className="size-4" />
     </button>
   );
 };

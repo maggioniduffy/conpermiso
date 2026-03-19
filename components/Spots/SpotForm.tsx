@@ -1,231 +1,180 @@
 "use client";
 
-import { useState, useActionState, useMemo } from "react";
+import { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { Loader, Send } from "lucide-react";
+import {
+  Loader,
+  Send,
+  DollarSign,
+  Users,
+  MapPin,
+  Image as ImageIcon,
+  Clock,
+  Type,
+  AlignLeft,
+} from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import ShiftsInput from "./ShiftsInput";
 import Uploader from "./Uploader";
-import { apiFetch } from "@/lib/apiFetch";
-import { Shift } from "@/utils/models";
 import { Allowed } from "@/utils/models";
+import { useSpotForm } from "@/hooks/use-spot-form";
+import { SectionCard } from "./SectionCard";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
+
+const toggleClass = `
+  px-4 bg-mywhite py-2 rounded-lg border text-sm text-jet transition-all border-principal/30
+  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:shadow-sm data-[state=on]:font-semibold
+  whitespace-normal text-center
+`;
 
 interface Props {
   title?: string;
 }
 
 export default function SpotForm({ title = "Nuevo Spot" }: Props) {
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [costType, setCostType] = useState<CostType>("Sin cargo");
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [allowed, setAllowed] = useState<Allowed>(Allowed.ONE);
-  const [address, setAddress] = useState("");
-
-  const router = useRouter();
+  const {
+    costType,
+    setCostType,
+    shifts,
+    setShifts,
+    location,
+    address,
+    imageFile,
+    setImageFile,
+    allowed,
+    setAllowed,
+    isPending,
+    handleLocationChange,
+    handleSubmit,
+  } = useSpotForm();
 
   const MapPicker = useMemo(
     () =>
       dynamic(() => import("@/components/Maps/MapPicker"), {
-        loading: () => <Loader className="animate-spin" />,
+        loading: () => <Loader className="animate-spin text-principal" />,
         ssr: false,
       }),
     [],
   );
 
-  const handleFormSubmit = async (prevState: any, formData: FormData) => {
-    try {
-      if (!location) {
-        toast("Error", { description: "Seleccioná una ubicación en el mapa" });
-        return { ...prevState, error: "Missing location", status: "ERROR" };
-      }
-
-      const backendForm = new FormData();
-      backendForm.append("name", formData.get("name") as string);
-      backendForm.append("description", formData.get("description") as string);
-      backendForm.append("address", address);
-      backendForm.append("allowed", allowed); // 👈 en vez de formData.get("allowed")
-
-      const cost =
-        costType === "Precio" ? (formData.get("cost") as string) : costType;
-      backendForm.append("cost", cost);
-
-      backendForm.append("shifts", JSON.stringify(shifts));
-      backendForm.append(
-        "location",
-        JSON.stringify({
-          type: "Point",
-          coordinates: [location.lng, location.lat],
-        }),
-      );
-
-      // en handleFormSubmit, reemplazá el bloque del file:
-      if (imageFile) {
-        backendForm.append("file", imageFile);
-      }
-
-      const res = await apiFetch("/baths", {
-        method: "POST",
-        body: backendForm,
-        headers: {}, // sin Content-Type para que fetch setee el boundary
-      });
-
-      if (!res.ok) throw new Error();
-
-      toast("Éxito", { description: "Baño creado correctamente" });
-      router.push("/");
-    } catch {
-      toast("Error", { description: "Algo salió mal" });
-      return { ...prevState, error: "Error", status: "ERROR" };
-    }
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    await handleSubmit(formData);
   };
 
-  const [state, formAction, isPending] = useActionState(handleFormSubmit, {
-    error: "",
-    status: "INITIAL",
-  });
-
   return (
-    <form
-      action={formAction}
-      className="w-full h-full md:h-fit md:w-2xl shadow-xl py-4 px-8 border-principal border-3 rounded-xl flex flex-col gap-3 bg-gray-100"
-    >
-      <h1 className="text-jet text-3xl font-semibold text-center md:text-left">
+    <form onSubmit={onSubmit} className="w-full md:w-2xl flex flex-col gap-4">
+      <h1 className="text-jet text-2xl font-bold text-center md:text-left px-1">
         {title}
       </h1>
 
-      <div>
-        <label htmlFor="name" className="font-semibold text-jet">
-          Nombre
-        </label>
+      <SectionCard icon={<Type className="size-4" />} label="Nombre">
         <Input
-          id="name"
           name="name"
-          className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
+          className="bg-mywhite border border-principal/30 rounded-lg"
           placeholder="Nombre del baño"
           required
         />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-      </div>
+      </SectionCard>
 
-      <div>
-        <label htmlFor="description" className="font-semibold text-jet">
-          Descripción
-        </label>
+      <SectionCard icon={<AlignLeft className="size-4" />} label="Descripción">
         <Textarea
-          id="description"
           name="description"
-          className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
+          className="bg-mywhite border border-principal/30 rounded-lg resize-none"
           placeholder="Descripción del baño"
+          rows={3}
           required
         />
-      </div>
+      </SectionCard>
 
-      <div className="space-y-2">
-        <label className="font-semibold text-jet">Costo</label>
+      <SectionCard icon={<DollarSign className="size-4" />} label="Costo">
         <ToggleGroup
           type="single"
           value={costType}
-          onValueChange={(value) => {
-            if (value) setCostType(value as CostType);
+          onValueChange={(v) => {
+            if (v) setCostType(v as CostType);
           }}
-          className="flex gap-2 flex-wrap"
+          className="flex gap-2 flex-wrap w-full"
         >
-          {["Sin cargo", "Con consumicion", "Precio"].map((label) => (
-            <ToggleGroupItem
-              key={label}
-              value={label}
-              className="px-4 bg-mywhite py-2 rounded-md border text-jet transition-all border-principal
-                data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:font-semibold w-full"
-            >
-              {label}
-            </ToggleGroupItem>
-          ))}
+          {(["Sin cargo", "Con consumicion", "Precio"] as CostType[]).map(
+            (label) => (
+              <ToggleGroupItem
+                key={label}
+                value={label}
+                className={toggleClass + " text-wrap"}
+              >
+                {label}
+              </ToggleGroupItem>
+            ),
+          )}
         </ToggleGroup>
         {costType === "Precio" && (
           <Input
             type="number"
             name="cost"
-            className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal w-[220px]"
-            placeholder="Ingresá el precio"
+            className="bg-mywhite border border-principal/30 rounded-lg w-40"
+            placeholder="$ Precio"
             min={0}
             required
           />
         )}
-      </div>
+      </SectionCard>
 
-      <div className="space-y-2">
-        <label className="font-semibold text-jet">Baños</label>
+      <SectionCard
+        icon={<Users className="size-4" />}
+        label="¿Qué se puede hacer?"
+      >
         <ToggleGroup
           type="single"
           value={allowed}
-          onValueChange={(value) => {
-            if (value) setAllowed(value as Allowed);
+          onValueChange={(v) => {
+            if (v) setAllowed(v as Allowed);
           }}
           className="flex gap-2"
         >
-          <ToggleGroupItem
-            value={Allowed.ONE}
-            className="px-4 bg-mywhite py-2 rounded-md border text-jet transition-all border-principal
-        data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:font-semibold"
-          >
-            Solo 1
+          <ToggleGroupItem value={Allowed.ONE} className={toggleClass}>
+            Número 1
           </ToggleGroupItem>
-          <ToggleGroupItem
-            value={Allowed.BOTH}
-            className="px-4 bg-mywhite py-2 rounded-md border text-jet transition-all border-principal
-        data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:font-semibold"
-          >
+          <ToggleGroupItem value={Allowed.BOTH} className={toggleClass}>
             Ambos
           </ToggleGroupItem>
         </ToggleGroup>
-      </div>
+      </SectionCard>
 
-      <div>
-        <label className="font-semibold text-jet">Horarios</label>
+      <SectionCard icon={<Clock className="size-4" />} label="Horarios">
         <ShiftsInput onChange={setShifts} />
-      </div>
+      </SectionCard>
 
-      <div>
-        <label className="font-semibold text-jet">Ubicación</label>
-        <p className="text-sm text-gray-500 mb-2">
-          Hacé click en el mapa para seleccionar la ubicación
+      <SectionCard icon={<MapPin className="size-4" />} label="Ubicación">
+        <p className="text-xs text-jet-700">
+          Buscá la dirección o hacé click en el mapa
         </p>
-        <MapPicker
-          onChange={({ lat, lng, address }) => {
-            setLocation({ lat, lng });
-            setAddress(address);
-          }}
-        />
+        <MapPicker onChange={handleLocationChange} />
         {location && (
-          <p className="text-xs text-gray-500 mt-1">
-            Seleccionado: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+          <p className="text-xs text-principal font-medium">
+            📍{" "}
+            {address ||
+              `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
           </p>
         )}
-      </div>
+      </SectionCard>
 
-      <div>
-        <label className="font-semibold text-jet">Imagen</label>
+      <SectionCard icon={<ImageIcon className="size-4" />} label="Imagen">
         <Uploader onChange={setImageFile} />
-      </div>
+      </SectionCard>
 
       <Button
         type="submit"
-        className="bg-principal mt-2 text-white hover:bg-principal-400 hover:scale-105"
+        className="w-full bg-principal text-white hover:bg-principal-400 hover:scale-[1.02] transition-all rounded-xl py-5 font-semibold text-base flex items-center gap-2"
         disabled={isPending}
       >
         {isPending ? "Enviando..." : "Crear baño"}
-        <Send className="size-6 ml-2" />
+        <Send className="size-4" />
       </Button>
     </form>
   );

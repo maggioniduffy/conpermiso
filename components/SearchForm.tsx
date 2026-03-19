@@ -1,3 +1,4 @@
+// components/SearchForm.tsx
 import Form from "next/form";
 import { Search } from "lucide-react";
 import SearchFormReset from "./SearchFormReset";
@@ -5,28 +6,24 @@ import SearchFormReset from "./SearchFormReset";
 interface Props {
   query?: string;
 }
+
 const SearchForm = ({ query }: Props) => {
   return (
     <Form
-      action={"/"}
+      action="/"
       scroll={false}
       id="search-form"
-      className="w-full h-full p-2 flex"
+      className="flex items-center gap-2 flex-1 h-9"
     >
-      <input
-        defaultValue={query}
-        name="query"
-        placeholder="Buscar..."
-        className="h-full w-full p-1 rounded-md"
-      />
-      <div className="flex gap-2">
-        {query ? (
-          <SearchFormReset />
-        ) : (
-          <button type="submit" className="text-jet">
-            <Search className="size-5" />
-          </button>
-        )}
+      <div className="flex items-center gap-2 flex-1 bg-mywhite rounded-xl px-3 h-full border border-gray-200 focus-within:border-principal transition-colors">
+        <Search className="size-4 text-jet-800 shrink-0" />
+        <input
+          defaultValue={query}
+          name="query"
+          placeholder="Buscar..."
+          className="flex-1 bg-transparent text-sm text-jet placeholder:text-jet-800 outline-none h-full"
+        />
+        {query && <SearchFormReset />}
       </div>
     </Form>
   );

@@ -1,5 +1,5 @@
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { PlusIcon, Terminal } from "lucide-react";
+// app/(app)/page.tsx
+import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import MyMapContainer from "@/components/Maps/MapContainer";
@@ -12,36 +12,30 @@ interface Params {
 
 export default async function Home({ searchParams }: Params) {
   const query = (await searchParams).query;
-  const params = {
-    search: query || null,
-  };
-
   const session = await auth();
   const user = session?.user;
 
   return (
-    <div className="w-full h-full grid place-items-center relative overflow-hidden">
-      <div className="fixed bottom-10 w-10/12 bg-mywhite h-12 rounded-lg shadow z-88 px-1 flex justify-between place-items-center">
-        <SearchForm query={query} />
-        {user && (
-          <div className="group w-fit z-90 bg-principal rounded-md">
-            <Link
-              href={"/spot/create"}
-              className="h-fit shadow-2xl hover:scale-105"
-            >
-              <PlusIcon width={40} height={40} />
-            </Link>
-
-            <Alert className="hidden group-hover:flex place-items-center w-fit fixed bottom-22 right-5">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>Agregar Spot!</AlertTitle>
-            </Alert>
-          </div>
-        )}
-      </div>
-
+    <div className="w-full h-full relative">
       <MyMapContainer />
       <GeolocationBanner />
+
+      {/* bottom bar */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-lg z-[1000]">
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 px-3 py-2 flex items-center gap-2">
+          <SearchForm query={query} />
+
+          {user && (
+            <Link
+              href="/spot/create"
+              title="Agregar spot"
+              className="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-principal text-white hover:bg-principal-400 hover:scale-110 transition-all shadow-sm"
+            >
+              <PlusIcon className="size-5" />
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

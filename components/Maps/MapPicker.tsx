@@ -9,9 +9,10 @@ import {
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { customIcon } from "@/lib/map/icon";
 import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
 
 interface Coords {
   lat: number;
@@ -43,25 +44,35 @@ function ClickHandler({
 
 function FlyTo({ coords }: { coords: Coords | null }) {
   const map = useMap();
-  if (coords) map.flyTo([coords.lat, coords.lng], 16);
+
+  useEffect(() => {
+    if (coords) map.flyTo([coords.lat, coords.lng], 16);
+  }, [coords?.lat, coords?.lng]);
+
   return null;
 }
 
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-    { headers: { "Accept-Language": "es" } },
-  );
-  const data = await res.json();
-  return data.display_name ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  const res = await fetch(`/api/geocode?lat=${lat}&lon=${lng}`);
+  const text = await res.text();
+  console.log("reverseGeocode response:", text);
+  try {
+    const data = JSON.parse(text);
+    return data.display_name ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  } catch {
+    return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
 }
 
 async function searchAddress(query: string): Promise<NominatimResult[]> {
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`,
-    { headers: { "Accept-Language": "es" } },
-  );
-  return res.json();
+  const res = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+  const text = await res.text();
+  console.log("searchAddress response:", text);
+  try {
+    return JSON.parse(text);
+  } catch {
+    return [];
+  }
 }
 
 export default function MapPicker({ onChange }: Props) {
@@ -73,26 +84,36 @@ export default function MapPicker({ onChange }: Props) {
 
   const handleMapClick = async (coords: Coords) => {
     setMarker(coords);
-    const addr = await reverseGeocode(coords.lat, coords.lng);
+    const res = await fetch(`/api/geocode?lat=${coords.lat}&lon=${coords.lng}`);
+    const data = await res.json();
+    const addr =
+      data.display_name ?? `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
     setAddress(addr);
     setQuery(addr);
     setSuggestions([]);
     onChange({ ...coords, address: addr });
   };
 
-  const handleSearch = async (value: string) => {
-    setQuery(value);
-    setAddress(value); // 👈 actualiza la dirección en tiempo real
-    onChange({ ...(marker ?? { lat: 0, lng: 0 }), address: value });
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const handleSearch = (value: string) => {
+    setQuery(value);
+    if (marker) onChange({ ...marker, address: value });
+
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
     if (value.length < 3) {
       setSuggestions([]);
       return;
     }
-    setLoading(true);
-    const results = await searchAddress(value);
-    setSuggestions(results);
-    setLoading(false);
+
+    searchTimeout.current = setTimeout(async () => {
+      setLoading(true);
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(value)}`);
+      const data = await res.json();
+      console.log("geocode result:", data); // 👈
+      setSuggestions(Array.isArray(data) ? data : []);
+      setLoading(false);
+    }, 600);
   };
 
   const handleSelect = (result: NominatimResult) => {
@@ -114,6 +135,20 @@ export default function MapPicker({ onChange }: Props) {
           placeholder="Buscar dirección..."
           className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
         />
+        {query && (
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setAddress("");
+              setSuggestions([]);
+              setMarker(null);
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-jet transition-colors"
+          >
+            <X className="size-4" />
+          </button>
+        )}
         {loading && <p className="text-xs text-gray-400 mt-1">Buscando...</p>}
         {suggestions.length > 0 && (
           <ul className="absolute z-[1000] w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
@@ -134,7 +169,7 @@ export default function MapPicker({ onChange }: Props) {
       <MapContainer
         center={[-31.4, -64.18]}
         zoom={13}
-        style={{ height: "300px", width: "100%" }}
+        style={{ height: "300px", width: "100%", zIndex: 0 }}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
@@ -146,8 +181,6 @@ export default function MapPicker({ onChange }: Props) {
           <Marker position={[marker.lat, marker.lng]} icon={customIcon} />
         )}
       </MapContainer>
-
-      {address && <p className="text-xs text-gray-500">📍 {address}</p>}
     </div>
   );
 }

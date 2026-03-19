@@ -1,9 +1,8 @@
 "use client";
 
-import { PlusCircle } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { PlusCircle, Trash2, Moon } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Day, Shift } from "@/utils/models";
 import { Checkbox } from "@/components/ui/checkbox";
 import { days, daysMap, daysNames, reverseDaysMap } from "@/utils/constants";
@@ -11,8 +10,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const initial: Shift = {
   days: [],
-  from: {},
-  to: {},
+  from: { hour: "", minute: "" },
+  to: { hour: "", minute: "" },
   allDay: false,
 };
 
@@ -20,15 +19,72 @@ interface Props {
   onChange: (shifts: Shift[]) => void;
 }
 
+function TimeInput({
+  value,
+  onChange,
+  label,
+}: {
+  value?: { hour?: string; minute?: string };
+  onChange: (val: { hour?: string; minute?: string }) => void;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs font-semibold text-jet-700">{label}</span>
+      <div className="flex items-center gap-1 bg-mywhite border border-principal/30 rounded-lg px-2 py-1.5 w-fit">
+        <input
+          type="number"
+          min="0"
+          max="23"
+          placeholder="00"
+          className="w-8 text-sm text-center bg-transparent outline-none text-jet font-medium"
+          value={value?.hour ?? ""}
+          onChange={(e) => {
+            const v = Math.max(0, Math.min(23, Number(e.target.value)));
+            onChange({ ...value, hour: v.toString().padStart(2, "0") });
+          }}
+        />
+        <span className="text-principal font-bold text-sm">:</span>
+        <input
+          type="number"
+          min="0"
+          max="59"
+          placeholder="00"
+          className="w-8 text-sm text-center bg-transparent outline-none text-jet font-medium"
+          value={value?.minute ?? ""}
+          onChange={(e) => {
+            const v = Math.max(0, Math.min(59, Number(e.target.value)));
+            onChange({ ...value, minute: v.toString().padStart(2, "0") });
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// detecta si el horario cruza medianoche
+function crossesMidnight(from?: { hour?: string }, to?: { hour?: string }) {
+  if (!from?.hour || !to?.hour) return false;
+  return parseInt(to.hour) < parseInt(from.hour);
+}
+
 const ShiftsInput = ({ onChange }: Props) => {
   const [shifts, setShifts] = useState<Shift[]>([initial]);
+
+  useEffect(() => {
+    onChange(shifts);
+  }, [shifts]);
 
   const updateShift = (i: number, field: Partial<Shift>) => {
     setShifts((prev) => {
       const updated = [...prev];
       updated[i] = { ...updated[i], ...field };
-      return updated; // ← solo actualizás el estado
+      return updated;
     });
+  };
+
+  const removeShift = (i: number) => {
+    setShifts((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const toggleDay = (i: number, updatedDays: string[]) => {
@@ -37,148 +93,105 @@ const ShiftsInput = ({ onChange }: Props) => {
       updated[i].days = updatedDays
         .map((u) => reverseDaysMap.get(u))
         .filter((d): d is Day => d !== undefined);
-      return updated; // ← solo actualizás el estado
+      return updated;
     });
   };
 
-  // useEffect notifica al padre después del render
-  useEffect(() => {
-    onChange(shifts);
-  }, [shifts]);
-
   return (
-    <>
-      {shifts.map((shift, index) => (
-        <div
-          key={index}
-          className="w-full p-4 border-r-3 border-b-3 border-r-principal border-b-principal rounded-lg space-y-2 mb-3 bg-mywhite"
-        >
-          <div className="flex gap-2 flex-wrap w-full">
+    <div className="flex flex-col gap-3">
+      {shifts.map((shift, index) => {
+        const overnight =
+          !shift.allDay && crossesMidnight(shift.from, shift.to);
+
+        return (
+          <div
+            key={index}
+            className="w-full p-4 border border-principal/20 rounded-xl bg-white shadow-sm flex flex-col gap-3"
+          >
+            {/* header con días y botón eliminar */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
+                Días
+              </span>
+              {shifts.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeShift(index)}
+                  className="text-red-400 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              )}
+            </div>
+
+            {/* selector de días */}
             <ToggleGroup
               type="multiple"
               value={shift.days
                 .map((d) => daysMap.get(d))
                 .filter((v): v is string => v !== undefined)}
               onValueChange={(value) => toggleDay(index, value)}
-              className="w-full flex gap-1"
+              className="flex gap-1 flex-wrap"
             >
-              {days.map((label, i) => (
+              {days.map((day, i) => (
                 <ToggleGroupItem
                   key={i}
                   value={daysNames[i]}
-                  className="h-8 border border-principal text-jet font-bold
-                    data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:shadow-md"
+                  className="h-8 w-8 text-xs border border-principal/30 text-jet font-bold rounded-lg
+                    data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:shadow-sm"
                 >
-                  {daysMap.get(label)?.substring(0, 1)}
+                  {daysNames[i].substring(0, 1)}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
+
+            {/* abierto 24hs */}
+            <label className="flex items-center gap-2 cursor-pointer w-fit">
+              <Checkbox
+                checked={shift.allDay}
+                onCheckedChange={(checked) =>
+                  updateShift(index, { allDay: checked as boolean })
+                }
+                className="rounded-md border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
+              />
+              <span className="text-sm text-jet font-medium">
+                Abierto 24 hs
+              </span>
+            </label>
+
+            {/* horarios */}
+            {!shift.allDay && (
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-6 flex-wrap">
+                  <TimeInput
+                    label="Abre"
+                    value={shift.from}
+                    onChange={(val) => updateShift(index, { from: val })}
+                  />
+                  <TimeInput
+                    label="Cierra"
+                    value={shift.to}
+                    onChange={(val) => updateShift(index, { to: val })}
+                  />
+                </div>
+
+                {/* aviso de medianoche */}
+                {overnight && (
+                  <div className="flex items-center gap-1.5 text-xs text-principal bg-principal/10 px-3 py-1.5 rounded-lg w-fit">
+                    <Moon className="size-3" />
+                    <span>Cierra pasada la medianoche del día siguiente</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-
-          {!shift.allDay && (
-            <div className="flex gap-4 items-center mt-2 flex-wrap">
-              <div>
-                <label className="block text-xs font-semibold text-jet">
-                  Desde
-                </label>
-                <div className="flex gap-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="23"
-                    placeholder="hh"
-                    className="w-16 text-sm"
-                    value={shift.from?.hour}
-                    onChange={(e) => {
-                      const value = Math.max(
-                        0,
-                        Math.min(23, Number(e.target.value)),
-                      );
-                      updateShift(index, {
-                        from: { ...shift.from, hour: value + "" },
-                      });
-                    }}
-                  />
-                  <Input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="mm"
-                    className="w-16 text-sm"
-                    value={shift.from?.minute}
-                    onChange={(e) => {
-                      const value = Math.max(
-                        0,
-                        Math.min(59, Number(e.target.value)),
-                      );
-                      updateShift(index, {
-                        from: { ...shift.from, minute: value + "" },
-                      });
-                    }}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-jet">
-                  Hasta
-                </label>
-                <div className="flex gap-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="23"
-                    placeholder="hh"
-                    className="w-16 text-sm"
-                    value={shift.to?.hour}
-                    onChange={(e) => {
-                      const value = Math.max(
-                        0,
-                        Math.min(23, Number(e.target.value)),
-                      );
-                      updateShift(index, {
-                        to: { ...shift.to, hour: value + "" },
-                      });
-                    }}
-                  />
-                  <Input
-                    type="number"
-                    min="0"
-                    max="59"
-                    placeholder="mm"
-                    className="w-16 text-sm"
-                    value={shift.to?.minute}
-                    onChange={(e) => {
-                      const value = Math.max(
-                        0,
-                        Math.min(59, Number(e.target.value)),
-                      );
-                      updateShift(index, {
-                        to: { ...shift.to, minute: value + "" },
-                      });
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          <label className="flex items-center gap-2 mt-2">
-            <Checkbox
-              checked={shift.allDay}
-              onCheckedChange={(checked) =>
-                updateShift(index, { allDay: checked as boolean })
-              }
-              className="rounded-full border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
-            />
-            <span className="text-sm text-jet">Abierto 24 hs</span>
-          </label>
-        </div>
-      ))}
+        );
+      })}
 
       <Button
         type="button"
         variant="outline"
-        onClick={() => {
+        onClick={() =>
           setShifts((prev) => [
             ...prev,
             {
@@ -187,13 +200,13 @@ const ShiftsInput = ({ onChange }: Props) => {
               to: { hour: "", minute: "" },
               allDay: false,
             },
-          ]);
-        }}
-        className="w-fit flex gap-2 items-center text-principal border-principal border-2 hover:scale-105"
+          ])
+        }
+        className="w-fit flex gap-2 items-center text-principal border-principal border-2 hover:bg-principal/5 hover:scale-105 rounded-xl"
       >
-        <PlusCircle className="size-5" /> Agregar horario
+        <PlusCircle className="size-4" /> Agregar horario
       </Button>
-    </>
+    </div>
   );
 };
 

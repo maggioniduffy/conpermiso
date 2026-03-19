@@ -9,7 +9,7 @@ export default function RootLayout({
   return (
     <>
       <Navbar additionalClass="fixed z-99 top-0" />
-      <main className="bg-jet min-h-screen flex flex-col">{children}</main>
+      <main className="min-h-screen flex flex-col">{children}</main>
       <Toaster />
     </>
   );
