@@ -53,7 +53,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
       backendForm.append("name", formData.get("name") as string);
       backendForm.append("description", formData.get("description") as string);
       backendForm.append("address", formData.get("address") as string);
-      backendForm.append("allowed", allowed);
+      backendForm.append("allowed", allowed); // 👈 en vez de formData.get("allowed")
 
       const cost =
         costType === "Precio" ? (formData.get("cost") as string) : costType;
@@ -180,7 +180,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
         <label className="font-semibold text-jet">Baños</label>
         <ToggleGroup
           type="single"
-          value={Allowed.ONE}
+          value={allowed}
           onValueChange={(value) => {
             if (value) setAllowed(value as Allowed);
           }}

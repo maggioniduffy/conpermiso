@@ -11,6 +11,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "conpermiso-images.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "conpermiso-images.s3.us-east-2.amazonaws.com",
+      },
     ],
   },
 };
