@@ -64,7 +64,7 @@ const SpotModal = ({
         <hr className="border-gray-200" />
 
         {/* direccion */}
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
           <p className="text-sm text-jet-500">{trimAddress(address)}</p>
         </div>

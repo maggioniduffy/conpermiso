@@ -29,7 +29,7 @@ export default function RecenterButton({ location, zoom = 15 }: Props) {
         disabled={!location}
         className="rounded-full shadow-lg p-3 bg-principal hover:bg-principal/90"
       >
-        <Crosshair className="h-7 w-5 text-white" />
+        <Crosshair className="h-5 w-5 text-white" />
       </Button>
     </div>
   );

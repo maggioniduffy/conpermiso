@@ -4,6 +4,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import MyMapContainer from "@/components/Maps/MapContainer";
 import SearchForm from "@/components/SearchForm";
+import GeolocationBanner from "@/components/Maps/GeolocationBanner";
 
 interface Params {
   searchParams: Promise<{ query?: string }>;
@@ -40,6 +41,7 @@ export default async function Home({ searchParams }: Params) {
       </div>
 
       <MyMapContainer />
+      <GeolocationBanner />
     </div>
   );
 }

@@ -8,6 +8,7 @@ export default function MyMapContainer() {
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
+    accuracy: number;
   } | null>(null);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function MyMapContainer() {
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
         });
       },
       (error) => {
@@ -28,8 +30,8 @@ export default function MyMapContainer() {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 100000, // cache position for up to 10s
-        timeout: 10000, // max time before error
+        maximumAge: 0, // cache position for up to 10s
+        timeout: 15000, // max time before error
       },
     );
 
