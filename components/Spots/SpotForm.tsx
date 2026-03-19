@@ -30,6 +30,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [allowed, setAllowed] = useState<Allowed>(Allowed.ONE);
+  const [address, setAddress] = useState("");
 
   const router = useRouter();
 
@@ -52,7 +53,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
       const backendForm = new FormData();
       backendForm.append("name", formData.get("name") as string);
       backendForm.append("description", formData.get("description") as string);
-      backendForm.append("address", formData.get("address") as string);
+      backendForm.append("address", address);
       backendForm.append("allowed", allowed); // 👈 en vez de formData.get("allowed")
 
       const cost =
@@ -130,19 +131,6 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
         />
       </div>
 
-      <div>
-        <label htmlFor="address" className="font-semibold text-jet">
-          Dirección
-        </label>
-        <Input
-          id="address"
-          name="address"
-          className="bg-mywhite border-r-3 border-b-3 border-r-principal border-b-principal"
-          placeholder="Ej: Av. Colón 1234, Córdoba"
-          required
-        />
-      </div>
-
       <div className="space-y-2">
         <label className="font-semibold text-jet">Costo</label>
         <ToggleGroup
@@ -158,7 +146,7 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
               key={label}
               value={label}
               className="px-4 bg-mywhite py-2 rounded-md border text-jet transition-all border-principal
-                data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:font-semibold w-fit"
+                data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:font-semibold w-full"
             >
               {label}
             </ToggleGroupItem>
@@ -213,7 +201,12 @@ export default function SpotForm({ title = "Nuevo Spot" }: Props) {
         <p className="text-sm text-gray-500 mb-2">
           Hacé click en el mapa para seleccionar la ubicación
         </p>
-        <MapPicker onChange={setLocation} />
+        <MapPicker
+          onChange={({ lat, lng, address }) => {
+            setLocation({ lat, lng });
+            setAddress(address);
+          }}
+        />
         {location && (
           <p className="text-xs text-gray-500 mt-1">
             Seleccionado: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}

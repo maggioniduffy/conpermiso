@@ -14,7 +14,7 @@ export const formatShifts = (dayList: Day[]) => {
 
   // Eliminar duplicados y ordenar circularmente
   const setDias = new Set(
-    dayList.map((d) => ((d % semanaLength) + semanaLength) % semanaLength)
+    dayList.map((d) => ((d % semanaLength) + semanaLength) % semanaLength),
   );
   const ordenados = [...setDias].sort((a, b) => a - b);
 
@@ -65,3 +65,8 @@ export const formatShifts = (dayList: Day[]) => {
   if (partes.length === 2) return partes.join(", ");
   return partes.slice(0, -1).join(", ") + " y " + partes.at(-1);
 };
+
+export function trimAddress(address: string, n = 2) {
+  const parts = address.split(",");
+  return parts.slice(0, n).join(",").trim();
+}

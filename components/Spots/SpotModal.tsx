@@ -1,13 +1,15 @@
+// SpotModal.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
 import { Cost, Shift } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
-import RankSpot from "./RankSpot";
-import { auth } from "@/auth";
+import Link from "next/link";
+import { MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
+import { trimAddress } from "@/lib/utils";
 
 interface Props {
+  id?: string;
   title?: string;
   description?: string;
   cost?: Cost;
@@ -17,8 +19,9 @@ interface Props {
 }
 
 const SpotModal = ({
+  id,
   title = "Lo de Pepe",
-  description = " Default DescriptionDefault DescriptionDefault Description Default DescriptionDefault Description",
+  description = "Default Description",
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
   shifts = [
@@ -33,52 +36,73 @@ const SpotModal = ({
       allDay: true,
     },
   ],
-  image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8",
+  image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
 }: Props) => {
-  const { data: session } = useSession();
-  const user = session?.user;
-
   return (
-    <div className="h-full w-full bg-mywhite overflow-y-auto p-1 flex flex-col gap-1">
-      <h2 className="font-medium text-2xl text-center ">{title}</h2>
-      <hr className="border border-gray-300" />
-      <div className="flex flex-col">
-        <div className="flex flex-col">
-          <p className="bg-mywhite-700 py-1 max-w-xl text-sm">
-            {" "}
-            {description}{" "}
-          </p>
-          <div>
-            <h4 className="font-semibold"> Direccion </h4>
-            <p className="text-sm"> {address}</p>
-          </div>
-          <div>
-            <h4 className="font-semibold"> Precio </h4>
-            <p className="text-sm"> {cost}</p>
-          </div>
-          <div className="">
-            <h4 className="font-semibold"> Horarios </h4>
-            {shifts.map((shift) => (
-              <ShiftVisualizer shift={shift} key={shift.days.toString()} />
-            ))}
-          </div>
-        </div>
-        <div className="flex place-items-center justify-center">
-          <Image
-            src={image}
-            width={500}
-            height={500}
-            alt="spot image"
-            className="rounded-lg shadow-xl hover:scale-105 hover:border-principal"
-          />
-        </div>
+    <div className="w-full rounded-xl overflow-hidden flex flex-col shadow-md">
+      {/* imagen */}
+      <div className="relative w-full h-36 overflow-hidden">
+        <Image
+          src={image}
+          fill
+          alt={title ?? "spot"}
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <h2 className="absolute bottom-2 left-3 text-white font-semibold text-lg drop-shadow">
+          {title}
+        </h2>
       </div>
-      {user && (
-        <>
-          <hr className="border border-gray-300" />
-          <RankSpot />
-        </>
-      )}
+
+      {/* contenido */}
+      <div className="flex flex-col gap-3 p-3">
+        {/* descripcion */}
+        <p className="text-sm text-jet-600 leading-relaxed line-clamp-2">
+          {description}
+        </p>
+
+        <hr className="border-gray-200" />
+
+        {/* direccion */}
+        <div className="flex items-start gap-2">
+          <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
+          <p className="text-sm text-jet-500">{trimAddress(address)}</p>
+        </div>
+
+        {/* costo */}
+        <div className="flex items-center gap-2">
+          <DollarSign className="size-4 text-principal shrink-0" />
+          <span className="text-sm font-medium text-jet-500">
+            {cost ?? "Sin cargo"}
+          </span>
+        </div>
+
+        {/* horarios */}
+        {shifts && shifts.length > 0 && (
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="size-4 text-principal shrink-0" />
+              <span className="text-sm font-semibold text-jet">Horarios</span>
+            </div>
+            <div className="pl-6 flex flex-col">
+              {shifts.map((shift) => (
+                <ShiftVisualizer shift={shift} key={shift.days.toString()} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* link detalle */}
+        {id && (
+          <Link
+            href={`/spot/${id}`}
+            className="mt-1 flex items-center justify-center gap-1 w-full rounded-lg bg-principal text-sm font-medium hover:bg-principal-400 transition-all hover:scale-[1.02]"
+          >
+            <p className="text-mywhite">Ver detalle </p>
+            <ArrowRight className="size-4" />
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

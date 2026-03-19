@@ -11,7 +11,7 @@ import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import { Bath } from "@/utils/models";
-import Link from "next/link";
+import { SpotModal } from "../Spots";
 
 interface Props {
   location: {
@@ -45,29 +45,36 @@ export default function MyMap({
 
       <MapRecenter location={location} />
 
-      {baths.map((bath: Bath) => (
-        <Marker
-          key={bath._id}
-          position={[
-            bath.location.coordinates[1],
-            bath.location.coordinates[0],
-          ]}
-          icon={customIcon}
-        >
-          <Popup>
-            <div className="flex flex-col gap-1">
-              <span className="font-semibold">{bath.name}</span>
-              <span className="text-sm text-gray-500">{bath.address}</span>
-              <Link
-                href={`/spot/${bath._id}`}
-                className="text-principal text-sm underline"
-              >
-                Ver detalle
-              </Link>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+      {baths.map(
+        ({
+          _id,
+          location,
+          name,
+          description,
+          cost,
+          address,
+          shifts,
+          images,
+        }: Bath) => (
+          <Marker
+            key={_id}
+            position={[location.coordinates[1], location.coordinates[0]]}
+            icon={customIcon}
+          >
+            <Popup maxHeight={500} maxWidth={250}>
+              <SpotModal
+                title={name}
+                description={description}
+                cost={cost}
+                address={address}
+                shifts={shifts}
+                image={images?.[0]?.url}
+                id={_id}
+              />
+            </Popup>
+          </Marker>
+        ),
+      )}
 
       <CurrentLocationMarker location={location} />
       <RecenterButton location={location} />
