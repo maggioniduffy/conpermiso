@@ -1,11 +1,9 @@
-"use client";
-
 // hooks/use-spot-form.ts
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/apiFetch";
-import { Shift, Allowed } from "@/utils/models";
+import { Shift, Allowed, Bath } from "@/utils/models";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
 
@@ -27,18 +25,34 @@ function sanitizeShifts(shifts: Shift[]) {
   }));
 }
 
-export function useSpotForm() {
-  const [costType, setCostType] = useState<CostType>("Sin cargo");
-  const [shifts, setShifts] = useState<Shift[]>([]);
+export function useSpotForm(initial?: Bath) {
+  const inferCostType = (cost?: Bath["cost"]): CostType => {
+    if (!cost || cost === "Sin cargo") return "Sin cargo";
+    if (cost === "Con consumicion") return "Con consumicion";
+    return "Precio";
+  };
+
+  const [costType, setCostType] = useState<CostType>(
+    inferCostType(initial?.cost),
+  );
+  const [shifts, setShifts] = useState<Shift[]>(initial?.shifts ?? []);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null,
+    initial?.location
+      ? {
+          lat: initial.location.coordinates[1],
+          lng: initial.location.coordinates[0],
+        }
+      : null,
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [allowed, setAllowed] = useState<Allowed>(Allowed.ONE);
-  const [address, setAddress] = useState("");
+  const [allowed, setAllowed] = useState<Allowed>(
+    initial?.allowed ?? Allowed.ONE,
+  );
+  const [address, setAddress] = useState(initial?.address ?? "");
   const [isPending, setIsPending] = useState(false);
 
   const router = useRouter();
+  const isEdit = !!initial;
 
   const handleLocationChange = ({
     lat,
@@ -54,6 +68,8 @@ export function useSpotForm() {
   };
 
   const handleSubmit = async (formData: FormData) => {
+    console.log("name desde formData:", formData.get("name"));
+    console.log("description desde formData:", formData.get("description"));
     if (!location) {
       toast("Error", { description: "Seleccioná una ubicación en el mapa" });
       return false;
@@ -82,16 +98,23 @@ export function useSpotForm() {
 
       if (imageFile) backendForm.append("file", imageFile);
 
-      const res = await apiFetch("/baths", {
-        method: "POST",
+      console.log("backendForm entries:");
+      for (const [key, value] of backendForm.entries()) {
+        console.log(key, value);
+      }
+
+      const res = await apiFetch(isEdit ? `/baths/${initial._id}` : "/baths", {
+        method: isEdit ? "PATCH" : "POST",
         body: backendForm,
         headers: {},
       });
 
       if (!res.ok) throw new Error();
 
-      toast("Éxito", { description: "Baño creado correctamente" });
-      router.push("/");
+      toast("Éxito", {
+        description: isEdit ? "Baño actualizado" : "Baño creado correctamente",
+      });
+      router.push("/my-list");
       return true;
     } catch {
       toast("Error", { description: "Algo salió mal" });
@@ -102,21 +125,19 @@ export function useSpotForm() {
   };
 
   return {
-    // state
     costType,
-    shifts,
-    location,
-    imageFile,
-    allowed,
-    address,
-    isPending,
-    // setters
     setCostType,
+    shifts,
     setShifts,
+    location,
+    address,
+    imageFile,
     setImageFile,
+    allowed,
     setAllowed,
+    isPending,
+    isEdit,
     handleLocationChange,
-    // submit
     handleSubmit,
   };
 }

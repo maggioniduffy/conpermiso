@@ -1,6 +1,6 @@
 "use client";
 
-import { useFavorites, useMyBaths } from "@/hooks";
+import { useMyBaths } from "@/hooks";
 import EditSpotCard from "../Spots/EditSpotCard";
 
 const MyOwnList = () => {
@@ -8,29 +8,27 @@ const MyOwnList = () => {
 
   if (loading) return <p>Cargando...</p>;
 
-  console.log("OWN: ", baths);
   return (
-    <div className="flex items-center gap-6 flex-wrap h-full">
-      <ul>
-        {baths.map(({ name, images, _id, description, location, shifts }) => (
-          <li key={_id}>
-            {name}
-            <EditSpotCard
-              name={name}
-              shifts={shifts}
-              description={description}
-              id={_id}
-              images={images}
-              location={location}
-            />
-          </li>
-        ))}
-      </ul>
-      {baths.length == 0 && (
+    <div className="flex flex-col gap-3 w-full">
+      {baths.length === 0 ? (
         <h3 className="text-center text-gray-600">
-          {" "}
-          Agrega algun local para colaborar con todos los usuarios!{" "}
+          Agregá algún local para colaborar con todos los usuarios!
         </h3>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {baths.map((bath) => (
+            <li key={bath._id}>
+              <EditSpotCard
+                name={bath.name}
+                shifts={bath.shifts}
+                description={bath.description}
+                id={bath._id}
+                images={bath.images}
+                location={bath.location}
+              />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

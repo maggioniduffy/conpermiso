@@ -21,6 +21,7 @@ interface Coords {
 
 interface Props {
   onChange: (coords: Coords & { address: string }) => void;
+  initialValue?: { lat: number; lng: number; address: string };
 }
 
 interface NominatimResult {
@@ -75,10 +76,12 @@ async function searchAddress(query: string): Promise<NominatimResult[]> {
   }
 }
 
-export default function MapPicker({ onChange }: Props) {
-  const [marker, setMarker] = useState<Coords | null>(null);
-  const [address, setAddress] = useState("");
-  const [query, setQuery] = useState("");
+export default function MapPicker({ onChange, initialValue }: Props) {
+  const [marker, setMarker] = useState<Coords | null>(
+    initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
+  );
+  const [query, setQuery] = useState(initialValue?.address ?? "");
+  const [address, setAddress] = useState(initialValue?.address ?? "");
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [loading, setLoading] = useState(false);
 

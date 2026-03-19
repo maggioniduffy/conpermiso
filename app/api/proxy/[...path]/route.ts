@@ -39,11 +39,17 @@ async function handler(
   });
 
   const data = await res.text();
-  console.log("BACKEND RESPONSE:", res.status, data);
+  console.log("BACKEND RESPONSE:", req.method, res.status, data);
 
   return new Response(data, {
     status: res.status,
     headers: { "Content-Type": "application/json" },
   });
 }
-export { handler as GET, handler as POST, handler as PUT, handler as DELETE };
+export {
+  handler as GET,
+  handler as POST,
+  handler as PUT,
+  handler as PATCH,
+  handler as DELETE,
+};

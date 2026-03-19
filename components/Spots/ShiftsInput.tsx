@@ -17,6 +17,7 @@ const initial: Shift = {
 
 interface Props {
   onChange: (shifts: Shift[]) => void;
+  initialValue?: Shift[];
 }
 
 function TimeInput({
@@ -68,8 +69,8 @@ function crossesMidnight(from?: { hour?: string }, to?: { hour?: string }) {
   return parseInt(to.hour) < parseInt(from.hour);
 }
 
-const ShiftsInput = ({ onChange }: Props) => {
-  const [shifts, setShifts] = useState<Shift[]>([initial]);
+const ShiftsInput = ({ onChange, initialValue }: Props) => {
+  const [shifts, setShifts] = useState<Shift[]>(initialValue ?? [initial]);
 
   useEffect(() => {
     onChange(shifts);
