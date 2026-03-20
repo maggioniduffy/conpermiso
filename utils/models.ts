@@ -44,4 +44,5 @@ export interface Bath {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  googleMapsLink?: string;
 }

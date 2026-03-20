@@ -26,7 +26,16 @@ export default async function SpotPage({
 
   if (!bath) return notFound();
 
-  const { name, images, address, description, cost, allowed, shifts } = bath;
+  const {
+    name,
+    images,
+    address,
+    description,
+    cost,
+    allowed,
+    shifts,
+    googleMapsLink,
+  } = bath;
   return (
     <div className="min-h-screen bg-mywhite">
       {/* Hero imagen */}
@@ -113,6 +122,17 @@ export default async function SpotPage({
             <p className="text-jet-500 text-sm leading-relaxed">
               {trimAddress(address, 3)}
             </p>
+            {googleMapsLink && (
+              <Link
+                href={googleMapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-principal hover:underline"
+              >
+                <MapPin className="size-3" />
+                Ver en Google Maps
+              </Link>
+            )}
           </div>
         </div>
 
