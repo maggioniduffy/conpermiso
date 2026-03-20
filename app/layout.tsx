@@ -65,7 +65,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} min-h-screen flex flex-col`}>
+      <body
+        className={`${montserrat.variable} min-h-screen bg-mywhite flex flex-col`}
+      >
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

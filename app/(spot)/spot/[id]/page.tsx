@@ -7,6 +7,8 @@ import { trimAddress } from "@/lib/utils";
 import { MapPin, DollarSign, Clock, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
+import ReviewsList from "@/components/Spots/ReviewsList";
+import ReviewSection from "@/components/Spots/ReviewSection";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -37,7 +39,7 @@ export default async function SpotPage({
     googleMapsLink,
   } = bath;
   return (
-    <div className="min-h-screen bg-mywhite">
+    <div className="h-full bg-mywhite pb-20">
       {/* Hero imagen */}
       <div className="relative w-full h-72 md:h-96">
         {images?.[0] ? (
@@ -80,7 +82,6 @@ export default async function SpotPage({
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>
-
         {/* info cards */}
         <div className="grid grid-cols-2 gap-3">
           {/* costo */}
@@ -109,7 +110,6 @@ export default async function SpotPage({
             </span>
           </div>
         </div>
-
         {/* dirección completa */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-3">
           <div className="bg-principal/10 p-2 rounded-xl shrink-0">
@@ -135,7 +135,6 @@ export default async function SpotPage({
             )}
           </div>
         </div>
-
         {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -155,10 +154,7 @@ export default async function SpotPage({
           </div>
         )}
 
-        {/* ranking */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <RankSpot />
-        </div>
+        <ReviewSection bathId={id} />
       </div>
     </div>
   );

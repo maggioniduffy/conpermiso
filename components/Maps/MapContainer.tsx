@@ -10,6 +10,9 @@ export default function MyMapContainer() {
     longitude: number;
     accuracy: number;
   } | null>(null);
+  const [locationDenied, setLocationDenied] = useState(false);
+
+  // en el error callback:
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -26,12 +29,14 @@ export default function MyMapContainer() {
         });
       },
       (error) => {
-        console.error("Error getting location:", error);
+        // ✅ GeolocationPositionError no es un objeto plano, leer propiedades explícitamente
+        console.error("Error getting location:", error.code, error.message);
+        if (error.code === 1) setLocationDenied(true); //
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 0, // cache position for up to 10s
-        timeout: 15000, // max time before error
+        maximumAge: 0,
+        timeout: 15000,
       },
     );
 
@@ -50,6 +55,11 @@ export default function MyMapContainer() {
 
   return (
     <div className="bg-mywhite h-screen w-screen z-80">
+      {locationDenied && (
+        <p className="text-xs text-center text-jet-700 py-2">
+          Activá tu ubicación para ver los baños cercanos
+        </p>
+      )}
       <Map location={location} />
     </div>
   );
