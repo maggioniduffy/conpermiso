@@ -1,7 +1,7 @@
 // app/spot/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Bath, Allowed } from "@/utils/models";
+import { Bath, Allowed, Shift, Day } from "@/utils/models";
 import { RankSpot } from "@/components/Spots";
 import { trimAddress } from "@/lib/utils";
 import { MapPin, DollarSign, Clock, Users, ArrowLeft } from "lucide-react";
@@ -9,6 +9,7 @@ import Link from "next/link";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import ReviewsList from "@/components/Spots/ReviewsList";
 import ReviewSection from "@/components/Spots/ReviewSection";
+import OpenBadge from "@/components/Spots/OpenBadge";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -16,6 +17,22 @@ async function getBath(id: string): Promise<Bath | null> {
   });
   if (!res.ok) return null;
   return res.json();
+}
+
+function isShiftOpenNow(shifts: Shift[]): boolean {
+  const now = new Date(new Date().getTime() - 3 * 60 * 60 * 1000);
+  const currentDay = now.getUTCDay(); // ← getUTCDay, no getDay
+  const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+
+  return (
+    shifts?.some((shift) => {
+      if (!shift.days.includes(currentDay as Day)) return false;
+      if (shift.allDay) return true;
+      const from = Number(shift.from?.hour) * 60 + Number(shift.from?.minute);
+      const to = Number(shift.to?.hour) * 60 + Number(shift.to?.minute);
+      return currentMinutes >= from && currentMinutes <= to;
+    }) ?? false
+  );
 }
 
 export default async function SpotPage({
@@ -69,9 +86,13 @@ export default async function SpotPage({
           <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
             {name}
           </h1>
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-2 mt-2">
             <MapPin className="size-4 text-white/80 shrink-0" />
             <p className="text-white/80 text-sm">{trimAddress(address)}</p>
+            {/* badge con fondo blanco semitransparente para legibilidad sobre foto */}
+            <span className="ml-auto">
+              <OpenBadge isOpen={isShiftOpenNow(shifts ?? [])} />
+            </span>
           </div>
         </div>
       </div>

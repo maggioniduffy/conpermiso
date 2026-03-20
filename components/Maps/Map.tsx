@@ -6,32 +6,40 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
-import { customIcon } from "@/lib/map/icon";
+import { createMarkerIcon } from "@/lib/map/icon";
 import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import { Bath } from "@/utils/models";
 import { SpotModal } from "../Spots";
+import { useEffect } from "react";
+import { useMap } from "react-leaflet";
 
 interface Props {
   location: {
     latitude: number;
     longitude: number;
+    accuracy: number;
   } | null;
+  searchCenter?: { latitude: number; longitude: number } | null;
   zoom?: number;
-  positions?: [number, number][];
 }
 
-export default function MyMap({
-  location,
-  zoom = 15,
-  positions = [[-39, 0]],
-}: Props) {
+function FlyToCoords({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([lat, lng], 17, { duration: 1.2 });
+  }, [lat, lng, map]);
+  return null;
+}
+
+export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const { baths, fetchBaths } = useBathsInBounds();
+
   return (
     <MapContainer
       center={
-        location ? [location.latitude, location.longitude] : positions![0]
+        location ? [location.latitude, location.longitude] : [-31.4, -64.18]
       }
       zoom={zoom}
       scrollWheelZoom={true}
@@ -41,9 +49,14 @@ export default function MyMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapBoundsWatcher onBoundsChange={fetchBaths} />
 
+      <MapBoundsWatcher onBoundsChange={fetchBaths} />
       <MapRecenter location={location} />
+
+      {/* volar al resultado de búsqueda */}
+      {searchCenter && (
+        <FlyToCoords lat={searchCenter.latitude} lng={searchCenter.longitude} />
+      )}
 
       {baths.map(
         ({
@@ -55,11 +68,12 @@ export default function MyMap({
           address,
           shifts,
           images,
+          isOpenNow,
         }: Bath) => (
           <Marker
             key={_id}
             position={[location.coordinates[1], location.coordinates[0]]}
-            icon={customIcon}
+            icon={createMarkerIcon(isOpenNow ?? false)}
           >
             <Popup maxHeight={500} maxWidth={250}>
               <SpotModal
@@ -70,6 +84,7 @@ export default function MyMap({
                 shifts={shifts}
                 image={images?.[0]?.url}
                 id={_id}
+                isOpenNow={isOpenNow}
               />
             </Popup>
           </Marker>

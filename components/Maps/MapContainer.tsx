@@ -4,15 +4,17 @@ import { Loader } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
-export default function MyMapContainer() {
+interface Props {
+  searchCenter?: { latitude: number; longitude: number } | null;
+}
+
+export default function MyMapContainer({ searchCenter }: Props) {
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
     accuracy: number;
   } | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
-
-  // en el error callback:
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -29,9 +31,8 @@ export default function MyMapContainer() {
         });
       },
       (error) => {
-        // ✅ GeolocationPositionError no es un objeto plano, leer propiedades explícitamente
         console.error("Error getting location:", error.code, error.message);
-        if (error.code === 1) setLocationDenied(true); //
+        if (error.code === 1) setLocationDenied(true);
       },
       {
         enableHighAccuracy: true,
@@ -40,7 +41,6 @@ export default function MyMapContainer() {
       },
     );
 
-    // ✅ Cleanup on unmount
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
@@ -56,11 +56,11 @@ export default function MyMapContainer() {
   return (
     <div className="bg-mywhite h-screen w-screen z-80">
       {locationDenied && (
-        <p className="text-xs text-center text-jet-700 py-2">
+        <p className="text-xs text-center text-jet-700 py-2 absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-3 rounded-full">
           Activá tu ubicación para ver los baños cercanos
         </p>
       )}
-      <Map location={location} />
+      <Map location={location} searchCenter={searchCenter} />
     </div>
   );
 }

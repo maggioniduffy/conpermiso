@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
 import { trimAddress } from "@/lib/utils";
+import OpenBadge from "./OpenBadge";
 
 interface Props {
   id?: string;
@@ -15,6 +16,7 @@ interface Props {
   address?: string;
   shifts?: Shift[];
   image?: string;
+  isOpenNow?: boolean; // ✅
 }
 
 const SpotModal = ({
@@ -23,6 +25,7 @@ const SpotModal = ({
   description = "Default Description",
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
+  isOpenNow,
   shifts = [
     {
       from: { hour: "12", minute: "30" },
@@ -54,7 +57,7 @@ const SpotModal = ({
       </div>
 
       {/* cuerpo sin padding horizontal extra */}
-      <div className="flex flex-col gap-3 px-3 py-3">
+      <div className="flex flex-col gap-3 px-1 py-3">
         {/* descripcion */}
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-2">
           {description}
@@ -62,12 +65,14 @@ const SpotModal = ({
 
         <div className="h-px bg-gray-100" />
 
-        {/* direccion */}
-        <div className="flex items-start gap-2">
-          <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
-          <p className="text-sm text-jet-500 leading-snug">
-            {trimAddress(address)}
-          </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-start gap-2">
+            <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
+            <p className="text-sm text-jet-500 leading-snug">
+              {trimAddress(address)}
+            </p>
+          </div>
+          <OpenBadge isOpen={isOpenNow ?? false} />
         </div>
 
         {/* costo */}

@@ -7,24 +7,27 @@ import SearchForm from "@/components/SearchForm";
 import GeolocationBanner from "@/components/Maps/GeolocationBanner";
 
 interface Params {
-  searchParams: Promise<{ query?: string }>;
+  searchParams: Promise<{ query?: string; lat?: string; lng?: string }>;
 }
 
 export default async function Home({ searchParams }: Params) {
-  const query = (await searchParams).query;
+  const { query, lat, lng } = await searchParams;
   const session = await auth();
   const user = session?.user;
 
+  const searchCenter =
+    lat && lng
+      ? { latitude: parseFloat(lat), longitude: parseFloat(lng) }
+      : null;
+
   return (
     <div className="w-full h-full relative">
-      <MyMapContainer />
+      <MyMapContainer searchCenter={searchCenter} />
       <GeolocationBanner />
 
-      {/* bottom bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-lg z-[1000]">
         <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 px-3 py-2 flex items-center gap-2">
           <SearchForm query={query} />
-
           {user && (
             <Link
               href="/spot/create"

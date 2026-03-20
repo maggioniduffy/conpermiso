@@ -1,21 +1,20 @@
-// components/MapBoundsWatcher.tsx
-import { useMapEvents } from "react-leaflet";
 import { LatLngBounds } from "leaflet";
+import { useMapEvents } from "react-leaflet";
 
 interface Props {
-  onBoundsChange: (bounds: LatLngBounds) => void;
+  onBoundsChange?: (bounds: LatLngBounds) => void; // ← opcional
 }
 
 export default function MapBoundsWatcher({ onBoundsChange }: Props) {
   const map = useMapEvents({
     moveend() {
-      onBoundsChange(map.getBounds());
+      onBoundsChange?.(map.getBounds()); // ← optional chaining
     },
     zoomend() {
-      onBoundsChange(map.getBounds());
+      onBoundsChange?.(map.getBounds());
     },
     load() {
-      onBoundsChange(map.getBounds());
+      onBoundsChange?.(map.getBounds());
     },
   });
 
