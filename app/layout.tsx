@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
 
 const montserrat = localFont({
@@ -51,11 +51,24 @@ const montserrat = localFont({
 
 export const metadata: Metadata = {
   title: "KKapp",
-  description: "Created by maggioniduffy",
-  icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "apple-touch-icon", url: "/favicon.ico" },
-  ],
+  description: "Encontrá baños cerca tuyo",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "KKapp",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png", // ya lo tenés en public
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

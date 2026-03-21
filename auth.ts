@@ -9,6 +9,7 @@ const EMAIL_FROM = process.env.EMAIL_FROM;
 const EMAIL_SERVER = process.env.EMAIL_SERVER;
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,

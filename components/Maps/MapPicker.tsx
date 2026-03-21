@@ -10,7 +10,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { useEffect, useState, useRef } from "react";
-import { customIcon } from "@/lib/map/icon";
+import { createMarkerIcon } from "@/lib/map/icon";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
@@ -181,7 +181,10 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         <ClickHandler onMapClick={handleMapClick} />
         <FlyTo coords={marker} />
         {marker && (
-          <Marker position={[marker.lat, marker.lng]} icon={customIcon} />
+          <Marker
+            position={[marker.lat, marker.lng]}
+            icon={createMarkerIcon(false)}
+          />
         )}
       </MapContainer>
     </div>
