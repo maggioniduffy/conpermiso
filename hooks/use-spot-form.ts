@@ -4,31 +4,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/apiFetch";
 import { Shift, Allowed, Bath } from "@/utils/models";
+import { sanitizeShifts } from "@/lib/utils";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
-
-function sanitizeShifts(shifts: Shift[]) {
-  return shifts.map((shift) => ({
-    ...shift,
-    from: shift.allDay
-      ? { hour: "00", minute: "00" }
-      : {
-          hour: shift.from?.hour?.padStart(2, "0") || "00",
-          minute: shift.from?.minute?.padStart(2, "0") || "00",
-        },
-    to: shift.allDay
-      ? { hour: "23", minute: "59" }
-      : {
-          hour: shift.to?.hour?.padStart(2, "0") || "00",
-          minute: shift.to?.minute?.padStart(2, "0") || "00",
-        },
-  }));
-}
 
 export function useSpotForm(
   initial?: Bath,
   mode: "admin-create" | "request" = "admin-create",
   requestId?: string,
+  imageRemoved = false,
 ) {
   const inferCostType = (cost?: Bath["cost"]): CostType => {
     if (!cost || cost === "Sin cargo") return "Sin cargo";
@@ -84,25 +68,37 @@ export function useSpotForm(
 
       // bath-requests no acepta multipart, solo JSON
       if (isRequest) {
-        const body = {
-          name: formData.get("name") as string,
-          description: formData.get("description") as string,
-          address,
-          allowed,
-          cost:
-            costType === "Precio" ? (formData.get("cost") as string) : costType,
-          shifts: sanitizeShifts(shifts),
-          location: {
+        const backendForm = new FormData();
+        backendForm.append("name", formData.get("name") as string);
+        backendForm.append(
+          "description",
+          formData.get("description") as string,
+        );
+        backendForm.append("address", address);
+        backendForm.append("allowed", allowed);
+        backendForm.append(
+          "cost",
+          costType === "Precio" ? (formData.get("cost") as string) : costType,
+        );
+        backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
+        backendForm.append(
+          "location",
+          JSON.stringify({
             type: "Point",
             coordinates: [location.lng, location.lat],
-          },
-        };
-
+          }),
+        );
+        if (imageFile) backendForm.append("file", imageFile);
+        // pasar imageRemoved como parámetro o manejarlo dentro del form
+        if (imageRemoved) {
+          backendForm.append("images", JSON.stringify([]));
+        }
         const res = await apiFetch(
           requestId ? `/bath-requests/${requestId}` : "/bath-requests",
           {
             method: requestId ? "PATCH" : "POST",
-            body: JSON.stringify(body),
+            body: backendForm,
+            headers: {}, // ← dejar vacío para que el browser ponga el boundary correcto
           },
         );
 
@@ -134,8 +130,14 @@ export function useSpotForm(
           coordinates: [location.lng, location.lat],
         }),
       );
-      if (imageFile) backendForm.append("file", imageFile);
 
+      if (imageRemoved && !imageFile) {
+        backendForm.append("images", JSON.stringify([]));
+      }
+      // si hay imageFile, ya se appendea normalmente y pisa la anterior
+      if (imageFile) {
+        backendForm.append("file", imageFile);
+      }
       const res = await apiFetch(isEdit ? `/baths/${initial!._id}` : "/baths", {
         method: isEdit ? "PATCH" : "POST",
         body: backendForm,

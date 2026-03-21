@@ -12,9 +12,9 @@ import {
   MapPin,
   DollarSign,
   Clock as ClockIcon,
+  Plus,
 } from "lucide-react";
 import { BathRequestStatus, Shift } from "@/utils/models";
-import { Button } from "@/components/ui/button";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import Link from "next/link";
 
@@ -76,23 +76,10 @@ export default function MyRequestsList() {
     });
   }
 
-  async function handleSave(id: string) {
-    setSaving(true);
-    await apiFetch(`/bath-requests/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(editForm),
-    });
-    setRequests((prev) =>
-      prev.map((r) => (r._id === id ? { ...r, ...editForm } : r)),
-    );
-    setEditing(null);
-    setSaving(false);
-  }
-
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-mywhite">
+    <div className="min-h-screen bg-mywhite pt-10">
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
         <h1 className="text-xl font-bold text-jet">Mis solicitudes</h1>
 
@@ -207,48 +194,40 @@ export default function MyRequestsList() {
                 )}
 
               {/* acciones — solo pendientes */}
-              {req.status === BathRequestStatus.PENDING && (
+              {(req.status === BathRequestStatus.PENDING ||
+                req.status === BathRequestStatus.REJECTED) && (
                 <div className="flex gap-2 pt-1 border-t border-gray-100">
-                  {isEditing ? (
-                    <>
-                      <Button
-                        onClick={() => handleSave(req._id)}
-                        disabled={saving}
-                        className="flex-1 bg-principal text-white hover:bg-principal-400 rounded-xl text-sm py-2"
-                      >
-                        {saving ? "Guardando..." : "Guardar cambios"}
-                      </Button>
-                      <Button
-                        onClick={() => setEditing(null)}
-                        variant="outline"
-                        className="rounded-xl text-sm px-3"
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href={`/requests/edit/${req._id}`}
-                        className="flex items-center gap-1 text-xs font-medium text-principal hover:text-principal-400 transition-colors"
-                      >
-                        <Pencil className="size-3" />
-                        Editar
-                      </Link>
-                      <button
-                        onClick={() => handleCancel(req._id)}
-                        className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 transition-colors ml-auto"
-                      >
-                        <Trash2 className="size-3" />
-                        Cancelar solicitud
-                      </button>
-                    </>
+                  <Link
+                    href={`/requests/edit/${req._id}`}
+                    className="flex items-center gap-1 text-xs font-medium text-principal hover:text-principal-400 transition-colors"
+                  >
+                    <Pencil className="size-3" />
+                    {req.status === BathRequestStatus.REJECTED
+                      ? "Editar y reenviar"
+                      : "Editar"}
+                  </Link>
+                  {req.status === BathRequestStatus.PENDING && (
+                    <button
+                      onClick={() => handleCancel(req._id)}
+                      className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 transition-colors ml-auto"
+                    >
+                      <Trash2 className="size-3" />
+                      Cancelar solicitud
+                    </button>
                   )}
                 </div>
               )}
             </div>
           );
         })}
+
+        <Link
+          href="/spot/create"
+          className="m-5 flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-dashed border-principal/30 text-principal hover:bg-principal/25 transition-colors text-sm font-medium"
+        >
+          <Plus className="size-4" />
+          Nueva Solicitud
+        </Link>
       </div>
     </div>
   );

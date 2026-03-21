@@ -1,5 +1,5 @@
 import { daysMap } from "@/utils/constants";
-import { Day } from "@/utils/models";
+import { Day, Shift } from "@/utils/models";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -69,4 +69,22 @@ export const formatShifts = (dayList: Day[]) => {
 export function trimAddress(address: string, n = 2) {
   const parts = address.split(",");
   return parts.slice(0, n).join(",").trim();
+}
+
+export function sanitizeShifts(shifts: Shift[]) {
+  return shifts.map((shift) => ({
+    ...shift,
+    from: shift.allDay
+      ? { hour: "00", minute: "00" }
+      : {
+          hour: shift.from?.hour?.padStart(2, "0") || "00",
+          minute: shift.from?.minute?.padStart(2, "0") || "00",
+        },
+    to: shift.allDay
+      ? { hour: "23", minute: "59" }
+      : {
+          hour: shift.to?.hour?.padStart(2, "0") || "00",
+          minute: shift.to?.minute?.padStart(2, "0") || "00",
+        },
+  }));
 }

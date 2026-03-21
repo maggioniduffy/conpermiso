@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Loader,
@@ -12,6 +12,7 @@ import {
   Clock,
   Type,
   AlignLeft,
+  XIcon,
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -47,6 +48,8 @@ export default function SpotForm({
   const isEdit = !!initialData;
   const endpoint = mode === "admin-create" ? "/baths" : "/bath-requests";
 
+  const [imageRemoved, setImageRemoved] = useState(false);
+
   const {
     costType,
     setCostType,
@@ -59,7 +62,7 @@ export default function SpotForm({
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(initialData, mode, requestId); // 👈 fix principal
+  } = useSpotForm(initialData, mode, requestId, imageRemoved); // 👈 fix principal
 
   const MapPicker = useMemo(
     () =>
@@ -192,13 +195,22 @@ export default function SpotForm({
       </SectionCard>
 
       <SectionCard icon={<ImageIcon className="size-4" />} label="Imagen">
-        {isEdit && initialData?.images?.[0] && (
-          <img
-            src={initialData.images[0].url}
-            alt={initialData.images[0].alt || initialData.name}
-            className="w-full h-32 object-cover rounded-lg mb-2"
-          />
-        )}
+        {isEdit && initialData?.images?.[0] && !imageRemoved ? (
+          <div className="relative w-full h-32 rounded-lg overflow-hidden mb-2">
+            <img
+              src={initialData.images[0].url}
+              alt={initialData.images[0].alt || initialData.name}
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => setImageRemoved(true)}
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 hover:bg-black/80 transition-colors"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </div>
+        ) : null}
         <Uploader onChange={setImageFile} />
       </SectionCard>
 
