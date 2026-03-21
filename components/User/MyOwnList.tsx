@@ -1,10 +1,19 @@
 "use client";
 
-import { useMyBaths } from "@/hooks";
+import { useBackendUser, useMyBaths } from "@/hooks";
 import EditSpotCard from "../Spots/EditSpotCard";
+import { apiFetch } from "@/lib/apiFetch";
+import { Bath } from "@/utils/models";
 
 const MyOwnList = () => {
-  const { baths, loading } = useMyBaths();
+  const { user } = useBackendUser();
+  const { baths, loading, setBaths } = useMyBaths(user?.role);
+  const isAdmin = user?.role === "admin";
+
+  async function handleDelete(id: string) {
+    await apiFetch(`/baths/${id}`, { method: "DELETE" });
+    setBaths((prev: Bath[]) => prev.filter((b) => b._id !== id));
+  }
 
   if (loading) return <p>Cargando...</p>;
 
@@ -16,7 +25,7 @@ const MyOwnList = () => {
         </h3>
       ) : (
         <ul className="flex flex-col gap-2">
-          {baths.map((bath) => (
+          {baths.map((bath: Bath) => (
             <li key={bath._id}>
               <EditSpotCard
                 name={bath.name}
@@ -25,6 +34,7 @@ const MyOwnList = () => {
                 id={bath._id}
                 images={bath.images}
                 location={bath.location}
+                onDelete={isAdmin ? handleDelete : undefined} // ← agregar
               />
             </li>
           ))}

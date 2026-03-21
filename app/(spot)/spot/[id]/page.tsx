@@ -19,9 +19,9 @@ async function getBath(id: string): Promise<Bath | null> {
 }
 
 function isShiftOpenNow(shifts: Bath["shifts"]): boolean {
-  if (!shifts?.length) return false;
   const now = new Date(new Date().getTime() - 3 * 60 * 60 * 1000);
-  const currentDay = now.getUTCDay();
+  const jsDay = now.getUTCDay();
+  const currentDay = jsDay === 0 ? 7 : jsDay; // ← Domingo=7
   const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
 
   return shifts.some((shift) => {

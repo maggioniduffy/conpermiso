@@ -9,5 +9,11 @@ export default async function CreateSpotPage() {
 
   const role = (session.user as any).role;
 
-  return <SpotForm mode={role === "admin" ? "admin-create" : "request"} />;
+  return (
+    <div className="min-h-screen bg-mywhite">
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <SpotForm mode={role === "admin" ? "admin-create" : "request"} />
+      </div>
+    </div>
+  );
 }

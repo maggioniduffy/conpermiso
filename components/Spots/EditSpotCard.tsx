@@ -1,8 +1,10 @@
-import { Edit, Trash2 } from "lucide-react";
+import { Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { GeoLocation, Shift } from "@/utils/models";
 import { Image as ImageType } from "@/utils/models";
+import ConfirmDialog from "../ConfirmDialog";
+import { Trash2 } from "lucide-react";
 
 interface Props {
   name: string;
@@ -58,13 +60,19 @@ export default function EditSpotCard({
         >
           <Edit className="size-4" />
         </Link>
-        <button
-          onClick={() => onDelete?.(id)}
-          className="p-2 rounded-xl hover:bg-red-50 text-jet-700 hover:text-red-500 transition-all"
-          title="Eliminar"
-        >
-          <Trash2 className="size-4" />
-        </button>
+        {onDelete && (
+          <ConfirmDialog
+            trigger={
+              <button className="p-2 rounded-xl hover:bg-red-50 text-jet-700 hover:text-red-500 transition-all">
+                <Trash2 className="size-4" />
+              </button>
+            }
+            title="¿Eliminar baño?"
+            description="Se eliminará permanentemente. Esta acción no se puede deshacer."
+            confirmLabel="Eliminar"
+            onConfirm={() => onDelete(id)}
+          />
+        )}
       </div>
     </div>
   );

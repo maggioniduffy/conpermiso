@@ -13,8 +13,12 @@ export const formatShifts = (dayList: Day[]) => {
   const semanaLength = 7;
 
   // Eliminar duplicados y ordenar circularmente
+  // en formatShifts, cambiar la normalización:
   const setDias = new Set(
-    dayList.map((d) => ((d % semanaLength) + semanaLength) % semanaLength),
+    dayList.map((d) => {
+      const normalized = ((d % 7) + 7) % 7; // esto convierte 7 → 0
+      return normalized === 0 ? 7 : normalized; // mantener 7 como Domingo
+    }),
   );
   const ordenados = [...setDias].sort((a, b) => a - b);
 
