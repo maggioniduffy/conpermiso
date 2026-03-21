@@ -25,7 +25,10 @@ function sanitizeShifts(shifts: Shift[]) {
   }));
 }
 
-export function useSpotForm(initial?: Bath) {
+export function useSpotForm(
+  initial?: Bath,
+  mode: "admin-create" | "request" = "admin-create",
+) {
   const inferCostType = (cost?: Bath["cost"]): CostType => {
     if (!cost || cost === "Sin cargo") return "Sin cargo";
     if (cost === "Con consumicion") return "Con consumicion";
@@ -68,8 +71,6 @@ export function useSpotForm(initial?: Bath) {
   };
 
   const handleSubmit = async (formData: FormData) => {
-    console.log("name desde formData:", formData.get("name"));
-    console.log("description desde formData:", formData.get("description"));
     if (!location) {
       toast("Error", { description: "Seleccioná una ubicación en el mapa" });
       return false;
@@ -78,15 +79,48 @@ export function useSpotForm(initial?: Bath) {
     setIsPending(true);
 
     try {
+      const isRequest = mode === "request";
+
+      // bath-requests no acepta multipart, solo JSON
+      if (isRequest) {
+        const body = {
+          name: formData.get("name") as string,
+          description: formData.get("description") as string,
+          address,
+          allowed,
+          cost:
+            costType === "Precio" ? (formData.get("cost") as string) : costType,
+          shifts: sanitizeShifts(shifts),
+          location: {
+            type: "Point",
+            coordinates: [location.lng, location.lat],
+          },
+        };
+
+        const res = await apiFetch("/bath-requests", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) throw new Error();
+
+        toast("Solicitud enviada", {
+          description: "El admin la revisará pronto.",
+        });
+        router.push("/requests");
+        return true;
+      }
+
+      // admin — multipart con archivo
       const backendForm = new FormData();
       backendForm.append("name", formData.get("name") as string);
       backendForm.append("description", formData.get("description") as string);
       backendForm.append("address", address);
       backendForm.append("allowed", allowed);
-
-      const cost =
-        costType === "Precio" ? (formData.get("cost") as string) : costType;
-      backendForm.append("cost", cost);
+      backendForm.append(
+        "cost",
+        costType === "Precio" ? (formData.get("cost") as string) : costType,
+      );
       backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
       backendForm.append(
         "location",
@@ -95,15 +129,9 @@ export function useSpotForm(initial?: Bath) {
           coordinates: [location.lng, location.lat],
         }),
       );
-
       if (imageFile) backendForm.append("file", imageFile);
 
-      console.log("backendForm entries:");
-      for (const [key, value] of backendForm.entries()) {
-        console.log(key, value);
-      }
-
-      const res = await apiFetch(isEdit ? `/baths/${initial._id}` : "/baths", {
+      const res = await apiFetch(isEdit ? `/baths/${initial!._id}` : "/baths", {
         method: isEdit ? "PATCH" : "POST",
         body: backendForm,
         headers: {},

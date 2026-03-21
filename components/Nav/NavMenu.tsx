@@ -1,4 +1,3 @@
-// NavMenu.tsx
 "use client";
 
 import React from "react";
@@ -6,16 +5,7 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
 import { useSession } from "next-auth/react";
-import { MapPin, Bookmark } from "lucide-react";
-
-const pages = [
-  { name: "Mi Ubicación", href: "/", icon: <MapPin className="size-4" /> },
-  {
-    name: "Mis Guardados",
-    href: "/my-list",
-    icon: <Bookmark className="size-4" />,
-  },
-];
+import { MapPin, Bookmark, ClipboardList, Shield } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -24,12 +14,18 @@ interface Props {
 
 const NavMenu = ({ open, toggle }: Props) => {
   const { data: session } = useSession();
+  const role = (session?.user as any)?.role;
   const router = useRouter();
 
   const navigate = (href: string) => {
     toggle();
     router.push(href);
   };
+
+  const linkClass =
+    "flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium text-left w-full group";
+  const iconClass =
+    "text-principal/60 group-hover:text-principal transition-colors";
 
   return (
     <div className="flex z-[1001]">
@@ -57,21 +53,46 @@ const NavMenu = ({ open, toggle }: Props) => {
 
         {/* nav links */}
         <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
-          {pages.map((page, i) => {
-            if (i === 1 && !session?.user) return null;
-            return (
-              <button
-                key={page.href}
-                onClick={() => navigate(page.href)}
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium text-left w-full group"
-              >
-                <span className="text-principal/60 group-hover:text-principal transition-colors">
-                  {page.icon}
-                </span>
-                {page.name}
-              </button>
-            );
-          })}
+          {/* siempre visible */}
+          <button onClick={() => navigate("/")} className={linkClass}>
+            <span className={iconClass}>
+              <MapPin className="size-4" />
+            </span>
+            Mi Ubicación
+          </button>
+
+          {/* usuarios autenticados */}
+          {session?.user && (
+            <button onClick={() => navigate("/my-list")} className={linkClass}>
+              <span className={iconClass}>
+                <Bookmark className="size-4" />
+              </span>
+              Mis Guardados
+            </button>
+          )}
+
+          {/* solo user */}
+          {role === "user" && (
+            <button onClick={() => navigate("/requests")} className={linkClass}>
+              <span className={iconClass}>
+                <ClipboardList className="size-4" />
+              </span>
+              Mis Solicitudes
+            </button>
+          )}
+
+          {/* solo admin */}
+          {role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/requests")}
+              className={linkClass}
+            >
+              <span className={iconClass}>
+                <Shield className="size-4" />
+              </span>
+              Solicitudes pendientes
+            </button>
+          )}
         </nav>
 
         {/* footer */}

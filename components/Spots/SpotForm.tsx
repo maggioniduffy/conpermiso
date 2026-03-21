@@ -32,12 +32,14 @@ const toggleClass = `
 `;
 
 interface Props {
+  mode?: "admin-create" | "request";
   title?: string;
   initialData?: Bath;
 }
 
-export default function SpotForm({ title, initialData }: Props) {
+export default function SpotForm({ mode, title, initialData }: Props) {
   const isEdit = !!initialData;
+  const endpoint = mode === "admin-create" ? "/baths" : "/bath-requests";
 
   const {
     costType,
@@ -51,7 +53,7 @@ export default function SpotForm({ title, initialData }: Props) {
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(initialData); // 👈 fix principal
+  } = useSpotForm(initialData, mode); // 👈 fix principal
 
   const MapPicker = useMemo(
     () =>

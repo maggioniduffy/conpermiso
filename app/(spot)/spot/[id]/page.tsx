@@ -1,15 +1,14 @@
-// app/spot/[id]/page.tsx
+// app/(spot)/spot/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Bath, Allowed, Shift, Day } from "@/utils/models";
-import { RankSpot } from "@/components/Spots";
+import { Bath, Allowed, Day } from "@/utils/models";
 import { trimAddress } from "@/lib/utils";
 import { MapPin, DollarSign, Clock, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
-import ReviewsList from "@/components/Spots/ReviewsList";
 import ReviewSection from "@/components/Spots/ReviewSection";
 import OpenBadge from "@/components/Spots/OpenBadge";
+import FavoriteButton from "@/components/Spots/FavoriteButton";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -19,20 +18,20 @@ async function getBath(id: string): Promise<Bath | null> {
   return res.json();
 }
 
-function isShiftOpenNow(shifts: Shift[]): boolean {
+function isShiftOpenNow(shifts: Bath["shifts"]): boolean {
+  if (!shifts?.length) return false;
   const now = new Date(new Date().getTime() - 3 * 60 * 60 * 1000);
-  const currentDay = now.getUTCDay(); // ← getUTCDay, no getDay
+  const currentDay = now.getUTCDay();
   const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
 
-  return (
-    shifts?.some((shift) => {
-      if (!shift.days.includes(currentDay as Day)) return false;
-      if (shift.allDay) return true;
-      const from = Number(shift.from?.hour) * 60 + Number(shift.from?.minute);
-      const to = Number(shift.to?.hour) * 60 + Number(shift.to?.minute);
-      return currentMinutes >= from && currentMinutes <= to;
-    }) ?? false
-  );
+  return shifts.some((shift) => {
+    if (!shift.days.includes(currentDay as Day)) return false;
+    if (shift.allDay) return true;
+    if (!shift.from || !shift.to) return false;
+    const from = Number(shift.from.hour) * 60 + Number(shift.from.minute);
+    const to = Number(shift.to.hour) * 60 + Number(shift.to.minute);
+    return currentMinutes >= from && currentMinutes <= to;
+  });
 }
 
 export default async function SpotPage({
@@ -55,6 +54,9 @@ export default async function SpotPage({
     shifts,
     googleMapsLink,
   } = bath;
+
+  const isOpen = isShiftOpenNow(shifts);
+
   return (
     <div className="h-full bg-mywhite pb-20">
       {/* Hero imagen */}
@@ -70,7 +72,6 @@ export default async function SpotPage({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-principal-200 to-principal-400" />
         )}
-        {/* overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
         {/* back button */}
@@ -81,18 +82,22 @@ export default async function SpotPage({
           <ArrowLeft className="size-5" />
         </Link>
 
+        {/* favorite button */}
+        <div className="absolute top-20 right-4">
+          <FavoriteButton bathId={id} />
+        </div>
+
         {/* título sobre imagen */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
-            {name}
-          </h1>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+              {name}
+            </h1>
+            <OpenBadge isOpen={isOpen} />
+          </div>
+          <div className="flex items-center gap-1 mt-1">
             <MapPin className="size-4 text-white/80 shrink-0" />
             <p className="text-white/80 text-sm">{trimAddress(address)}</p>
-            {/* badge con fondo blanco semitransparente para legibilidad sobre foto */}
-            <span className="ml-auto">
-              <OpenBadge isOpen={isShiftOpenNow(shifts ?? [])} />
-            </span>
           </div>
         </div>
       </div>
@@ -103,9 +108,9 @@ export default async function SpotPage({
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>
+
         {/* info cards */}
         <div className="grid grid-cols-2 gap-3">
-          {/* costo */}
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-principal">
               <DollarSign className="size-4" />
@@ -118,7 +123,6 @@ export default async function SpotPage({
             </span>
           </div>
 
-          {/* permitido */}
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-principal">
               <Users className="size-4" />
@@ -131,7 +135,8 @@ export default async function SpotPage({
             </span>
           </div>
         </div>
-        {/* dirección completa */}
+
+        {/* dirección */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-3">
           <div className="bg-principal/10 p-2 rounded-xl shrink-0">
             <MapPin className="size-5 text-principal" />
@@ -156,6 +161,7 @@ export default async function SpotPage({
             )}
           </div>
         </div>
+
         {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">

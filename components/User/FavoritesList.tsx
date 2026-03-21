@@ -3,28 +3,31 @@
 import { useFavorites } from "@/hooks";
 import React from "react";
 import SpotCard from "../Spots/SpotCard";
+import { Bookmark } from "lucide-react";
 
 const FavoritesList = () => {
-  const { favorites, loading, addFavorite } = useFavorites();
+  const { favorites, loading } = useFavorites();
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return null;
 
-  console.log("FAVORITES: ", favorites);
   return (
-    <div className="flex items-center gap-6 flex-wrap h-full">
-      <ul>
-        {favorites.map(({ name, image, _id }) => (
-          <li key={_id}>
-            {name}
-            <SpotCard title={name} id={_id} image={image} />
-          </li>
-        ))}
-      </ul>
-      {favorites.length == 0 && (
-        <h3 className="text-center text-gray-600">
-          {" "}
-          Agrega algun local que te guste para encontrarlo mas rapido luego{" "}
-        </h3>
+    <div className="flex flex-col gap-3">
+      {favorites.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-8 text-center">
+          <Bookmark className="size-8 text-gray-300" />
+          <p className="text-sm text-jet-700">
+            Agrega algún local que te guste para encontrarlo más rápido luego
+          </p>
+        </div>
+      ) : (
+        favorites.map(({ name, images, _id }) => (
+          <SpotCard
+            key={_id}
+            title={name}
+            id={_id}
+            image={images?.[0]?.url ?? "/biglogo_blue.png"}
+          />
+        ))
       )}
     </div>
   );

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
 import { trimAddress } from "@/lib/utils";
 import OpenBadge from "./OpenBadge";
+import FavoriteButton from "./FavoriteButton";
 
 interface Props {
   id?: string;
@@ -17,6 +18,7 @@ interface Props {
   shifts?: Shift[];
   image?: string;
   isOpenNow?: boolean; // ✅
+  isFavorite?: boolean;
 }
 
 const SpotModal = ({
@@ -26,6 +28,7 @@ const SpotModal = ({
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
   isOpenNow,
+  isFavorite,
   shifts = [
     {
       from: { hour: "12", minute: "30" },
@@ -54,6 +57,12 @@ const SpotModal = ({
         <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
           {title}
         </h2>
+
+        {id && (
+          <div className="absolute top-2 right-2">
+            <FavoriteButton bathId={id} size="sm" />
+          </div>
+        )}
       </div>
 
       {/* cuerpo sin padding horizontal extra */}

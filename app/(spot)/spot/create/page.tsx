@@ -1,22 +1,13 @@
+// app/(spot)/spot/create/page.tsx
 import { auth } from "@/auth";
-
-import SpotForm from "@/components/Spots/SpotForm";
 import { redirect } from "next/navigation";
+import SpotForm from "@/components/Spots/SpotForm";
 
-const page = async () => {
-  // const session = await auth();
+export default async function CreateSpotPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/auth");
 
-  // if (!session?.user) {
-  //   redirect("/");
-  // }
+  const role = (session.user as any).role;
 
-  return (
-    <div className="py-15 w-full bg-mywhite max-h-fit">
-      <div className="flex place-items-center p-5 w-full justify-center">
-        <SpotForm />
-      </div>
-    </div>
-  );
-};
-
-export default page;
+  return <SpotForm mode={role === "admin" ? "admin-create" : "request"} />;
+}

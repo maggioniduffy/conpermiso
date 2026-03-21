@@ -31,24 +31,23 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
   callbacks: {
     async jwt({ token, user, account }) {
-      if (account) {
-        token.provider = account.provider;
-      }
-
+      if (account) token.provider = account.provider;
       if (user) {
         token.authProviderId = user.id;
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
         token.emailVerified = true;
+        // ✅ acceso seguro — role puede no existir en el tipo
+        token.role = (user as any).role ?? null;
       }
-
       return token;
     },
 
     async session({ session, token }) {
       session.user.id = token.authProviderId as string;
-      session.token = token; // Include all token data in session for debugging
+      (session.user as any).role = token.role ?? null;
+      session.token = token;
       return session;
     },
   },

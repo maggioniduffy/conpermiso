@@ -3,42 +3,51 @@
 import React from "react";
 import { X } from "lucide-react";
 import { useFavorites } from "@/hooks";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Props {
   title?: string;
   image?: string;
-  href?: string;
   id: string;
 }
 
 const SpotCard = ({
   title = "Lo de pepe",
   image = "/biglogo_blue.png",
-  href = "/",
   id,
 }: Props) => {
   const { removeFavorite } = useFavorites();
 
   return (
-    <article className="shadow-2xl border duration-300 hover:shadow-lg bg-gray-100 hover:bg-gray-200 relative rounded-xl">
-      <a href={href}>
-        <img
+    <article className="bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 p-3 hover:shadow-md transition-shadow">
+      {/* imagen */}
+      <div className="shrink-0 size-11 rounded-xl overflow-hidden bg-principal/10">
+        <Image
           src={image}
           alt={title}
-          className="w-full md:h-48 md:w-full rounded-t-xl"
+          width={44}
+          height={44}
+          className="object-cover w-full h-full"
         />
-      </a>
-      <div className="flex flex-row place-items-center justify-between w-full ">
-        <div className="p-2 rounded-b-lg flex justify-between">
-          <h3 className="text-lg text-gray-900 font-medium">{title}</h3>
-        </div>
-        <button
-          className="bg-gray-300 rounded-full h-full p-1 mx-2 cursor-pointer"
-          onClick={() => removeFavorite(id)}
-        >
-          <X />
-        </button>
       </div>
+
+      {/* nombre */}
+      <Link
+        href={`/spot/${id}`}
+        className="flex-1 text-sm font-semibold text-jet hover:text-principal transition-colors truncate"
+      >
+        {title}
+      </Link>
+
+      {/* quitar */}
+      <button
+        onClick={() => removeFavorite(id)}
+        className="shrink-0 p-1.5 rounded-xl hover:bg-red-50 text-jet-700 hover:text-red-500 transition-all"
+        title="Quitar de favoritos"
+      >
+        <X className="size-4" />
+      </button>
     </article>
   );
 };

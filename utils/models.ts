@@ -49,3 +49,9 @@ export interface Bath {
   googleMapsLink?: string;
   isOpenNow: boolean;
 }
+
+export enum BathRequestStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
