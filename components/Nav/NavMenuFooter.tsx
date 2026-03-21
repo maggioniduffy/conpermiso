@@ -57,7 +57,10 @@ const NavMenuFooter = ({ session }: { session: Session | null }) => {
 
       {/* logout */}
       <button
-        onClick={() => signOut()}
+        onClick={() => {
+          localStorage.removeItem("accessToken"); // ← limpiar token del backend
+          signOut({ callbackUrl: "/" });
+        }}
         className="p-2 rounded-xl text-jet-700 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
         title="Cerrar sesión"
       >

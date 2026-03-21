@@ -62,7 +62,10 @@ const Navbar = ({ additionalClass }: Props) => {
               ) : (
                 <button
                   className="hover:text-principal hover:font-semibold cursor-pointer"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={() => {
+                    localStorage.removeItem("accessToken");
+                    signOut({ callbackUrl: "/" });
+                  }}
                 >
                   {" "}
                   Cerrar sesion{" "}
