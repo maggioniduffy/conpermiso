@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
 import { useSession } from "next-auth/react";
 import { MapPin, Bookmark, ClipboardList, Shield } from "lucide-react";
+import { useBackendUser } from "@/hooks";
 
 interface Props {
   open: boolean;
@@ -14,7 +15,9 @@ interface Props {
 
 const NavMenu = ({ open, toggle }: Props) => {
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role;
+  const { user } = useBackendUser(); // ← agregar
+  const role = user?.role;
+
   const router = useRouter();
 
   const navigate = (href: string) => {

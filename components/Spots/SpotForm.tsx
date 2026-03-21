@@ -35,9 +35,15 @@ interface Props {
   mode?: "admin-create" | "request";
   title?: string;
   initialData?: Bath;
+  requestId?: string; // ← agregar
 }
 
-export default function SpotForm({ mode, title, initialData }: Props) {
+export default function SpotForm({
+  mode,
+  title,
+  initialData,
+  requestId,
+}: Props) {
   const isEdit = !!initialData;
   const endpoint = mode === "admin-create" ? "/baths" : "/bath-requests";
 
@@ -53,7 +59,7 @@ export default function SpotForm({ mode, title, initialData }: Props) {
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(initialData, mode); // 👈 fix principal
+  } = useSpotForm(initialData, mode, requestId); // 👈 fix principal
 
   const MapPicker = useMemo(
     () =>

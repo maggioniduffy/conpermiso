@@ -28,6 +28,7 @@ function sanitizeShifts(shifts: Shift[]) {
 export function useSpotForm(
   initial?: Bath,
   mode: "admin-create" | "request" = "admin-create",
+  requestId?: string,
 ) {
   const inferCostType = (cost?: Bath["cost"]): CostType => {
     if (!cost || cost === "Sin cargo") return "Sin cargo";
@@ -97,15 +98,19 @@ export function useSpotForm(
           },
         };
 
-        const res = await apiFetch("/bath-requests", {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
+        const res = await apiFetch(
+          requestId ? `/bath-requests/${requestId}` : "/bath-requests",
+          {
+            method: requestId ? "PATCH" : "POST",
+            body: JSON.stringify(body),
+          },
+        );
 
         if (!res.ok) throw new Error();
-
-        toast("Solicitud enviada", {
-          description: "El admin la revisará pronto.",
+        toast(requestId ? "Solicitud actualizada" : "Solicitud enviada", {
+          description: requestId
+            ? "Los cambios fueron guardados."
+            : "El admin la revisará pronto.",
         });
         router.push("/requests");
         return true;

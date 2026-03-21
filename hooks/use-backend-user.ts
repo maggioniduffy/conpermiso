@@ -11,6 +11,7 @@ export interface BackendUser {
   name?: string;
   image?: string;
   emailVerified: boolean;
+  role: string;
 }
 
 function isTokenExpired(token: string): boolean {
