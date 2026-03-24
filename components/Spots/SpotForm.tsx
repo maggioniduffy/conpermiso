@@ -36,19 +36,18 @@ interface Props {
   mode?: "admin-create" | "request";
   title?: string;
   initialData?: Bath;
-  requestId?: string; // ← agregar
+  requestId?: string;
 }
 
 export default function SpotForm({
-  mode,
+  mode = "admin-create",
   title,
   initialData,
   requestId,
 }: Props) {
   const isEdit = !!initialData;
-  const endpoint = mode === "admin-create" ? "/baths" : "/bath-requests";
 
-  const [imageRemoved, setImageRemoved] = useState(false);
+  const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
 
   const {
     costType,
@@ -56,13 +55,19 @@ export default function SpotForm({
     setShifts,
     location,
     address,
-    setImageFile,
+    imageFiles,
+    setImageFiles,
     allowed,
     setAllowed,
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(initialData, mode, requestId, imageRemoved); // 👈 fix principal
+  } = useSpotForm(
+    initialData,
+    mode,
+    requestId,
+    removedImages.size === initialData?.images?.length,
+  );
 
   const MapPicker = useMemo(
     () =>
@@ -99,7 +104,6 @@ export default function SpotForm({
         <Textarea
           name="description"
           className="bg-mywhite border border-principal/30 rounded-lg resize-none"
-          placeholder="Descripción del baño"
           rows={3}
           required
           defaultValue={initialData?.description}
@@ -110,9 +114,7 @@ export default function SpotForm({
         <ToggleGroup
           type="single"
           value={costType}
-          onValueChange={(v) => {
-            if (v) setCostType(v as CostType);
-          }}
+          onValueChange={(v) => v && setCostType(v as CostType)}
           className="flex gap-2 flex-wrap w-full"
         >
           {(["Sin cargo", "Con consumicion", "Precio"] as CostType[]).map(
@@ -120,19 +122,19 @@ export default function SpotForm({
               <ToggleGroupItem
                 key={label}
                 value={label}
-                className={toggleClass + " text-wrap"}
+                className={toggleClass}
               >
                 {label}
               </ToggleGroupItem>
             ),
           )}
         </ToggleGroup>
+
         {costType === "Precio" && (
           <Input
             type="number"
             name="cost"
             className="bg-mywhite border border-principal/30 rounded-lg w-40"
-            placeholder="$ Precio"
             min={0}
             required
             defaultValue={
@@ -151,9 +153,7 @@ export default function SpotForm({
         <ToggleGroup
           type="single"
           value={allowed}
-          onValueChange={(v) => {
-            if (v) setAllowed(v as Allowed);
-          }}
+          onValueChange={(v) => v && setAllowed(v as Allowed)}
           className="flex gap-2"
         >
           <ToggleGroupItem value={Allowed.ONE} className={toggleClass}>
@@ -170,9 +170,6 @@ export default function SpotForm({
       </SectionCard>
 
       <SectionCard icon={<MapPin className="size-4" />} label="Ubicación">
-        <p className="text-xs text-jet-700">
-          Buscá la dirección o hacé click en el mapa
-        </p>
         <MapPicker
           onChange={handleLocationChange}
           initialValue={
@@ -194,31 +191,49 @@ export default function SpotForm({
         )}
       </SectionCard>
 
-      <SectionCard icon={<ImageIcon className="size-4" />} label="Imagen">
-        {isEdit && initialData?.images?.[0] && !imageRemoved ? (
-          <div className="relative w-full h-32 rounded-lg overflow-hidden mb-2">
-            <img
-              src={initialData.images[0].url}
-              alt={initialData.images[0].alt || initialData.name}
-              className="w-full h-full object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => setImageRemoved(true)}
-              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 hover:bg-black/80 transition-colors"
-            >
-              <XIcon className="size-4" />
-            </button>
+      <SectionCard icon={<ImageIcon className="size-4" />} label="Imágenes">
+        {/* existentes */}
+        {isEdit && initialData?.images && (
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            {initialData.images
+              .filter((img) => !removedImages.has(img.url))
+              .map((img) => (
+                <div
+                  key={img.url}
+                  className="relative aspect-square rounded-xl overflow-hidden"
+                >
+                  <img src={img.url} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRemovedImages((prev) => new Set(prev).add(img.url))
+                    }
+                    className="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-black/60 text-white"
+                  >
+                    <XIcon className="size-3" />
+                  </button>
+                </div>
+              ))}
           </div>
-        ) : null}
-        <Uploader onChange={setImageFile} />
+        )}
+
+        {/* nuevas */}
+        {imageFiles.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            {imageFiles.map((file, i) => (
+              <img
+                key={i}
+                src={URL.createObjectURL(file)}
+                className="aspect-square object-cover rounded-xl"
+              />
+            ))}
+          </div>
+        )}
+
+        <Uploader onChange={setImageFiles} maxFiles={5} />
       </SectionCard>
 
-      <Button
-        type="submit"
-        className="w-full bg-principal text-white hover:bg-principal-400 hover:scale-[1.02] transition-all rounded-xl py-5 font-semibold text-base flex items-center gap-2"
-        disabled={isPending}
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear baño"}
         <Send className="size-4" />
       </Button>

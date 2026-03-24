@@ -32,7 +32,7 @@ export function useSpotForm(
         }
       : null,
   );
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [allowed, setAllowed] = useState<Allowed>(
     initial?.allowed ?? Allowed.ONE,
   );
@@ -55,6 +55,39 @@ export function useSpotForm(
     setAddress(address);
   };
 
+  const buildFormData = (formData: FormData) => {
+    const backendForm = new FormData();
+
+    backendForm.append("name", formData.get("name") as string);
+    backendForm.append("description", formData.get("description") as string);
+    backendForm.append("address", address);
+    backendForm.append("allowed", allowed);
+    backendForm.append(
+      "cost",
+      costType === "Precio" ? (formData.get("cost") as string) : costType,
+    );
+    backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
+    backendForm.append(
+      "location",
+      JSON.stringify({
+        type: "Point",
+        coordinates: [location!.lng, location!.lat],
+      }),
+    );
+
+    // ✅ SOLO files (multiple)
+    imageFiles.forEach((file) => {
+      backendForm.append("files", file);
+    });
+
+    // ✅ borrar imágenes existentes
+    if (imageRemoved && imageFiles.length === 0) {
+      backendForm.append("removeAllImages", "true");
+    }
+
+    return backendForm;
+  };
+
   const handleSubmit = async (formData: FormData) => {
     if (!location) {
       toast("Error", { description: "Seleccioná una ubicación en el mapa" });
@@ -66,90 +99,49 @@ export function useSpotForm(
     try {
       const isRequest = mode === "request";
 
-      // bath-requests no acepta multipart, solo JSON
-      if (isRequest) {
-        const backendForm = new FormData();
-        backendForm.append("name", formData.get("name") as string);
-        backendForm.append(
-          "description",
-          formData.get("description") as string,
-        );
-        backendForm.append("address", address);
-        backendForm.append("allowed", allowed);
-        backendForm.append(
-          "cost",
-          costType === "Precio" ? (formData.get("cost") as string) : costType,
-        );
-        backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
-        backendForm.append(
-          "location",
-          JSON.stringify({
-            type: "Point",
-            coordinates: [location.lng, location.lat],
-          }),
-        );
-        if (imageFile) backendForm.append("file", imageFile);
-        // pasar imageRemoved como parámetro o manejarlo dentro del form
-        if (imageRemoved) {
-          backendForm.append("images", JSON.stringify([]));
-        }
-        const res = await apiFetch(
-          requestId ? `/bath-requests/${requestId}` : "/bath-requests",
-          {
-            method: requestId ? "PATCH" : "POST",
-            body: backendForm,
-            headers: {}, // ← dejar vacío para que el browser ponga el boundary correcto
-          },
-        );
+      const backendForm = buildFormData(formData);
 
-        if (!res.ok) throw new Error();
-        toast(requestId ? "Solicitud actualizada" : "Solicitud enviada", {
-          description: requestId
-            ? "Los cambios fueron guardados."
-            : "El admin la revisará pronto.",
-        });
-        router.push("/requests");
-        return true;
-      }
-
-      // admin — multipart con archivo
-      const backendForm = new FormData();
-      backendForm.append("name", formData.get("name") as string);
-      backendForm.append("description", formData.get("description") as string);
-      backendForm.append("address", address);
-      backendForm.append("allowed", allowed);
-      backendForm.append(
-        "cost",
-        costType === "Precio" ? (formData.get("cost") as string) : costType,
+      const res = await apiFetch(
+        isRequest
+          ? requestId
+            ? `/bath-requests/${requestId}`
+            : "/bath-requests"
+          : isEdit
+            ? `/baths/${initial!._id}`
+            : "/baths",
+        {
+          method: isRequest
+            ? requestId
+              ? "PATCH"
+              : "POST"
+            : isEdit
+              ? "PATCH"
+              : "POST",
+          body: backendForm,
+          headers: {}, // importante para multipart
+        },
       );
-      backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
-      backendForm.append(
-        "location",
-        JSON.stringify({
-          type: "Point",
-          coordinates: [location.lng, location.lat],
-        }),
-      );
-
-      if (imageRemoved && !imageFile) {
-        backendForm.append("images", JSON.stringify([]));
-      }
-      // si hay imageFile, ya se appendea normalmente y pisa la anterior
-      if (imageFile) {
-        backendForm.append("file", imageFile);
-      }
-      const res = await apiFetch(isEdit ? `/baths/${initial!._id}` : "/baths", {
-        method: isEdit ? "PATCH" : "POST",
-        body: backendForm,
-        headers: {},
-      });
 
       if (!res.ok) throw new Error();
 
-      toast("Éxito", {
-        description: isEdit ? "Baño actualizado" : "Baño creado correctamente",
-      });
-      router.push("/my-list");
+      toast(
+        isRequest
+          ? requestId
+            ? "Solicitud actualizada"
+            : "Solicitud enviada"
+          : "Éxito",
+        {
+          description: isRequest
+            ? requestId
+              ? "Los cambios fueron guardados."
+              : "El admin la revisará pronto."
+            : isEdit
+              ? "Baño actualizado"
+              : "Baño creado correctamente",
+        },
+      );
+
+      router.push(isRequest ? "/requests" : "/my-list");
       return true;
     } catch {
       toast("Error", { description: "Algo salió mal" });
@@ -166,8 +158,8 @@ export function useSpotForm(
     setShifts,
     location,
     address,
-    imageFile,
-    setImageFile,
+    imageFiles,
+    setImageFiles,
     allowed,
     setAllowed,
     isPending,
