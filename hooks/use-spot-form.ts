@@ -12,7 +12,7 @@ export function useSpotForm(
   initial?: Bath,
   mode: "admin-create" | "request" = "admin-create",
   requestId?: string,
-  remainingImages?: BathImage[], // ✅ imágenes existentes que quedan (sin las eliminadas)
+  remainingImages?: BathImage[],
 ) {
   const inferCostType = (cost?: Bath["cost"]): CostType => {
     if (!cost || cost === "Sin cargo") return "Sin cargo";
@@ -55,7 +55,27 @@ export function useSpotForm(
     setAddress(address);
   };
 
-  // ✅ buildFormData usa remainingImages del closure (siempre el valor más reciente)
+  const validate = (formData: FormData): string | null => {
+    const name = (formData.get("name") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim();
+
+    if (!name) return "El nombre es requerido.";
+    if (name.length < 3) return "El nombre debe tener al menos 3 caracteres.";
+    if (!description) return "La descripción es requerida.";
+    if (description.length < 10)
+      return "La descripción debe tener al menos 10 caracteres.";
+    if (!location) return "Seleccioná una ubicación en el mapa.";
+    if (!address?.trim())
+      return "La dirección es requerida. Usá el buscador del mapa.";
+    if (costType === "Precio") {
+      const cost = formData.get("cost") as string;
+      if (!cost || Number(cost) <= 0)
+        return "Ingresá un precio válido mayor a 0.";
+    }
+
+    return null;
+  };
+
   const buildFormData = (formData: FormData) => {
     const backendForm = new FormData();
 
@@ -76,13 +96,8 @@ export function useSpotForm(
       }),
     );
 
-    // ✅ nuevos archivos
-    imageFiles.forEach((file) => {
-      backendForm.append("files", file);
-    });
+    imageFiles.forEach((file) => backendForm.append("files", file));
 
-    // ✅ imágenes existentes que quedan (pasadas desde SpotForm reactivamente)
-    // siempre se manda para que el backend sepa cuáles conservar
     if (isEdit) {
       backendForm.append(
         "existingImages",
@@ -94,8 +109,9 @@ export function useSpotForm(
   };
 
   const handleSubmit = async (formData: FormData) => {
-    if (!location) {
-      toast("Error", { description: "Seleccioná una ubicación en el mapa" });
+    const error = validate(formData);
+    if (error) {
+      toast.error("Completá el formulario", { description: error });
       return false;
     }
 
@@ -124,10 +140,17 @@ export function useSpotForm(
       const res = await apiFetch(url, {
         method,
         body: backendForm,
-        headers: {}, // dejar vacío para que el browser setee el boundary de multipart
+        headers: {},
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const msg = body?.message ?? "Algo salió mal. Intentá de nuevo.";
+        toast.error("Error al guardar", {
+          description: Array.isArray(msg) ? msg.join(" · ") : msg,
+        });
+        return false;
+      }
 
       const successTitle = isRequest
         ? requestId
@@ -140,14 +163,16 @@ export function useSpotForm(
           ? "Los cambios fueron guardados."
           : "El admin la revisará pronto."
         : isEdit
-          ? "Baño actualizado"
-          : "Baño creado correctamente";
+          ? "Baño actualizado correctamente."
+          : "Baño creado correctamente.";
 
-      toast(successTitle, { description: successDesc });
+      toast.success(successTitle, { description: successDesc });
       router.push(isRequest ? "/requests" : "/my-list");
       return true;
     } catch {
-      toast("Error", { description: "Algo salió mal" });
+      toast.error("Error de conexión", {
+        description: "No se pudo conectar con el servidor.",
+      });
       return false;
     } finally {
       setIsPending(false);

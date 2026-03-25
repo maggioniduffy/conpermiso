@@ -5,7 +5,7 @@ export function SectionCard({
   children,
 }: {
   icon: React.ReactNode;
-  label: string;
+  label: string | React.ReactNode;
   children: React.ReactNode;
 }) {
   return (

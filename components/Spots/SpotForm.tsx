@@ -32,6 +32,9 @@ const toggleClass = `
   whitespace-normal text-center
 `;
 
+// asterisco para campos requeridos
+const Required = () => <span className="text-red-500 ml-0.5">*</span>;
+
 interface Props {
   mode?: "admin-create" | "request";
   title?: string;
@@ -48,7 +51,6 @@ export default function SpotForm({
   const isEdit = !!initialData;
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
 
-  // imágenes existentes que NO fueron eliminadas
   const remainingImages = (initialData?.images ?? []).filter(
     (img) => !removedImages.has(img.url),
   );
@@ -79,33 +81,53 @@ export default function SpotForm({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    // ✅ NO appendear nada aquí — useSpotForm maneja images y files
     await handleSubmit(formData);
   };
 
   return (
     <form onSubmit={onSubmit} className="w-full md:w-2xl flex flex-col gap-4">
-      <h1 className="text-jet text-2xl font-bold text-center md:text-left px-1">
-        {title ?? (isEdit ? "Editar Spot" : "Nuevo Spot")}
-      </h1>
+      <div className="flex items-baseline justify-between px-1">
+        <h1 className="text-jet text-2xl font-bold text-center md:text-left">
+          {title ?? (isEdit ? "Editar Spot" : "Nuevo Spot")}
+        </h1>
+        <p className="text-xs text-jet-700">
+          <Required /> campos requeridos
+        </p>
+      </div>
 
-      <SectionCard icon={<Type className="size-4" />} label="Nombre">
+      <SectionCard
+        icon={<Type className="size-4" />}
+        label={
+          <>
+            Nombre <Required />
+          </>
+        }
+      >
         <Input
           name="name"
           className="bg-mywhite border border-principal/30 rounded-lg"
           placeholder="Nombre del baño"
           required
+          minLength={3}
           defaultValue={initialData?.name}
         />
       </SectionCard>
 
-      <SectionCard icon={<AlignLeft className="size-4" />} label="Descripción">
+      <SectionCard
+        icon={<AlignLeft className="size-4" />}
+        label={
+          <>
+            Descripción <Required />
+          </>
+        }
+      >
         <Textarea
           name="description"
           className="bg-mywhite border border-principal/30 rounded-lg resize-none"
           placeholder="Descripción del baño"
           rows={3}
           required
+          minLength={10}
           defaultValue={initialData?.description}
         />
       </SectionCard>
@@ -135,7 +157,7 @@ export default function SpotForm({
             name="cost"
             className="bg-mywhite border border-principal/30 rounded-lg w-40"
             placeholder="$ Precio"
-            min={0}
+            min={1}
             required
             defaultValue={
               typeof initialData?.cost === "number"
@@ -169,7 +191,14 @@ export default function SpotForm({
         <ShiftsInput onChange={setShifts} initialValue={initialData?.shifts} />
       </SectionCard>
 
-      <SectionCard icon={<MapPin className="size-4" />} label="Ubicación">
+      <SectionCard
+        icon={<MapPin className="size-4" />}
+        label={
+          <>
+            Ubicación <Required />
+          </>
+        }
+      >
         <p className="text-xs text-jet-700">
           Buscá la dirección o hacé click en el mapa
         </p>
@@ -185,17 +214,20 @@ export default function SpotForm({
               : undefined
           }
         />
-        {location && (
+        {location ? (
           <p className="text-xs text-principal font-medium">
             📍{" "}
             {address ||
               `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
           </p>
+        ) : (
+          <p className="text-xs text-red-400 font-medium">
+            Seleccioná una ubicación para continuar
+          </p>
         )}
       </SectionCard>
 
       <SectionCard icon={<ImageIcon className="size-4" />} label="Imágenes">
-        {/* imágenes existentes que no fueron eliminadas */}
         {isEdit && remainingImages.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-2">
             {remainingImages.map((img) => (
@@ -221,19 +253,23 @@ export default function SpotForm({
             ))}
           </div>
         )}
-
-        {/* uploader para nuevas imágenes */}
         <Uploader onChange={setImageFiles} maxFiles={5} />
       </SectionCard>
 
       <Button
         type="submit"
         className="w-full bg-principal text-white hover:bg-principal-400 hover:scale-[1.02] transition-all rounded-xl py-5 font-semibold text-base flex items-center gap-2"
-        disabled={isPending}
+        disabled={isPending || !location}
       >
         {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear baño"}
         <Send className="size-4" />
       </Button>
+
+      {!location && (
+        <p className="text-xs text-center text-red-400 -mt-2">
+          Falta seleccionar la ubicación en el mapa
+        </p>
+      )}
     </form>
   );
 }
