@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import {
   CheckCircle2,
@@ -17,6 +17,7 @@ import { BathRequestStatus, Shift } from "@/utils/models";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import Link from "next/link";
 import ConfirmDialog from "../ConfirmDialog";
+import Pagination from "@/components/Pagination";
 
 interface BathRequest {
   _id: string;
@@ -29,6 +30,17 @@ interface BathRequest {
   adminComment?: string;
   createdAt: string;
 }
+
+interface Paginated {
+  data: BathRequest[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+const PAGE_SIZE = 5;
 
 const statusConfig = {
   PENDING: {
@@ -49,29 +61,45 @@ const statusConfig = {
 };
 
 export default function MyRequestsList() {
-  const [requests, setRequests] = useState<BathRequest[]>([]);
+  const [result, setResult] = useState<Paginated | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    apiFetch("/bath-requests/me")
+  const fetchPage = useCallback((p: number) => {
+    setLoading(true);
+    apiFetch(`/bath-requests/me?page=${p}&limit=${PAGE_SIZE}`)
       .then((r) => r.json())
-      .then(setRequests)
+      .then((data: Paginated) => {
+        setResult(data);
+        setPage(p);
+      })
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetchPage(1);
+  }, [fetchPage]);
+
   async function handleCancel(id: string) {
     await apiFetch(`/bath-requests/${id}`, { method: "DELETE" });
-    setRequests((prev) => prev.filter((r) => r._id !== id));
+    fetchPage(page);
   }
 
-  if (loading) return null;
+  const requests = result?.data ?? [];
 
   return (
     <div className="min-h-screen bg-mywhite pt-10">
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-jet">Mis solicitudes</h1>
+        <h1 className="text-xl font-bold text-jet">
+          Mis solicitudes
+          {result && (
+            <span className="ml-2 text-sm font-normal text-jet-700">
+              ({result.total})
+            </span>
+          )}
+        </h1>
 
-        {requests.length === 0 && (
+        {!loading && requests.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <Clock className="size-10 text-gray-200" />
             <p className="text-sm text-jet-700">No tenés solicitudes todavía</p>
@@ -86,7 +114,6 @@ export default function MyRequestsList() {
               key={req._id}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 p-5"
             >
-              {/* header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-jet truncate">{req.name}</p>
@@ -105,12 +132,10 @@ export default function MyRequestsList() {
                 </span>
               </div>
 
-              {/* descripcion */}
               <p className="text-sm text-jet-500 leading-relaxed">
                 {req.description}
               </p>
 
-              {/* costo */}
               {req.cost && (
                 <div className="flex items-center gap-2">
                   <DollarSign className="size-4 text-principal shrink-0" />
@@ -118,7 +143,6 @@ export default function MyRequestsList() {
                 </div>
               )}
 
-              {/* horarios */}
               {req.shifts && req.shifts.length > 0 && (
                 <div className="bg-gray-50 rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-2">
@@ -135,7 +159,6 @@ export default function MyRequestsList() {
                 </div>
               )}
 
-              {/* motivo de rechazo */}
               {req.status === BathRequestStatus.REJECTED &&
                 req.adminComment && (
                   <div className="bg-red-50 rounded-xl p-3 border border-red-100">
@@ -146,7 +169,6 @@ export default function MyRequestsList() {
                   </div>
                 )}
 
-              {/* acciones */}
               {(req.status === BathRequestStatus.PENDING ||
                 req.status === BathRequestStatus.REJECTED) && (
                 <div className="flex gap-2 pt-1 border-t border-gray-100">
@@ -178,6 +200,14 @@ export default function MyRequestsList() {
             </div>
           );
         })}
+
+        {result && (
+          <Pagination
+            page={result.page}
+            totalPages={result.totalPages}
+            onPageChange={fetchPage}
+          />
+        )}
 
         <Link
           href="/spot/create"

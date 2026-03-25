@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import {
   CheckCircle2,
@@ -31,6 +31,7 @@ import Image from "next/image";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import { Allowed, Shift } from "@/utils/models";
 import ImagesSlider from "../ImagesSlider";
+import Pagination from "@/components/Pagination";
 
 interface BathRequest {
   _id: string;
@@ -50,11 +51,24 @@ interface BathRequest {
   updatedAt: string;
 }
 
+interface Paginated {
+  data: BathRequest[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
 interface PendingAction {
   id: string;
   status: "APPROVED" | "REJECTED";
   name: string;
 }
+
+type StatusFilter = "PENDING" | "APPROVED" | "REJECTED";
+
+const PAGE_SIZE = 10;
 
 const STATUS_LABEL: Record<
   string,
@@ -72,28 +86,46 @@ const STATUS_LABEL: Record<
   },
 };
 
+const FILTER_TABS: { label: string; value: StatusFilter | "ALL" }[] = [
+  { label: "Pendientes", value: "PENDING" },
+  { label: "Historial", value: "ALL" },
+  { label: "Aprobadas", value: "APPROVED" },
+  { label: "Rechazadas", value: "REJECTED" },
+];
+
 export default function AdminRequestsPool() {
-  const [requests, setRequests] = useState<BathRequest[]>([]);
+  const [result, setResult] = useState<Paginated | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState<StatusFilter | "ALL">("PENDING");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, string>>({});
   const [processing, setProcessing] = useState<string | null>(null);
-  const [showResolved, setShowResolved] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(
     null,
   );
 
-  const fetchAll = () =>
-    apiFetch("/bath-requests")
+  const fetchPage = useCallback((p: number, f: StatusFilter | "ALL") => {
+    setLoading(true);
+    const statusParam = f !== "ALL" ? `&status=${f}` : "";
+    apiFetch(`/bath-requests?page=${p}&limit=${PAGE_SIZE}${statusParam}`)
       .then((r) => r.json())
-      .then((data: BathRequest[]) => setRequests(data));
-
-  useEffect(() => {
-    fetchAll().finally(() => setLoading(false));
+      .then((data: Paginated) => {
+        setResult(data);
+        setPage(p);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const pending = requests.filter((r) => r.status === "PENDING");
-  const resolved = requests.filter((r) => r.status !== "PENDING");
+  useEffect(() => {
+    fetchPage(1, filter);
+  }, [filter, fetchPage]);
+
+  function handleFilterChange(f: StatusFilter | "ALL") {
+    setFilter(f);
+    setExpanded(null);
+    setPage(1);
+  }
 
   function confirmResolve(
     id: string,
@@ -115,7 +147,7 @@ export default function AdminRequestsPool() {
         method: "PATCH",
         body: JSON.stringify({ status, adminComment: comments[id] }),
       });
-      await fetchAll();
+      fetchPage(page, filter);
       setExpanded(null);
 
       if (status === "APPROVED") {
@@ -136,41 +168,28 @@ export default function AdminRequestsPool() {
     }
   }
 
-  async function handleExpand(id: string) {
-    if (expanded === id) {
-      setExpanded(null);
-      return;
-    }
-    setExpanded(id);
-    await fetchAll();
-  }
+  const requests = result?.data ?? [];
+  const muted = filter !== "PENDING";
 
-  if (loading) return null;
-
-  const RequestCard = ({
-    req,
-    muted = false,
-  }: {
-    req: BathRequest;
-    muted?: boolean;
-  }) => {
+  const RequestCard = ({ req }: { req: BathRequest }) => {
     const [lng, lat] = req.location?.coordinates ?? [];
     const mapsLink =
       lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : null;
     const isExpanded = expanded === req._id;
     const statusMeta = STATUS_LABEL[req.status];
+    const isResolved = req.status !== "PENDING";
 
     return (
       <div
         className={`rounded-2xl shadow-sm border overflow-hidden transition-opacity ${
-          muted
+          isResolved
             ? "border-gray-100 bg-gray-50 opacity-60 hover:opacity-80"
             : "border-gray-100 bg-white"
         }`}
       >
         {req.images?.[0] && (
           <div
-            className={`relative w-full h-36 overflow-hidden ${muted ? "grayscale" : ""}`}
+            className={`relative w-full h-36 overflow-hidden ${isResolved ? "grayscale" : ""}`}
           >
             <Image
               src={req.images[0].url}
@@ -186,13 +205,13 @@ export default function AdminRequestsPool() {
         )}
 
         <button
-          onClick={() => handleExpand(req._id)}
+          onClick={() => setExpanded(isExpanded ? null : req._id)}
           className="w-full flex items-start justify-between p-5 text-left"
         >
           <div className="flex-1 min-w-0">
             {!req.images?.[0] && (
               <p
-                className={`font-semibold ${muted ? "text-jet-700" : "text-jet"}`}
+                className={`font-semibold ${isResolved ? "text-jet-700" : "text-jet"}`}
               >
                 {req.name}
               </p>
@@ -201,7 +220,7 @@ export default function AdminRequestsPool() {
             <p className="text-xs text-jet-700 mt-0.5">
               por {req.user?.name ?? req.user?.email}
             </p>
-            {muted && statusMeta && (
+            {isResolved && statusMeta && (
               <span
                 className={`inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusMeta.color}`}
               >
@@ -219,7 +238,7 @@ export default function AdminRequestsPool() {
 
         {isExpanded && (
           <div className="px-5 pb-5 flex flex-col gap-4 border-t border-gray-100">
-            {muted && req.resolvedBy && (
+            {isResolved && req.resolvedBy && (
               <div className="flex items-center gap-2 pt-3 text-xs text-jet-700">
                 <UserCheck className="size-3.5 text-jet-500 shrink-0" />
                 <span>
@@ -237,7 +256,7 @@ export default function AdminRequestsPool() {
               </div>
             )}
 
-            {muted && req.adminComment && (
+            {isResolved && req.adminComment && (
               <div className="bg-red-50 border-l-4 border-red-300 rounded-lg px-3 py-2 text-xs text-red-700">
                 <span className="font-semibold">Motivo: </span>
                 {req.adminComment}
@@ -245,7 +264,7 @@ export default function AdminRequestsPool() {
             )}
 
             <p
-              className={`text-sm leading-relaxed ${muted ? "text-jet-700" : "text-jet-500 pt-3"}`}
+              className={`text-sm leading-relaxed ${isResolved ? "text-jet-700" : "text-jet-500 pt-3"}`}
             >
               {req.description}
             </p>
@@ -312,7 +331,7 @@ export default function AdminRequestsPool() {
               </div>
             )}
 
-            {!muted && (
+            {!isResolved && (
               <>
                 <Textarea
                   placeholder="Comentario (requerido si rechazás)..."
@@ -362,7 +381,6 @@ export default function AdminRequestsPool() {
 
   return (
     <>
-      {/* confirm dialog */}
       <AlertDialog
         open={!!pendingAction}
         onOpenChange={(o) => !o && setPendingAction(null)}
@@ -399,42 +417,52 @@ export default function AdminRequestsPool() {
       </AlertDialog>
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-jet">
-          Solicitudes pendientes
-          <span className="ml-2 text-sm font-normal text-jet-700">
-            ({pending.length})
-          </span>
-        </h1>
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-xl font-bold text-jet">
+            Solicitudes
+            {result && (
+              <span className="ml-2 text-sm font-normal text-jet-700">
+                ({result.total})
+              </span>
+            )}
+          </h1>
+        </div>
 
-        {pending.length === 0 && (
+        {/* filter tabs */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+          {FILTER_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => handleFilterChange(tab.value)}
+              className={`flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all ${
+                filter === tab.value
+                  ? "bg-white text-jet shadow-sm"
+                  : "text-jet-700 hover:text-jet"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {!loading && requests.length === 0 && (
           <p className="text-sm text-jet-700 text-center py-8">
-            No hay solicitudes pendientes 🎉
+            {filter === "PENDING"
+              ? "No hay solicitudes pendientes 🎉"
+              : "No hay solicitudes en esta categoría."}
           </p>
         )}
 
-        {pending.map((req) => (
+        {requests.map((req) => (
           <RequestCard key={req._id} req={req} />
         ))}
 
-        {resolved.length > 0 && (
-          <div className="mt-2 flex flex-col gap-3">
-            <button
-              onClick={() => setShowResolved((v) => !v)}
-              className="flex items-center gap-2 text-sm text-jet-700 hover:text-jet transition-colors self-start"
-            >
-              {showResolved ? (
-                <ChevronUp className="size-4" />
-              ) : (
-                <ChevronDown className="size-4" />
-              )}
-              <span className="font-medium">Historial ({resolved.length})</span>
-            </button>
-
-            {showResolved &&
-              resolved.map((req) => (
-                <RequestCard key={req._id} req={req} muted />
-              ))}
-          </div>
+        {result && (
+          <Pagination
+            page={result.page}
+            totalPages={result.totalPages}
+            onPageChange={(p) => fetchPage(p, filter)}
+          />
         )}
       </div>
     </>
