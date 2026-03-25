@@ -23,13 +23,20 @@ const NavMenu = ({ open, toggle }: Props) => {
 
   useEffect(() => {
     if (role !== "admin") return;
-    apiFetch("/bath-requests")
-      .then((r) => r.json())
-      .then((data) => {
-        const count = data.filter((r: any) => r.status === "PENDING").length;
-        setPendingCount(count);
-      })
-      .catch(() => setPendingCount(0));
+
+    const fetchPending = () => {
+      apiFetch("/bath-requests")
+        .then((r) => r.json())
+        .then((data) => {
+          const count = data.filter((r: any) => r.status === "PENDING").length;
+          setPendingCount(count);
+        })
+        .catch(() => setPendingCount(0));
+    };
+
+    fetchPending();
+    const interval = setInterval(fetchPending, 60_000);
+    return () => clearInterval(interval);
   }, [role]);
 
   const navigate = (href: string) => {
@@ -42,8 +49,28 @@ const NavMenu = ({ open, toggle }: Props) => {
   const iconClass =
     "text-principal/60 group-hover:text-principal transition-colors";
 
+  const badge = pendingCount > 0 && (
+    <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+      {pendingCount > 99 ? "99+" : pendingCount}
+    </span>
+  );
+
   return (
     <div className="flex z-[1001]">
+      {/* globo flotante cuando el sidebar está cerrado */}
+      {!open && role === "admin" && pendingCount > 0 && (
+        <button
+          onClick={() => {
+            toggle();
+            router.push("/admin/requests");
+          }}
+          className="fixed top-4 left-12 z-[1002] flex items-center justify-center size-5 rounded-full bg-red-500 text-white text-[10px] font-bold shadow-md hover:bg-red-600 transition-colors"
+          title={`${pendingCount} solicitud${pendingCount !== 1 ? "es" : ""} pendiente${pendingCount !== 1 ? "s" : ""}`}
+        >
+          {pendingCount > 99 ? "99+" : pendingCount}
+        </button>
+      )}
+
       {/* overlay */}
       <span
         className={`fixed top-0 left-0 w-full h-full bg-black z-89 transition-opacity duration-500 ease-in-out ${
@@ -106,11 +133,7 @@ const NavMenu = ({ open, toggle }: Props) => {
                 <Shield className="size-4" />
               </span>
               <span className="flex-1">Solicitudes pendientes</span>
-              {pendingCount > 0 && (
-                <span className="ml-auto flex items-center justify-center size-5 rounded-full bg-red-500 text-white text-xs font-bold">
-                  {pendingCount > 99 ? "99+" : pendingCount}
-                </span>
-              )}
+              {badge}
             </button>
           )}
         </nav>
