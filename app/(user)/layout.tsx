@@ -1,16 +1,13 @@
-import { Navbar } from "@/components/Nav";
-import { Toaster } from "@/components/ui/sonner";
+import { ReactNode } from "react";
+import Navbar from "@/components/Nav/Navbar";
+import AppFooter from "@/components/Footer";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function UserLayout({ children }: { children: ReactNode }) {
   return (
-    <>
-      <Navbar additionalClass="fixed z-99 top-0" />
-      <main className="bg-jet min-h-screen flex flex-col">{children}</main>
-      <Toaster />
-    </>
+    <div className="flex-1 flex flex-col min-h-0">
+      <Navbar />
+      <main className="flex-1">{children}</main>
+      <AppFooter />
+    </div>
   );
 }
