@@ -9,6 +9,7 @@ import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import ReviewSection from "@/components/Spots/ReviewSection";
 import OpenBadge from "@/components/Spots/OpenBadge";
 import FavoriteButton from "@/components/Spots/FavoriteButton";
+import ImagesSlider from "@/components/ImagesSlider";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -180,7 +181,7 @@ export default async function SpotPage({
             </div>
           </div>
         )}
-
+        <ImagesSlider images={images} />
         <ReviewSection bathId={id} />
       </div>
     </div>

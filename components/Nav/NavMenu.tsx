@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DropdownMenu from "./DropdownMenu";
 import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
 import { useSession } from "next-auth/react";
 import { MapPin, Bookmark, ClipboardList, Shield } from "lucide-react";
 import { useBackendUser } from "@/hooks";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Props {
   open: boolean;
@@ -15,10 +16,21 @@ interface Props {
 
 const NavMenu = ({ open, toggle }: Props) => {
   const { data: session } = useSession();
-  const { user } = useBackendUser(); // ← agregar
+  const { user } = useBackendUser();
   const role = user?.role;
-
+  const [pendingCount, setPendingCount] = useState(0);
   const router = useRouter();
+
+  useEffect(() => {
+    if (role !== "admin") return;
+    apiFetch("/bath-requests")
+      .then((r) => r.json())
+      .then((data) => {
+        const count = data.filter((r: any) => r.status === "PENDING").length;
+        setPendingCount(count);
+      })
+      .catch(() => setPendingCount(0));
+  }, [role]);
 
   const navigate = (href: string) => {
     toggle();
@@ -93,7 +105,12 @@ const NavMenu = ({ open, toggle }: Props) => {
               <span className={iconClass}>
                 <Shield className="size-4" />
               </span>
-              Solicitudes pendientes
+              <span className="flex-1">Solicitudes pendientes</span>
+              {pendingCount > 0 && (
+                <span className="ml-auto flex items-center justify-center size-5 rounded-full bg-red-500 text-white text-xs font-bold">
+                  {pendingCount > 99 ? "99+" : pendingCount}
+                </span>
+              )}
             </button>
           )}
         </nav>

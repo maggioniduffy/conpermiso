@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import { Allowed, Shift } from "@/utils/models";
+import ImagesSlider from "../ImagesSlider";
 
 interface BathRequest {
   _id: string;
@@ -251,6 +252,7 @@ export default function AdminRequestsPool() {
                     Rechazar
                   </Button>
                 </div>
+                {req.images && <ImagesSlider images={req.images} />}
               </div>
             )}
           </div>

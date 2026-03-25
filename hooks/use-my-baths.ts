@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 // acordate de agregar esto al archivo o al componente que lo use
 
 // hooks/use-my-baths.ts
-export function useMyBaths(role?: string) {
+export default function useMyBaths(role?: string) {
   const [baths, setBaths] = useState<Bath[]>([]);
   const [loading, setLoading] = useState(true);
 

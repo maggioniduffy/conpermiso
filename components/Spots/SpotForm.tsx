@@ -46,8 +46,12 @@ export default function SpotForm({
   requestId,
 }: Props) {
   const isEdit = !!initialData;
-
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
+
+  // imágenes existentes que NO fueron eliminadas
+  const remainingImages = (initialData?.images ?? []).filter(
+    (img) => !removedImages.has(img.url),
+  );
 
   const {
     costType,
@@ -55,19 +59,13 @@ export default function SpotForm({
     setShifts,
     location,
     address,
-    imageFiles,
     setImageFiles,
     allowed,
     setAllowed,
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(
-    initialData,
-    mode,
-    requestId,
-    removedImages.size === initialData?.images?.length,
-  );
+  } = useSpotForm(initialData, mode, requestId, remainingImages);
 
   const MapPicker = useMemo(
     () =>
@@ -81,6 +79,7 @@ export default function SpotForm({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    // ✅ NO appendear nada aquí — useSpotForm maneja images y files
     await handleSubmit(formData);
   };
 
@@ -104,6 +103,7 @@ export default function SpotForm({
         <Textarea
           name="description"
           className="bg-mywhite border border-principal/30 rounded-lg resize-none"
+          placeholder="Descripción del baño"
           rows={3}
           required
           defaultValue={initialData?.description}
@@ -129,12 +129,12 @@ export default function SpotForm({
             ),
           )}
         </ToggleGroup>
-
         {costType === "Precio" && (
           <Input
             type="number"
             name="cost"
             className="bg-mywhite border border-principal/30 rounded-lg w-40"
+            placeholder="$ Precio"
             min={0}
             required
             defaultValue={
@@ -170,6 +170,9 @@ export default function SpotForm({
       </SectionCard>
 
       <SectionCard icon={<MapPin className="size-4" />} label="Ubicación">
+        <p className="text-xs text-jet-700">
+          Buscá la dirección o hacé click en el mapa
+        </p>
         <MapPicker
           onChange={handleLocationChange}
           initialValue={
@@ -192,48 +195,42 @@ export default function SpotForm({
       </SectionCard>
 
       <SectionCard icon={<ImageIcon className="size-4" />} label="Imágenes">
-        {/* existentes */}
-        {isEdit && initialData?.images && (
+        {/* imágenes existentes que no fueron eliminadas */}
+        {isEdit && remainingImages.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mb-2">
-            {initialData.images
-              .filter((img) => !removedImages.has(img.url))
-              .map((img) => (
-                <div
-                  key={img.url}
-                  className="relative aspect-square rounded-xl overflow-hidden"
+            {remainingImages.map((img) => (
+              <div
+                key={img.url}
+                className="relative aspect-square rounded-xl overflow-hidden"
+              >
+                <img
+                  src={img.url}
+                  alt={img.alt ?? ""}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRemovedImages((prev) => new Set(prev).add(img.url))
+                  }
+                  className="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
                 >
-                  <img src={img.url} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setRemovedImages((prev) => new Set(prev).add(img.url))
-                    }
-                    className="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-black/60 text-white"
-                  >
-                    <XIcon className="size-3" />
-                  </button>
-                </div>
-              ))}
-          </div>
-        )}
-
-        {/* nuevas */}
-        {imageFiles.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            {imageFiles.map((file, i) => (
-              <img
-                key={i}
-                src={URL.createObjectURL(file)}
-                className="aspect-square object-cover rounded-xl"
-              />
+                  <XIcon className="size-3" />
+                </button>
+              </div>
             ))}
           </div>
         )}
 
+        {/* uploader para nuevas imágenes */}
         <Uploader onChange={setImageFiles} maxFiles={5} />
       </SectionCard>
 
-      <Button type="submit" disabled={isPending}>
+      <Button
+        type="submit"
+        className="w-full bg-principal text-white hover:bg-principal-400 hover:scale-[1.02] transition-all rounded-xl py-5 font-semibold text-base flex items-center gap-2"
+        disabled={isPending}
+      >
         {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear baño"}
         <Send className="size-4" />
       </Button>

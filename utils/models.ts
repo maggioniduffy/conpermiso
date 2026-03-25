@@ -14,7 +14,7 @@ export type Shift = {
   allDay: boolean;
 };
 
-export interface Image {
+export interface BathImage {
   url: string;
   alt?: string;
 }
@@ -34,7 +34,7 @@ export interface Bath {
   _id: string;
   name: string;
   description: string;
-  images: Image[];
+  images: BathImage[];
   cost: Cost;
   shifts: Shift[];
   location: GeoLocation;

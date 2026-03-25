@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/apiFetch";
-import { Shift, Allowed, Bath } from "@/utils/models";
+import { Shift, Allowed, Bath, BathImage } from "@/utils/models";
 import { sanitizeShifts } from "@/lib/utils";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
@@ -12,7 +12,7 @@ export function useSpotForm(
   initial?: Bath,
   mode: "admin-create" | "request" = "admin-create",
   requestId?: string,
-  imageRemoved = false,
+  remainingImages?: BathImage[], // ✅ imágenes existentes que quedan (sin las eliminadas)
 ) {
   const inferCostType = (cost?: Bath["cost"]): CostType => {
     if (!cost || cost === "Sin cargo") return "Sin cargo";
@@ -55,6 +55,7 @@ export function useSpotForm(
     setAddress(address);
   };
 
+  // ✅ buildFormData usa remainingImages del closure (siempre el valor más reciente)
   const buildFormData = (formData: FormData) => {
     const backendForm = new FormData();
 
@@ -75,14 +76,18 @@ export function useSpotForm(
       }),
     );
 
-    // ✅ SOLO files (multiple)
+    // ✅ nuevos archivos
     imageFiles.forEach((file) => {
       backendForm.append("files", file);
     });
 
-    // ✅ borrar imágenes existentes
-    if (imageRemoved && imageFiles.length === 0) {
-      backendForm.append("removeAllImages", "true");
+    // ✅ imágenes existentes que quedan (pasadas desde SpotForm reactivamente)
+    // siempre se manda para que el backend sepa cuáles conservar
+    if (isEdit) {
+      backendForm.append(
+        "existingImages",
+        JSON.stringify(remainingImages ?? []),
+      );
     }
 
     return backendForm;
@@ -98,49 +103,47 @@ export function useSpotForm(
 
     try {
       const isRequest = mode === "request";
-
       const backendForm = buildFormData(formData);
 
-      const res = await apiFetch(
-        isRequest
-          ? requestId
-            ? `/bath-requests/${requestId}`
-            : "/bath-requests"
-          : isEdit
-            ? `/baths/${initial!._id}`
-            : "/baths",
-        {
-          method: isRequest
-            ? requestId
-              ? "PATCH"
-              : "POST"
-            : isEdit
-              ? "PATCH"
-              : "POST",
-          body: backendForm,
-          headers: {}, // importante para multipart
-        },
-      );
+      const url = isRequest
+        ? requestId
+          ? `/bath-requests/${requestId}`
+          : "/bath-requests"
+        : isEdit
+          ? `/baths/${initial!._id}`
+          : "/baths";
+
+      const method = isRequest
+        ? requestId
+          ? "PATCH"
+          : "POST"
+        : isEdit
+          ? "PATCH"
+          : "POST";
+
+      const res = await apiFetch(url, {
+        method,
+        body: backendForm,
+        headers: {}, // dejar vacío para que el browser setee el boundary de multipart
+      });
 
       if (!res.ok) throw new Error();
 
-      toast(
-        isRequest
-          ? requestId
-            ? "Solicitud actualizada"
-            : "Solicitud enviada"
-          : "Éxito",
-        {
-          description: isRequest
-            ? requestId
-              ? "Los cambios fueron guardados."
-              : "El admin la revisará pronto."
-            : isEdit
-              ? "Baño actualizado"
-              : "Baño creado correctamente",
-        },
-      );
+      const successTitle = isRequest
+        ? requestId
+          ? "Solicitud actualizada"
+          : "Solicitud enviada"
+        : "Éxito";
 
+      const successDesc = isRequest
+        ? requestId
+          ? "Los cambios fueron guardados."
+          : "El admin la revisará pronto."
+        : isEdit
+          ? "Baño actualizado"
+          : "Baño creado correctamente";
+
+      toast(successTitle, { description: successDesc });
       router.push(isRequest ? "/requests" : "/my-list");
       return true;
     } catch {
