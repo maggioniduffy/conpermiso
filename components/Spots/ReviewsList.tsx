@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { Star } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Review {
   _id: string;
@@ -46,7 +47,29 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
       .finally(() => setLoading(false));
   }, [bathId, refreshKey]);
 
-  if (loading && reviews.length === 0) return null;
+  if (loading && reviews.length === 0)
+    return (
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-12 h-10 rounded-md" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {[1, 2].map((i) => (
+            <div key={i} className="py-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
 
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
