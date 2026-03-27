@@ -10,6 +10,7 @@ import ReviewSection from "@/components/Spots/ReviewSection";
 import OpenBadge from "@/components/Spots/OpenBadge";
 import FavoriteButton from "@/components/Spots/FavoriteButton";
 import ImagesSlider from "@/components/ImagesSlider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -22,7 +23,7 @@ async function getBath(id: string): Promise<Bath | null> {
 function isShiftOpenNow(shifts: Bath["shifts"]): boolean {
   const now = new Date(new Date().getTime() - 3 * 60 * 60 * 1000);
   const jsDay = now.getUTCDay();
-  const currentDay = jsDay === 0 ? 7 : jsDay; // ← Domingo=7
+  const currentDay = jsDay === 0 ? 7 : jsDay;
   const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
 
   return shifts.some((shift) => {
@@ -55,7 +56,6 @@ export default async function SpotPage({
     shifts,
     googleMapsLink,
   } = bath;
-
   const isOpen = isShiftOpenNow(shifts);
 
   return (
@@ -75,7 +75,6 @@ export default async function SpotPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {/* back button */}
         <Link
           href="/"
           className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-all"
@@ -83,12 +82,10 @@ export default async function SpotPage({
           <ArrowLeft className="size-5" />
         </Link>
 
-        {/* favorite button */}
         <div className="absolute top-20 right-4">
           <FavoriteButton bathId={id} />
         </div>
 
-        {/* título sobre imagen */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
@@ -105,12 +102,10 @@ export default async function SpotPage({
 
       {/* contenido */}
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
-        {/* descripcion */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>
 
-        {/* info cards */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-principal">
@@ -123,7 +118,6 @@ export default async function SpotPage({
               {cost ?? "Sin cargo"}
             </span>
           </div>
-
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-principal">
               <Users className="size-4" />
@@ -137,7 +131,6 @@ export default async function SpotPage({
           </div>
         </div>
 
-        {/* dirección */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-3">
           <div className="bg-principal/10 p-2 rounded-xl shrink-0">
             <MapPin className="size-5 text-principal" />
@@ -163,7 +156,6 @@ export default async function SpotPage({
           </div>
         </div>
 
-        {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -181,8 +173,13 @@ export default async function SpotPage({
             </div>
           </div>
         )}
+
         <ImagesSlider images={images} />
-        <ReviewSection bathId={id} />
+
+        {/* ReviewSection es client component — wrapeamos */}
+        <ErrorBoundary>
+          <ReviewSection bathId={id} />
+        </ErrorBoundary>
       </div>
     </div>
   );

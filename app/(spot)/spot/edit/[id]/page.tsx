@@ -1,7 +1,9 @@
+// app/(spot)/spot/edit/[id]/page.tsx
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SpotForm from "@/components/Spots/SpotForm";
 import { Bath } from "@/utils/models";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 async function getBath(id: string): Promise<Bath | null> {
   const res = await fetch(`${process.env.BACKEND_URL}/baths/${id}`, {
@@ -26,7 +28,9 @@ export default async function EditSpotPage({
   return (
     <div className="py-15 w-full bg-mywhite">
       <div className="flex place-items-center p-5 w-full justify-center">
-        <SpotForm title="Editar Spot" initialData={bath} />
+        <ErrorBoundary>
+          <SpotForm title="Editar Spot" initialData={bath} />
+        </ErrorBoundary>
       </div>
     </div>
   );

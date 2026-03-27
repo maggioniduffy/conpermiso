@@ -2,6 +2,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SpotForm from "@/components/Spots/SpotForm";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default async function CreateSpotPage() {
   const session = await auth();
@@ -12,7 +13,9 @@ export default async function CreateSpotPage() {
   return (
     <div className="min-h-screen bg-mywhite">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <SpotForm mode={role === "admin" ? "admin-create" : "request"} />
+        <ErrorBoundary>
+          <SpotForm mode={role === "admin" ? "admin-create" : "request"} />
+        </ErrorBoundary>
       </div>
     </div>
   );
