@@ -18,6 +18,7 @@ import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import Link from "next/link";
 import ConfirmDialog from "../ConfirmDialog";
 import Pagination from "@/components/Pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BathRequest {
   _id: string;
@@ -99,6 +100,27 @@ export default function MyRequestsList() {
           )}
         </h1>
 
+        {loading && (
+          <>
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            ))}
+          </>
+        )}
+
         {!loading && requests.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <Clock className="size-10 text-gray-200" />
@@ -106,7 +128,7 @@ export default function MyRequestsList() {
           </div>
         )}
 
-        {requests.map((req) => {
+        {!loading && requests.map((req) => {
           const { label, icon: Icon, color } = statusConfig[req.status];
 
           return (

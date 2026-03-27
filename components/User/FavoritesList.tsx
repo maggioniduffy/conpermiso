@@ -4,11 +4,26 @@ import { useFavorites } from "@/hooks";
 import React from "react";
 import SpotCard from "../Spots/SpotCard";
 import { Bookmark } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FavoritesList = () => {
   const { favorites, loading } = useFavorites();
 
-  if (loading) return null;
+  if (loading)
+    return (
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 p-3"
+          >
+            <Skeleton className="shrink-0 size-11 rounded-xl" />
+            <Skeleton className="flex-1 h-4" />
+            <Skeleton className="shrink-0 size-7 rounded-xl" />
+          </div>
+        ))}
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-3">
