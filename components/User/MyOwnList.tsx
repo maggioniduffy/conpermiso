@@ -5,15 +5,34 @@ import EditSpotCard from "../Spots/EditSpotCard";
 import { apiFetch } from "@/lib/apiFetch";
 import { Bath } from "@/utils/models";
 import { Skeleton } from "@/components/ui/skeleton";
+import Pagination from "@/components/Pagination";
+import { useState, useMemo } from "react";
+
+const PAGE_SIZE = 5;
 
 const MyOwnList = () => {
   const { user } = useBackendUser();
   const { baths, loading, setBaths } = useMyBaths(user?.role);
   const isAdmin = user?.role === "admin";
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(baths.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+
+  const paginated = useMemo(
+    () => baths.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [baths, safePage],
+  );
 
   async function handleDelete(id: string) {
     await apiFetch(`/baths/${id}`, { method: "DELETE" });
-    setBaths((prev: Bath[]) => prev.filter((b) => b._id !== id));
+    setBaths((prev: Bath[]) => {
+      const next = prev.filter((b) => b._id !== id);
+      // si la página queda vacía tras el delete, retroceder
+      const newTotal = Math.max(1, Math.ceil(next.length / PAGE_SIZE));
+      if (safePage > newTotal) setPage(newTotal);
+      return next;
+    });
   }
 
   if (loading)
@@ -35,29 +54,36 @@ const MyOwnList = () => {
       </div>
     );
 
+  if (baths.length === 0)
+    return (
+      <h3 className="text-center text-gray-600">
+        Agregá algún local para colaborar con todos los usuarios!
+      </h3>
+    );
+
   return (
     <div className="flex flex-col gap-3 w-full">
-      {baths.length === 0 ? (
-        <h3 className="text-center text-gray-600">
-          Agregá algún local para colaborar con todos los usuarios!
-        </h3>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {baths?.map((bath: Bath) => (
-            <li key={bath._id}>
-              <EditSpotCard
-                name={bath.name}
-                shifts={bath.shifts}
-                description={bath.description}
-                id={bath._id}
-                images={bath.images}
-                location={bath.location}
-                onDelete={isAdmin ? handleDelete : undefined} // ← agregar
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="flex flex-col gap-2">
+        {paginated.map((bath: Bath) => (
+          <li key={bath._id}>
+            <EditSpotCard
+              name={bath.name}
+              shifts={bath.shifts}
+              description={bath.description}
+              id={bath._id}
+              images={bath.images}
+              location={bath.location}
+              onDelete={isAdmin ? handleDelete : undefined}
+            />
+          </li>
+        ))}
+      </ul>
+
+      <Pagination
+        page={safePage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 };
