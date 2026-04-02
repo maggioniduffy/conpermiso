@@ -43,7 +43,7 @@ const MyOwnList = () => {
         </h3>
       ) : (
         <ul className="flex flex-col gap-2">
-          {baths.map((bath: Bath) => (
+          {baths?.map((bath: Bath) => (
             <li key={bath._id}>
               <EditSpotCard
                 name={bath.name}
