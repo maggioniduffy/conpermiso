@@ -6,7 +6,6 @@ import {
   Loader,
   Send,
   DollarSign,
-  Users,
   MapPin,
   Image as ImageIcon,
   Clock,
@@ -20,7 +19,7 @@ import { Button } from "../ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import ShiftsInput from "./ShiftsInput";
 import Uploader from "./Uploader";
-import { Allowed, Bath } from "@/utils/models";
+import { Bath } from "@/utils/models";
 import { useSpotForm } from "@/hooks/use-spot-form";
 import { SectionCard } from "./SectionCard";
 
@@ -32,7 +31,6 @@ const toggleClass = `
   whitespace-normal text-center
 `;
 
-// asterisco para campos requeridos
 const Required = () => <span className="text-red-500 ml-0.5">*</span>;
 
 interface Props {
@@ -62,8 +60,6 @@ export default function SpotForm({
     location,
     address,
     setImageFiles,
-    allowed,
-    setAllowed,
     isPending,
     handleLocationChange,
     handleSubmit,
@@ -166,25 +162,6 @@ export default function SpotForm({
             }
           />
         )}
-      </SectionCard>
-
-      <SectionCard
-        icon={<Users className="size-4" />}
-        label="¿Qué se puede hacer?"
-      >
-        <ToggleGroup
-          type="single"
-          value={allowed}
-          onValueChange={(v) => v && setAllowed(v as Allowed)}
-          className="flex gap-2"
-        >
-          <ToggleGroupItem value={Allowed.ONE} className={toggleClass}>
-            Número 1
-          </ToggleGroupItem>
-          <ToggleGroupItem value={Allowed.BOTH} className={toggleClass}>
-            Ambos
-          </ToggleGroupItem>
-        </ToggleGroup>
       </SectionCard>
 
       <SectionCard icon={<Clock className="size-4" />} label="Horarios">

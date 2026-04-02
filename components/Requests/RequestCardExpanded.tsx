@@ -2,7 +2,6 @@ import {
   MapPin,
   DollarSign,
   Clock,
-  Users,
   ExternalLink,
   UserCheck,
   CheckCircle2,
@@ -12,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import ImagesSlider from "@/components/ImagesSlider";
-import { Allowed, Shift, BathRequest } from "@/utils/models";
+import { Shift, BathRequest } from "@/utils/models";
 
 interface Props {
   req: BathRequest;
@@ -72,30 +71,17 @@ export function RequestCardExpanded({
         {req.description}
       </p>
 
-      {/* costo / baños */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gray-50 rounded-xl p-3 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <DollarSign className="size-3.5 text-principal" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-              Costo
-            </span>
-          </div>
-          <span className="text-sm font-medium text-jet">
-            {req.cost ?? "Sin cargo"}
+      {/* costo */}
+      <div className="bg-gray-50 rounded-xl p-3 flex flex-col gap-1">
+        <div className="flex items-center gap-1.5">
+          <DollarSign className="size-3.5 text-principal" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
+            Costo
           </span>
         </div>
-        <div className="bg-gray-50 rounded-xl p-3 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <Users className="size-3.5 text-principal" />
-            <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-              Baños
-            </span>
-          </div>
-          <span className="text-sm font-medium text-jet">
-            {req.allowed === Allowed.BOTH ? "Número 1 y 2" : "Número 1"}
-          </span>
-        </div>
+        <span className="text-sm font-medium text-jet">
+          {req.cost ?? "Sin cargo"}
+        </span>
       </div>
 
       {/* dirección */}

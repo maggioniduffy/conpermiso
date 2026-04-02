@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/apiFetch";
-import { Shift, Allowed, Bath, BathImage } from "@/utils/models";
+import { Shift, Bath, BathImage } from "@/utils/models";
 import { sanitizeShifts } from "@/lib/utils";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
@@ -33,9 +33,6 @@ export function useSpotForm(
       : null,
   );
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [allowed, setAllowed] = useState<Allowed>(
-    initial?.allowed ?? Allowed.ONE,
-  );
   const [address, setAddress] = useState(initial?.address ?? "");
   const [isPending, setIsPending] = useState(false);
 
@@ -82,7 +79,6 @@ export function useSpotForm(
     backendForm.append("name", formData.get("name") as string);
     backendForm.append("description", formData.get("description") as string);
     backendForm.append("address", address);
-    backendForm.append("allowed", allowed);
     backendForm.append(
       "cost",
       costType === "Precio" ? (formData.get("cost") as string) : costType,
@@ -167,6 +163,7 @@ export function useSpotForm(
           : "Baño creado correctamente.";
 
       toast.success(successTitle, { description: successDesc });
+      router.refresh();
       router.push(isRequest ? "/requests" : "/my-list");
       return true;
     } catch {
@@ -188,8 +185,6 @@ export function useSpotForm(
     address,
     imageFiles,
     setImageFiles,
-    allowed,
-    setAllowed,
     isPending,
     isEdit,
     handleLocationChange,

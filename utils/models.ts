@@ -19,11 +19,6 @@ export interface BathImage {
   alt?: string;
 }
 
-export enum Allowed {
-  ONE = "one",
-  BOTH = "both",
-}
-
 export interface GeoLocation {
   type: "Point";
   coordinates: [number, number]; // [lng, lat]
@@ -39,7 +34,6 @@ export interface Bath {
   shifts: Shift[];
   location: GeoLocation;
   address: string;
-  allowed: Allowed;
   reviews: string[];
   createdBy: string;
   createdAt: string;
@@ -64,7 +58,6 @@ export interface BathRequest {
   status: "PENDING" | "APPROVED" | "REJECTED";
   adminComment?: string;
   cost?: any;
-  allowed?: Allowed;
   shifts?: Shift[];
   images?: { url: string; alt?: string }[];
   location?: { type: string; coordinates: [number, number] };
