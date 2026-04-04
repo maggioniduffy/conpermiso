@@ -11,7 +11,7 @@ export default function ReviewSection({ bathId }: { bathId: string }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [userReviewId, setUserReviewId] = useState<string | null>(null);
-  const { user } = useBackendUser();
+  const { user, loading } = useBackendUser();
 
   useEffect(() => {
     if (!user) return;
@@ -27,7 +27,6 @@ export default function ReviewSection({ bathId }: { bathId: string }) {
   function handleReviewed() {
     setAlreadyReviewed(true);
     setRefreshKey((k) => k + 1);
-    // re-fetch para obtener el _id de la nueva review
     if (!user) return;
     apiFetch(`/reviews/bath/${bathId}`)
       .then((r) => r.json())
@@ -48,26 +47,30 @@ export default function ReviewSection({ bathId }: { bathId: string }) {
   return (
     <>
       <ReviewsList bathId={bathId} refreshKey={refreshKey} />
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
-        <RankSpot
-          bathId={bathId}
-          alreadyReviewed={alreadyReviewed}
-          onReviewed={handleReviewed}
-        />
-        {alreadyReviewed && userReviewId && (
-          <ConfirmDialog
-            trigger={
-              <button className="text-xs text-red-500 hover:text-red-600 transition-colors self-start">
-                Eliminar mi valoración
-              </button>
-            }
-            title="¿Eliminar valoración?"
-            description="Tu valoración será eliminada permanentemente."
-            confirmLabel="Eliminar"
-            onConfirm={handleDeleteReview}
+
+      {/* solo mostrar el formulario si el usuario está autenticado */}
+      {!loading && user && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
+          <RankSpot
+            bathId={bathId}
+            alreadyReviewed={alreadyReviewed}
+            onReviewed={handleReviewed}
           />
-        )}
-      </div>
+          {alreadyReviewed && userReviewId && (
+            <ConfirmDialog
+              trigger={
+                <button className="text-xs text-red-500 hover:text-red-600 transition-colors self-start">
+                  Eliminar mi valoración
+                </button>
+              }
+              title="¿Eliminar valoración?"
+              description="Tu valoración será eliminada permanentemente."
+              confirmLabel="Eliminar"
+              onConfirm={handleDeleteReview}
+            />
+          )}
+        </div>
+      )}
     </>
   );
 }

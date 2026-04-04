@@ -1,9 +1,15 @@
 // app/(spot)/spot/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Bath, Allowed, Day } from "@/utils/models";
+import { Bath, Day } from "@/utils/models";
 import { trimAddress } from "@/lib/utils";
-import { MapPin, DollarSign, Clock, Users, ArrowLeft } from "lucide-react";
+import {
+  MapPin,
+  DollarSign,
+  Clock,
+  ArrowLeft,
+  ExternalLink,
+} from "lucide-react";
 import Link from "next/link";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
 import ReviewSection from "@/components/Spots/ReviewSection";
@@ -46,16 +52,8 @@ export default async function SpotPage({
 
   if (!bath) return notFound();
 
-  const {
-    name,
-    images,
-    address,
-    description,
-    cost,
-    allowed,
-    shifts,
-    googleMapsLink,
-  } = bath;
+  const { name, images, address, description, cost, shifts, googleMapsLink } =
+    bath;
   const isOpen = isShiftOpenNow(shifts);
 
   return (
@@ -102,60 +100,56 @@ export default async function SpotPage({
 
       {/* contenido */}
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+        {/* descripcion */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-principal">
-              <DollarSign className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-                Costo
-              </span>
-            </div>
+        {/* costo */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
+          <div className="bg-principal/10 p-2 rounded-xl shrink-0">
+            <DollarSign className="size-5 text-principal" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-jet-700 mb-0.5">
+              Costo
+            </p>
             <span className="text-jet font-semibold">
               {cost ?? "Sin cargo"}
             </span>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-principal">
-              <Users className="size-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-                Baños
-              </span>
+        </div>
+
+        {/* dirección + google maps */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <div className="bg-principal/10 p-2 rounded-xl shrink-0">
+              <MapPin className="size-5 text-principal" />
             </div>
-            <span className="text-jet font-semibold">
-              {allowed === Allowed.BOTH ? "Numero 1 y 2" : "Numero 1"}
-            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-jet-700 mb-1">
+                Dirección
+              </p>
+              <p className="text-jet-500 text-sm leading-relaxed">
+                {trimAddress(address, 3)}
+              </p>
+            </div>
           </div>
+
+          {googleMapsLink && (
+            <Link
+              href={googleMapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-principal text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <ExternalLink className="size-4" />
+              Abrir en Google Maps
+            </Link>
+          )}
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-3">
-          <div className="bg-principal/10 p-2 rounded-xl shrink-0">
-            <MapPin className="size-5 text-principal" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-jet-700 mb-1">
-              Dirección
-            </p>
-            <p className="text-jet-500 text-sm leading-relaxed">
-              {trimAddress(address, 3)}
-            </p>
-            {googleMapsLink && (
-              <Link
-                href={googleMapsLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-principal hover:underline"
-              >
-                <MapPin className="size-3" />
-                Ver en Google Maps
-              </Link>
-            )}
-          </div>
-        </div>
-
+        {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -176,7 +170,6 @@ export default async function SpotPage({
 
         <ImagesSlider images={images} />
 
-        {/* ReviewSection es client component — wrapeamos */}
         <ErrorBoundary>
           <ReviewSection bathId={id} />
         </ErrorBoundary>
