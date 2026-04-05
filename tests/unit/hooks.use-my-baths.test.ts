@@ -14,14 +14,21 @@ describe("useMyBaths", () => {
 
   it("starts with loading=true and empty baths", () => {
     mockApiFetch.mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useMyBaths());
+    const { result } = renderHook(() => useMyBaths("user"));
     expect(result.current.loading).toBe(true);
     expect(result.current.baths).toEqual([]);
   });
 
-  it("fetches /baths/mine when no role is provided", async () => {
-    mockApiFetch.mockResolvedValue({ json: () => Promise.resolve(BATHS) });
+  it("stays loading=true when no role is provided (waits for role)", () => {
+    // The hook early-returns when role is undefined
     const { result } = renderHook(() => useMyBaths());
+    expect(result.current.loading).toBe(true);
+    expect(mockApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("fetches /baths/mine for 'user' role", async () => {
+    mockApiFetch.mockResolvedValue({ json: () => Promise.resolve(BATHS) });
+    const { result } = renderHook(() => useMyBaths("user"));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(mockApiFetch).toHaveBeenCalledWith("/baths/mine");
@@ -54,10 +61,26 @@ describe("useMyBaths", () => {
 
   it("sets baths via setBaths", async () => {
     mockApiFetch.mockResolvedValue({ json: () => Promise.resolve([]) });
-    const { result } = renderHook(() => useMyBaths());
+    const { result } = renderHook(() => useMyBaths("user"));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     act(() => { result.current.setBaths(BATHS as any); });
     expect(result.current.baths).toEqual(BATHS);
+  });
+
+  it("normalizes response that has { data: [] } shape", async () => {
+    mockApiFetch.mockResolvedValue({ json: () => Promise.resolve({ data: BATHS }) });
+    const { result } = renderHook(() => useMyBaths("user"));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.baths).toEqual(BATHS);
+  });
+
+  it("sets empty baths array on fetch error", async () => {
+    mockApiFetch.mockRejectedValue(new Error("network"));
+    const { result } = renderHook(() => useMyBaths("user"));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.baths).toEqual([]);
   });
 });
