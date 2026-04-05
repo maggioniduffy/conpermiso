@@ -8,6 +8,24 @@ import { sanitizeShifts } from "@/lib/utils";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
 
+// Infiere la timezone IANA a partir de coordenadas usando la API del navegador
+// Si falla, usa la timezone local del browser como fallback
+async function inferTimezone(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://timezonefinder.michelfe.it/api/0?lat=${lat}&lng=${lng}`,
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.timezone) return data.timezone;
+    }
+  } catch {
+    // silently fall through
+  }
+  // fallback: timezone del browser del usuario
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 export function useSpotForm(
   initial?: Bath,
   mode: "admin-create" | "request" = "admin-create",
@@ -32,6 +50,10 @@ export function useSpotForm(
         }
       : null,
   );
+  const [timezone, setTimezone] = useState<string>(
+    (initial as any)?.timezone ??
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [address, setAddress] = useState(initial?.address ?? "");
   const [isPending, setIsPending] = useState(false);
@@ -39,7 +61,7 @@ export function useSpotForm(
   const router = useRouter();
   const isEdit = !!initial;
 
-  const handleLocationChange = ({
+  const handleLocationChange = async ({
     lat,
     lng,
     address,
@@ -50,6 +72,9 @@ export function useSpotForm(
   }) => {
     setLocation({ lat, lng });
     setAddress(address);
+    // inferir timezone de las coordenadas seleccionadas
+    const tz = await inferTimezone(lat, lng);
+    setTimezone(tz);
   };
 
   const validate = (formData: FormData): string | null => {
@@ -69,7 +94,6 @@ export function useSpotForm(
       if (!cost || Number(cost) <= 0)
         return "Ingresá un precio válido mayor a 0.";
     }
-
     return null;
   };
 
@@ -91,6 +115,7 @@ export function useSpotForm(
         coordinates: [location!.lng, location!.lat],
       }),
     );
+    backendForm.append("timezone", timezone);
 
     imageFiles.forEach((file) => backendForm.append("files", file));
 
@@ -183,6 +208,7 @@ export function useSpotForm(
     setShifts,
     location,
     address,
+    timezone,
     imageFiles,
     setImageFiles,
     isPending,

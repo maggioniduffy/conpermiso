@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
 import { trimAddress } from "@/lib/utils";
-import OpenBadge from "./OpenBadge";
+import OpenStatus from "./OpenStatus";
 import FavoriteButton from "./FavoriteButton";
 
 interface Props {
@@ -17,7 +17,6 @@ interface Props {
   address?: string;
   shifts?: Shift[];
   image?: string;
-  isOpenNow?: boolean; // ✅
   isFavorite?: boolean;
 }
 
@@ -27,25 +26,11 @@ const SpotModal = ({
   description = "Default Description",
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
-  isOpenNow,
-  isFavorite,
-  shifts = [
-    {
-      from: { hour: "12", minute: "30" },
-      to: { hour: "19", minute: "30" },
-      days: [1, 4, 5],
-      allDay: false,
-    },
-    {
-      days: [2, 6],
-      allDay: true,
-    },
-  ],
+  shifts = [],
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
 }: Props) => {
   return (
     <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white">
-      {/* imagen con título superpuesto */}
       <div className="relative w-full h-40 overflow-hidden shrink-0">
         <Image
           src={image}
@@ -57,7 +42,6 @@ const SpotModal = ({
         <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
           {title}
         </h2>
-
         {id && (
           <div className="absolute top-2 right-2">
             <FavoriteButton bathId={id} size="sm" />
@@ -65,9 +49,7 @@ const SpotModal = ({
         )}
       </div>
 
-      {/* cuerpo sin padding horizontal extra */}
       <div className="flex flex-col gap-3 px-1 py-3">
-        {/* descripcion */}
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-2">
           {description}
         </p>
@@ -81,10 +63,10 @@ const SpotModal = ({
               {trimAddress(address)}
             </p>
           </div>
-          <OpenBadge isOpen={isOpenNow ?? false} />
+          {/* ← cliente: hora local del navegador */}
+          <OpenStatus shifts={shifts} />
         </div>
 
-        {/* costo */}
         <div className="flex items-center gap-2">
           <DollarSign className="size-4 text-principal shrink-0" />
           <span className="text-sm font-medium text-jet-500">
@@ -92,7 +74,6 @@ const SpotModal = ({
           </span>
         </div>
 
-        {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
@@ -107,11 +88,10 @@ const SpotModal = ({
           </div>
         )}
 
-        {/* link detalle */}
         {id && (
           <Link
             href={`/spot/${id}`}
-            className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-principal px-2.5 text-sm font-semibold  hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-principal px-2.5 text-sm font-semibold hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <p className="text-mywhite-800 m-0">Ver detalle</p>
             <ArrowRight className="size-4 text-white/70" />

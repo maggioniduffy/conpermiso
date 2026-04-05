@@ -26,20 +26,50 @@ async function getBath(id: string): Promise<Bath | null> {
   return res.json();
 }
 
-function isShiftOpenNow(shifts: Bath["shifts"]): boolean {
-  const now = new Date(new Date().getTime() - 3 * 60 * 60 * 1000);
-  const jsDay = now.getUTCDay();
-  const currentDay = jsDay === 0 ? 7 : jsDay;
-  const currentMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+function isShiftOpenNow(shifts: Bath["shifts"], timezone: string): boolean {
+  try {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "numeric",
+      weekday: "short",
+      hour12: false,
+    });
 
-  return shifts.some((shift) => {
-    if (!shift.days.includes(currentDay as Day)) return false;
-    if (shift.allDay) return true;
-    if (!shift.from || !shift.to) return false;
-    const from = Number(shift.from.hour) * 60 + Number(shift.from.minute);
-    const to = Number(shift.to.hour) * 60 + Number(shift.to.minute);
-    return currentMinutes >= from && currentMinutes <= to;
-  });
+    const parts = formatter.formatToParts(now);
+    const get = (type: string) =>
+      parts.find((p) => p.type === type)?.value ?? "0";
+
+    const weekdayMap: Record<string, number> = {
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+      Sun: 7,
+    };
+
+    const currentDay = weekdayMap[get("weekday")] ?? 1;
+    const hours = parseInt(get("hour"), 10) % 24;
+    const minutes = parseInt(get("minute"), 10);
+    const currentMinutes = hours * 60 + minutes;
+
+    return shifts.some((shift) => {
+      if (!shift.days.includes(currentDay as Day)) return false;
+      if (shift.allDay) return true;
+      if (!shift.from || !shift.to) return false;
+
+      const from = Number(shift.from.hour) * 60 + Number(shift.from.minute);
+      const to = Number(shift.to.hour) * 60 + Number(shift.to.minute);
+
+      if (from > to) return currentMinutes >= from || currentMinutes <= to;
+      return currentMinutes >= from && currentMinutes <= to;
+    });
+  } catch {
+    return false;
+  }
 }
 
 export default async function SpotPage({
@@ -49,16 +79,15 @@ export default async function SpotPage({
 }) {
   const { id } = await params;
   const bath = await getBath(id);
-
   if (!bath) return notFound();
 
   const { name, images, address, description, cost, shifts, googleMapsLink } =
     bath;
-  const isOpen = isShiftOpenNow(shifts);
+  const timezone = (bath as any).timezone ?? "UTC";
+  const isOpen = isShiftOpenNow(shifts, timezone);
 
   return (
     <div className="h-full bg-mywhite pb-20">
-      {/* Hero imagen */}
       <div className="relative w-full h-72 md:h-96">
         {images?.[0] ? (
           <Image
@@ -72,18 +101,15 @@ export default async function SpotPage({
           <div className="w-full h-full bg-gradient-to-br from-principal-200 to-principal-400" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
         <Link
           href="/"
           className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-all"
         >
           <ArrowLeft className="size-5" />
         </Link>
-
         <div className="absolute top-20 right-4">
           <FavoriteButton bathId={id} />
         </div>
-
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
@@ -98,14 +124,11 @@ export default async function SpotPage({
         </div>
       </div>
 
-      {/* contenido */}
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
-        {/* descripcion */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>
 
-        {/* costo */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
           <div className="bg-principal/10 p-2 rounded-xl shrink-0">
             <DollarSign className="size-5 text-principal" />
@@ -120,7 +143,6 @@ export default async function SpotPage({
           </div>
         </div>
 
-        {/* dirección + google maps */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-3">
           <div className="flex items-start gap-3">
             <div className="bg-principal/10 p-2 rounded-xl shrink-0">
@@ -135,7 +157,6 @@ export default async function SpotPage({
               </p>
             </div>
           </div>
-
           {googleMapsLink && (
             <Link
               href={googleMapsLink}
@@ -149,7 +170,6 @@ export default async function SpotPage({
           )}
         </div>
 
-        {/* horarios */}
         {shifts && shifts.length > 0 && (
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -169,7 +189,6 @@ export default async function SpotPage({
         )}
 
         <ImagesSlider images={images} />
-
         <ErrorBoundary>
           <ReviewSection bathId={id} />
         </ErrorBoundary>

@@ -5,7 +5,7 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
 import { useSession } from "next-auth/react";
-import { MapPin, Bookmark, ClipboardList, Shield } from "lucide-react";
+import { MapPin, Bookmark, ClipboardList, Shield, Users } from "lucide-react";
 import { useBackendUser } from "@/hooks";
 
 interface Props {
@@ -97,6 +97,18 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
               </span>
               <span className="flex-1">Solicitudes pendientes</span>
               {badge}
+            </button>
+          )}
+
+          {role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/users")}
+              className={linkClass}
+            >
+              <span className={iconClass}>
+                <Users className="size-4" />
+              </span>
+              <span className="flex-1">Usuarios</span>
             </button>
           )}
         </nav>

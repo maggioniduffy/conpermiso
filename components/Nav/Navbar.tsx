@@ -47,7 +47,7 @@ const Navbar = ({ additionalClass }: Props) => {
     <nav
       className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
     >
-      <div className="w-full shadow-md md:shadow bg-mywhite flex justify-between items-center px-2">
+      <div className="w-full shadow-md bg-white border-b border-gray-200 flex justify-between items-center px-2">
         {/* botón hamburguesa con globito */}
         <div className="relative">
           <DropdownMenu open={open} toggle={toggle} />
@@ -105,7 +105,9 @@ const Navbar = ({ additionalClass }: Props) => {
         </div>
       </div>
 
-      {open && <NavMenu open={open} toggle={toggle} />}
+      {open && (
+        <NavMenu open={open} toggle={toggle} pendingCount={pendingCount} />
+      )}
     </nav>
   );
 };
