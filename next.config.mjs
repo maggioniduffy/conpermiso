@@ -1,38 +1,88 @@
 // next.config.mjs
-/** @type {import('next').NextConfig} */
-
-import withPWA from "next-pwa";
+import withPWA from "@ducanh2912/next-pwa";
 
 const pwaConfig = withPWA({
   dest: "public",
-  register: true,
-  skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
   disable: process.env.NODE_ENV === "development",
-});
-
-const nextConfig = {
-  images: {
-    remotePatterns: [
+  fallbacks: {
+    document: "/offline",
+  },
+  workboxOptions: {
+    disableDevLogs: true,
+    navigationPreload: false,
+    additionalManifestEntries: [
+      { url: "/offline", revision: "1" },
+    ],
+    runtimeCaching: [
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
+        urlPattern: /^\/offline$/,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "offline-page",
+        },
       },
       {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
+        urlPattern: /\/_next\/static\/.*/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "next-static",
+          expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 365 },
+        },
       },
       {
-        protocol: "https",
-        hostname: "conpermiso-images.s3.amazonaws.com",
+        urlPattern: /^https:\/\/conpermiso-images\.s3\..*\.amazonaws\.com\/.*/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "s3-images",
+          expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+        },
       },
       {
-        protocol: "https",
-        hostname: "conpermiso-images.s3.us-east-2.amazonaws.com",
+        urlPattern: /^https:\/\/.*\.basemaps\.cartocdn\.com\/.*/i,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "carto-tiles",
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 7 },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/.*\.tile\.openstreetmap\.org\/.*/i,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "map-tiles",
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 7 },
+        },
+      },
+      {
+        urlPattern: /^\/api\/.*/i,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "api-cache",
+          networkTimeoutSeconds: 10,
+          expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
+        },
       },
     ],
   },
+});
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "conpermiso-images.s3.amazonaws.com" },
+      { protocol: "https", hostname: "conpermiso-images.s3.us-east-2.amazonaws.com" },
+    ],
+  },
   eslint: {
-    ignoreDuringBuilds: true, // ← saltear ESLint en build
+    ignoreDuringBuilds: true,
   },
 };
 

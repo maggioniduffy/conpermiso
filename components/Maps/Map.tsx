@@ -84,7 +84,6 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
                 shifts={shifts}
                 image={images?.[0]?.url}
                 id={_id}
-                isOpenNow={isOpenNow}
               />
             </Popup>
           </Marker>

@@ -14,6 +14,8 @@ export interface BackendUser {
   role: string;
 }
 
+const USER_CACHE_KEY = "kkapp:user";
+
 function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -23,20 +25,43 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
-// use-backend-user.ts
+function getCachedUser(): BackendUser | null {
+  try {
+    const raw = localStorage.getItem(USER_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedUser(user: BackendUser) {
+  try {
+    localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+  } catch {}
+}
+
+function clearCachedUser() {
+  try {
+    localStorage.removeItem(USER_CACHE_KEY);
+  } catch {}
+}
+
 export default function useBackendUser() {
-  const [user, setUser] = useState<BackendUser | null>(null);
+  const [user, setUser] = useState<BackendUser | null>(() => getCachedUser());
   const [loading, setLoading] = useState(true);
-  const { status } = useSession(); // 👈 agregás esto
+  const { status } = useSession();
 
   useEffect(() => {
-    if (status !== "authenticated") {
+    if (status === "unauthenticated") {
+      clearCachedUser();
+      setUser(null);
       setLoading(false);
       return;
     }
 
+    if (status !== "authenticated") return;
+
     const fetchUser = async () => {
-      // Esperás a que el token esté en localStorage
       let token = localStorage.getItem("accessToken");
 
       if (token && isTokenExpired(token)) {
@@ -45,10 +70,12 @@ export default function useBackendUser() {
       }
 
       if (!token) {
-        // Exchange si no existe
         try {
           token = await exchangeToken();
         } catch {
+          // sin red — usar cache si existe
+          const cached = getCachedUser();
+          setUser(cached);
           setLoading(false);
           return;
         }
@@ -59,25 +86,18 @@ export default function useBackendUser() {
         if (!res.ok) throw new Error();
         const data = await res.json();
         setUser(data);
+        setCachedUser(data); // actualizar cache con datos frescos
       } catch {
-        setUser(null);
+        // sin red o error — usar cache
+        const cached = getCachedUser();
+        setUser(cached);
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [status]); // 👈 depende del status, no corre hasta que sea "authenticated"
+  }, [status]);
 
   return { user, loading };
 }
-
-/*
-
-USAGE EXAMPLE:
-
-const { user, loading } = useBackendUser();
-if (loading) return <p>Loading...</p>;
-return <p>Welcome {user.email}</p>;
-
-*/

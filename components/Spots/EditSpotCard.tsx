@@ -2,13 +2,13 @@ import { Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { GeoLocation, Shift } from "@/utils/models";
-import { Image as ImageType } from "@/utils/models";
+import { BathImage } from "@/utils/models";
 import ConfirmDialog from "../ConfirmDialog";
 import { Trash2 } from "lucide-react";
 
 interface Props {
   name: string;
-  images: ImageType[];
+  images: BathImage[];
   id: string;
   description: string;
   location: GeoLocation;

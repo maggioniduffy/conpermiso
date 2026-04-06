@@ -90,7 +90,7 @@ const Navbar = ({ additionalClass }: Props) => {
           </ul>
         )}
 
-        <div className="relative cursor-pointer" onClick={toggleAuth}>
+        <div className="relative cursor-pointer mr-2" onClick={toggleAuth}>
           <Image
             src={"/icons/cool_avatar.png"}
             alt="Account"
