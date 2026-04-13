@@ -59,7 +59,11 @@ export default function useBackendUser() {
       return;
     }
 
-    if (status !== "authenticated") return;
+    if (status !== "authenticated") {
+      // "loading" — sesión todavía no resuelta, no hay nada que hacer
+      setLoading(false);
+      return;
+    }
 
     const fetchUser = async () => {
       let token = localStorage.getItem("accessToken");
@@ -73,7 +77,6 @@ export default function useBackendUser() {
         try {
           token = await exchangeToken();
         } catch {
-          // sin red — usar cache si existe
           const cached = getCachedUser();
           setUser(cached);
           setLoading(false);
@@ -86,9 +89,8 @@ export default function useBackendUser() {
         if (!res.ok) throw new Error();
         const data = await res.json();
         setUser(data);
-        setCachedUser(data); // actualizar cache con datos frescos
+        setCachedUser(data);
       } catch {
-        // sin red o error — usar cache
         const cached = getCachedUser();
         setUser(cached);
       } finally {

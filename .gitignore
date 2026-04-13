@@ -49,3 +49,7 @@ public/workbox-*.js
 public/workbox-*.js.map
 # Sentry Config File
 .env.sentry-build-plugin
+test-results/*
+test-results
+playwright-report/*
+playwright-report
