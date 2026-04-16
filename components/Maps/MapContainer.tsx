@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
@@ -8,6 +7,25 @@ interface Props {
   searchCenter?: { latitude: number; longitude: number } | null;
 }
 
+// Placeholder estático mientras Leaflet carga — mejora el LCP
+function MapPlaceholder() {
+  return (
+    <div className="h-screen w-screen relative overflow-hidden">
+      <img
+        src="/map-placeholder.png"
+        alt="Cargando mapa..."
+        className="absolute inset-0 w-full h-full object-cover"
+        fetchPriority="high"
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-sm">
+          <div className="size-5 border-2 border-principal border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-jet-700 font-medium">Cargando mapa...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function MyMapContainer({ searchCenter }: Props) {
   const [location, setLocation] = useState<{
     latitude: number;
@@ -17,10 +35,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
   const [locationDenied, setLocationDenied] = useState(false);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      console.error("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -31,7 +46,6 @@ export default function MyMapContainer({ searchCenter }: Props) {
         });
       },
       (error) => {
-        console.error("Error getting location:", error.code, error.message);
         if (error.code === 1) setLocationDenied(true);
       },
       {
@@ -47,7 +61,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
   const Map = useMemo(
     () =>
       dynamic(() => import("@/components/Maps/Map"), {
-        loading: () => <Loader className="animate-spin m-auto h-full" />,
+        loading: () => <MapPlaceholder />,
         ssr: false,
       }),
     [],

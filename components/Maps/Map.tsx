@@ -39,7 +39,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   return (
     <MapContainer
       center={
-        location ? [location.latitude, location.longitude] : [-31.4, -64.18]
+        location ? [location.latitude, location.longitude] : [39.4699, -0.3763]
       }
       zoom={zoom}
       scrollWheelZoom={true}
