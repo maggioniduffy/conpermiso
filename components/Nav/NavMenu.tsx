@@ -40,7 +40,7 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
     <div className="flex z-[1001]">
       {/* overlay */}
       <span
-        className={`fixed top-0 left-0 w-full h-full bg-black z-89 transition-opacity duration-500 ease-in-out ${
+        className={`fixed inset-0 bg-black z-89 transition-opacity duration-500 ease-in-out ${
           open ? "opacity-40" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggle}
@@ -48,9 +48,10 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
 
       {/* drawer */}
       <div
-        className={`fixed top-0 left-0 h-screen z-90 transition-transform duration-500 ease-in-out ${
+        className={`fixed top-0 left-0 z-90 transition-transform duration-500 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } w-72 bg-white shadow-2xl flex flex-col border-r border-gray-100`}
+        style={{ height: "100dvh" }}
       >
         {/* header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">

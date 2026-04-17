@@ -10,7 +10,7 @@ interface Props {
 // Placeholder estático mientras Leaflet carga — mejora el LCP
 function MapPlaceholder() {
   return (
-    <div className="h-screen w-screen relative overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden">
       <img
         src="/map-placeholder.png"
         alt="Cargando mapa..."
@@ -68,7 +68,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
   );
 
   return (
-    <div className="bg-mywhite w-screen z-80" style={{ height: "100dvh" }}>
+    <div className="bg-mywhite h-full w-full z-80">
       {locationDenied && (
         <p className="text-xs text-center text-jet-700 py-2 absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-3 rounded-full">
           Activá tu ubicación para ver los baños cercanos

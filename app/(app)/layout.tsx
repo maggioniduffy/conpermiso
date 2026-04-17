@@ -8,7 +8,10 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <main className="bg-trasparent h-screen flex flex-col">
+      <main
+        className="bg-trasparent flex flex-col"
+        style={{ height: "100dvh" }}
+      >
         <Navbar />
         <div className="flex-1 overflow-hidden">{children}</div>
       </main>

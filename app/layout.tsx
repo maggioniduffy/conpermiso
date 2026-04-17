@@ -27,7 +27,7 @@ const montserrat = localFont({
 
 export const metadata: Metadata = {
   title: "KKapp",
-  description: "Encontrá baños cerca tuyo",
+  description: "Encontrá baños disponibles cerca tuyo!",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
