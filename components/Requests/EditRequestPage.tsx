@@ -15,7 +15,8 @@ export default function EditRequestPage({ requestId }: { requestId: string }) {
     apiFetch("/bath-requests/me")
       .then((r) => r.json())
       .then((data) => {
-        const found = data.find((r: any) => r._id === requestId);
+        const items = Array.isArray(data) ? data : (data.data ?? []);
+        const found = items.find((r: any) => r._id === requestId);
         setRequest(found ?? null);
       })
       .finally(() => setLoading(false));
