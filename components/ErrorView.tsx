@@ -14,7 +14,7 @@ interface Props {
 
 export function ErrorView({
   reset,
-  title = "Algo salió mal",
+  title = "Algo salió mal!",
   description = "Ocurrió un error inesperado. Podés intentar de nuevo o volver al inicio.",
   backHref = "/",
   backLabel = "Ir al inicio",
