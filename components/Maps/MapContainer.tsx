@@ -68,7 +68,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
   );
 
   return (
-    <div className="bg-mywhite h-screen w-screen z-80">
+    <div className="bg-mywhite h-full w-screen z-80">
       {locationDenied && (
         <p className="text-xs text-center text-jet-700 py-2 absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-3 rounded-full">
           Activá tu ubicación para ver los baños cercanos
