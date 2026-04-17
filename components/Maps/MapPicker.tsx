@@ -14,6 +14,8 @@ import { createMarkerIcon } from "@/lib/map/icon";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
+const VALENCIA_CENTER = { lat: 39.4699, lng: -0.3763 };
+
 interface Coords {
   lat: number;
   lng: number;
@@ -53,29 +55,6 @@ function FlyTo({ coords }: { coords: Coords | null }) {
   return null;
 }
 
-async function reverseGeocode(lat: number, lng: number): Promise<string> {
-  const res = await fetch(`/api/geocode?lat=${lat}&lon=${lng}`);
-  const text = await res.text();
-  console.log("reverseGeocode response:", text);
-  try {
-    const data = JSON.parse(text);
-    return data.display_name ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-  } catch {
-    return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-  }
-}
-
-async function searchAddress(query: string): Promise<NominatimResult[]> {
-  const res = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
-  const text = await res.text();
-  console.log("searchAddress response:", text);
-  try {
-    return JSON.parse(text);
-  } catch {
-    return [];
-  }
-}
-
 export default function MapPicker({ onChange, initialValue }: Props) {
   const [marker, setMarker] = useState<Coords | null>(
     initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
@@ -113,7 +92,6 @@ export default function MapPicker({ onChange, initialValue }: Props) {
       setLoading(true);
       const res = await fetch(`/api/geocode?q=${encodeURIComponent(value)}`);
       const data = await res.json();
-      console.log("geocode result:", data); // 👈
       setSuggestions(Array.isArray(data) ? data : []);
       setLoading(false);
     }, 600);
@@ -130,7 +108,6 @@ export default function MapPicker({ onChange, initialValue }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Search box */}
       <div className="relative">
         <Input
           value={query}
@@ -168,15 +145,15 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         )}
       </div>
 
-      {/* Map */}
       <MapContainer
-        center={[-31.4, -64.18]}
+        center={[VALENCIA_CENTER.lat, VALENCIA_CENTER.lng]}
         zoom={13}
         style={{ height: "300px", width: "100%", zIndex: 0 }}
       >
+        {/* mismo estilo que el mapa principal */}
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         <ClickHandler onMapClick={handleMapClick} />
         <FlyTo coords={marker} />
