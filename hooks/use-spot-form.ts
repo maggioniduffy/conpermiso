@@ -188,7 +188,6 @@ export function useSpotForm(
           : "Baño creado correctamente.";
 
       toast.success(successTitle, { description: successDesc });
-      router.refresh();
       router.push(isRequest ? "/requests" : "/my-list");
       return true;
     } catch {
