@@ -7,7 +7,7 @@ export async function POST() {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const res = await fetch("http://localhost:5000/auth/exchange", {
+  const res = await fetch(`${process.env.BACKEND_URL}/auth/exchange`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
