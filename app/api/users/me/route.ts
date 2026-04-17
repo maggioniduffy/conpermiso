@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const res = await fetch("http://localhost:5000/users/me", {
+  const res = await fetch(`${process.env.BACKEND_URL}/users/me`, {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
