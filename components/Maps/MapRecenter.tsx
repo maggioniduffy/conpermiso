@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 
 interface Props {
@@ -12,13 +12,16 @@ interface Props {
 
 export default function MapRecenter({ location }: Props) {
   const map = useMap();
+  const hascentered = useRef(false);
 
-  const { latitude, longitude } = location || { latitude: 0, longitude: 0 };
   useEffect(() => {
-    if (location) {
-      map.setView([latitude, longitude], map.getZoom(), { animate: false });
+    if (location && !hascentered.current) {
+      map.setView([location.latitude, location.longitude], map.getZoom(), {
+        animate: true,
+      });
+      hascentered.current = true;
     }
-  }, [latitude, longitude, map]);
+  }, [location, map]);
 
   return null;
 }
