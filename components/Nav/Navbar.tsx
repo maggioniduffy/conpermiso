@@ -69,8 +69,8 @@ const Navbar = ({ additionalClass }: Props) => {
           <Image
             src="/longlogo_white.png"
             alt="Logo"
-            width={200}
-            height={150}
+            width={150}
+            height={120}
           />
         </Link>
 
