@@ -47,13 +47,21 @@ const Navbar = ({ additionalClass }: Props) => {
     <nav
       className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
     >
-      <div className="w-full shadow-md bg-white border-b border-gray-200 flex justify-between items-center px-2">
-        {/* botón hamburguesa con globito */}
-        <div className="relative">
-          <DropdownMenu open={open} toggle={toggle} />
-          {!open && user?.role === "admin" && pendingCount > 0 && (
-            <span className="absolute top-1 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-mywhite pointer-events-none" />
-          )}
+      <div className="w-full shadow-md bg-mywhite border-b border-gray-200 flex justify-between items-center px-2">
+        {/* izquierda: hamburguesa + ¿Cómo funciona? */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <DropdownMenu open={open} toggle={toggle} />
+            {!open && user?.role === "admin" && pendingCount > 0 && (
+              <span className="absolute top-1 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-mywhite pointer-events-none" />
+            )}
+          </div>
+          <Link
+            href="/welcome"
+            className="text-xs text-jet-600 hover:text-principal transition-colors font-medium hidden sm:block"
+          >
+            ¿Cómo funciona?
+          </Link>
         </div>
 
         <Link href={"/"}>

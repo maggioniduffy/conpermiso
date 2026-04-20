@@ -36,6 +36,16 @@ export const metadata: Metadata = {
   icons: {
     apple: "/apple-touch-icon.png",
   },
+  openGraph: {
+    title: "KKapp",
+    description: "Encontrá baños cerca tuyo, cuando más lo necesitás.",
+    url: "https://kkapp.es",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.png"],
+  },
 };
 
 export const viewport: Viewport = {

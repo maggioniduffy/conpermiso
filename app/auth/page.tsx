@@ -1,6 +1,7 @@
 import AuthAlternatives from "@/components/Auth/AuthAlternatives";
 import AuthHeader from "@/components/Auth/AuthHeader";
 import { signIn } from "@/auth";
+import Link from "next/link";
 
 const page = () => {
   async function handleSignIn(formData: FormData) {
@@ -38,6 +39,17 @@ const page = () => {
           </button>
         </form>
         <AuthAlternatives />
+
+        {/* Link a la landing */}
+        <p className="text-center text-xs text-jet-700">
+          ¿No sabés qué es KKapp?{" "}
+          <Link
+            href="/welcome"
+            className="text-principal font-semibold hover:underline"
+          >
+            ¿Cómo funciona?
+          </Link>
+        </p>
       </div>
     </main>
   );
