@@ -43,8 +43,8 @@ export default function WelcomePage() {
           <span className="text-principal">cuando más lo necesitás.</span>
         </h1>
         <p className="text-jet-600 text-lg max-w-md">
-          KKapp es una app colaborativa que te muestra baños públicos en tiempo
-          real, con horarios y costos actualizados por la comunidad.
+          KKapp es una app colaborativa que te muestra baños públicos o privados
+          en tiempo real, con horarios y costos actualizados por la comunidad.
         </p>
         <div className="flex gap-3 flex-wrap justify-center">
           <Link
