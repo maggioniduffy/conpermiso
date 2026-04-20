@@ -47,7 +47,7 @@ const Navbar = ({ additionalClass }: Props) => {
     <nav
       className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
     >
-      <div className="w-full shadow-md bg-mywhite border-b border-gray-200 flex justify-between items-center px-2">
+      <div className="w-full shadow-md bg-mywhite border-b border-gray-200 flex items-center px-2 relative h-14">
         {/* izquierda: hamburguesa + ¿Cómo funciona? */}
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -64,14 +64,33 @@ const Navbar = ({ additionalClass }: Props) => {
           </Link>
         </div>
 
-        <Link href={"/"}>
+        {/* logo — centrado absoluto */}
+        <Link href="/" className="absolute left-1/2 -translate-x-1/2">
           <Image
-            src={"/longlogo_white.png"}
+            src="/longlogo_white.png"
             alt="Logo"
             width={200}
             height={150}
           />
         </Link>
+
+        {/* derecha: avatar */}
+        <div
+          className="ml-auto relative cursor-pointer mr-2"
+          onClick={toggleAuth}
+        >
+          <Image
+            src="/icons/cool_avatar.png"
+            alt="Account"
+            width={35}
+            height={25}
+          />
+          {user?.role === "admin" && (
+            <span className="absolute -bottom-1 -right-1 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-full leading-none ring-2 ring-mywhite">
+              ADMIN
+            </span>
+          )}
+        </div>
 
         {authOptions && (
           <ul className="h-fit shadow min-w-20 z-99 absolute right-0 top-10 bg-mywhite rounded">
@@ -97,20 +116,6 @@ const Navbar = ({ additionalClass }: Props) => {
             </li>
           </ul>
         )}
-
-        <div className="relative cursor-pointer mr-2" onClick={toggleAuth}>
-          <Image
-            src={"/icons/cool_avatar.png"}
-            alt="Account"
-            width={35}
-            height={25}
-          />
-          {user?.role === "admin" && (
-            <span className="absolute -bottom-1 -right-1 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-full leading-none ring-2 ring-mywhite">
-              ADMIN
-            </span>
-          )}
-        </div>
       </div>
 
       {open && (
