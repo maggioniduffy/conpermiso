@@ -122,7 +122,7 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
         </nav>
 
         {/* ¿Cómo funciona? — visible solo en mobile */}
-        <div className="border-t border-gray-100 pt-3 mt-1 px-3">
+        <div className="pt-3 mt-1 px-3">
           <Link
             href="/welcome"
             onClick={toggle}
