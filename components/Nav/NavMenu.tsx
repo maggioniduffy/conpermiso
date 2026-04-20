@@ -1,11 +1,18 @@
 "use client";
 
-import React from "react";
+import Link from "next/link";
 import DropdownMenu from "./DropdownMenu";
 import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
 import { useSession } from "next-auth/react";
-import { MapPin, Bookmark, ClipboardList, Shield, Users } from "lucide-react";
+import {
+  MapPin,
+  Bookmark,
+  ClipboardList,
+  Shield,
+  Users,
+  HelpCircle,
+} from "lucide-react";
 import { useBackendUser } from "@/hooks";
 
 interface Props {
@@ -113,6 +120,20 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
             </button>
           )}
         </nav>
+
+        {/* ¿Cómo funciona? — visible solo en mobile */}
+        <div className="border-t border-gray-100 pt-3 mt-1 px-3">
+          <Link
+            href="/welcome"
+            onClick={toggle}
+            className="flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium w-full"
+          >
+            <span className="text-principal/60">
+              <HelpCircle className="size-4" />
+            </span>
+            ¿Cómo funciona?
+          </Link>
+        </div>
 
         {/* footer */}
         <div className="border-t border-gray-100 px-4 py-4">
