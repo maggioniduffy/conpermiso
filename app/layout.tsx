@@ -73,7 +73,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body
-        className={`${montserrat.variable} min-h-screen bg-mywhite flex flex-col`}
+        className={`${montserrat.variable} bg-mywhite flex flex-col`}
       >
         <SessionProvider>{children}</SessionProvider>
         <Analytics />

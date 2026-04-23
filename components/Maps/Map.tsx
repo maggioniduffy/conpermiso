@@ -67,7 +67,7 @@ function PopupFlyTo() {
       if (shouldZoom) {
         map.flyTo(centeredLatLng, targetZoom, { animate: true, duration: 1.2 });
       } else {
-        map.panTo(centeredLatLng, { animate: true, duration: 0.25 });
+        map.panTo(centeredLatLng, { animate: true, duration: 1.2 });
       }
     };
 
