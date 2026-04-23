@@ -14,7 +14,6 @@ import {
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 
 import FavoriteButton from "./FavoriteButton";
-import { useRef, useEffect } from "react";
 
 interface Props {
   id?: string;
@@ -40,25 +39,11 @@ const SpotModal = ({
   googleMapsLink,
   timezone,
 }: Props) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const isOpen =
     shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const stop = (e: TouchEvent) => e.stopPropagation();
-    el.addEventListener("touchstart", stop, { passive: true });
-    el.addEventListener("touchmove", stop, { passive: true });
-    return () => {
-      el.removeEventListener("touchstart", stop);
-      el.removeEventListener("touchmove", stop);
-    };
-  }, []);
-
   return (
     <div
-      ref={containerRef}
       className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative"
     >
       {id && (
@@ -113,14 +98,21 @@ const SpotModal = ({
       )}
 
       <div className="flex flex-col gap-3 p-4">
-        <div className="flex items-center gap-1.5">
-          <DollarSign className="size-3 text-jet-800" />
-          <span className="text-xs text-jet-800">{cost ?? "Sin cargo"}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="size-3 text-jet-600" />
+            <span className="text-xs text-jet-600">{cost ?? "Sin cargo"}</span>
+          </div>
+          <span className="text-jet-700 text-xs">·</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPin className="size-3 text-jet-600 shrink-0" />
+            <span className="text-xs text-jet-600 truncate">{trimAddress(address)}</span>
+          </div>
         </div>
-        <p className="text-sm text-jet-600 leading-relaxed line-clamp-4">
+        <p className="text-sm text-jet-600 leading-relaxed line-clamp-3">
           {description}
         </p>
-        <div className="flex flex-col gap-2 mt-1">
+        <div className="flex flex-col gap-2">
           {googleMapsLink && (
             <Link
               href={googleMapsLink}
@@ -142,26 +134,13 @@ const SpotModal = ({
             </Link>
           )}
         </div>
-        <div className="h-px bg-mywhite" />
-
-        <div className="flex items-center gap-2">
-          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-            <MapPin className="size-3.5 text-principal" />
-          </div>
-          <p className="text-sm text-jet-500 leading-snug">
-            {trimAddress(address)}
-          </p>
-        </div>
-
         {shifts && shifts.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-                <Clock className="size-3.5 text-principal" />
-              </div>
-              <span className="text-sm font-semibold text-jet">Horarios</span>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <Clock className="size-3 text-jet-600" />
+              <span className="text-xs font-semibold text-jet-600">Horarios</span>
             </div>
-            <div className="pl-8 flex flex-col">
+            <div className="flex flex-col">
               {shifts.map((shift) => (
                 <ShiftVisualizer shift={shift} key={shift.days.toString()} />
               ))}

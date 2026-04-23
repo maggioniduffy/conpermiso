@@ -131,7 +131,6 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
               icon={createMarkerIcon(isOpen)}
             >
               <Popup
-                maxHeight={500}
                 maxWidth={250}
                 autoPan={false}
                 keepInView={false}
