@@ -215,3 +215,21 @@ body {
 .leaflet-popup-tip {
   background: #4a90e2 !important;
 }
+
+.leaflet-popup-close-button {
+  top: -11px !important;
+  right: -11px !important;
+  width: 22px !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  text-align: center !important;
+  background: white !important;
+  border-radius: 50% !important;
+  border: 2px solid #4a90e2 !important;
+  color: #4a90e2 !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+}

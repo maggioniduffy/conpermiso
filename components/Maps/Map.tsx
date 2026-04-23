@@ -43,7 +43,7 @@ function PopupFlyTo() {
       if (!latlng) return;
 
       const currentZoom = map.getZoom();
-      const MIN_ZOOM = 15;
+      const MIN_ZOOM = 13;
       const shouldZoom = currentZoom < MIN_ZOOM;
       const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
 
