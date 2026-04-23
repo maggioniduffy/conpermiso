@@ -50,7 +50,7 @@ function PopupFlyTo() {
       // Shift centering target upward so the marker lands below center,
       // giving the popup (which renders above the pin) top margin.
       const markerPx = map.project(latlng, targetZoom);
-      const centeredPx = markerPx.add([0, -200]);
+      const centeredPx = markerPx.add([0, -225]);
       const centeredLatLng = map.unproject(centeredPx, targetZoom);
 
       if (shouldZoom) {
