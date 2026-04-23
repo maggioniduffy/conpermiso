@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
 interface Props {
-  searchCenter?: { latitude: number; longitude: number } | null;
+  searchCenter?: { latitude: number; longitude: number; pin?: boolean } | null;
 }
 
 // Placeholder estático mientras Leaflet carga — mejora el LCP

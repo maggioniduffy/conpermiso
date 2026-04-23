@@ -34,7 +34,13 @@ export async function GET(req: NextRequest) {
     if (lat && lon) {
       url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=es`;
     } else if (q) {
-      url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1&accept-language=es`;
+      const nearLat = searchParams.get("near_lat");
+      const nearLng = searchParams.get("near_lng");
+      const viewbox =
+        nearLat && nearLng
+          ? `&viewbox=${parseFloat(nearLng) - 0.5},${parseFloat(nearLat) + 0.5},${parseFloat(nearLng) + 0.5},${parseFloat(nearLat) - 0.5}&bounded=0`
+          : "";
+      url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=7&addressdetails=1&accept-language=es${viewbox}`;
     } else {
       return Response.json({ error: "Missing params" }, { status: 400 });
     }
@@ -54,19 +60,33 @@ export async function GET(req: NextRequest) {
     const data = JSON.parse(text);
 
     if (q && Array.isArray(data)) {
-      const formatted = data.map((item: any) => ({
-        lat: item.lat,
-        lon: item.lon,
-        display_name:
-          [
-            item.address?.road,
-            item.address?.house_number,
-            item.address?.city || item.address?.town,
-            item.address?.state,
-          ]
-            .filter(Boolean)
-            .join(" ") || item.display_name,
-      }));
+      const formatted = data.map((item: any) => {
+        const a = item.address ?? {};
+
+        const specific = a.road
+          ? [a.road, a.house_number].filter(Boolean).join(" ")
+          : (a.quarter ??
+            a.suburb ??
+            a.neighbourhood ??
+            a.city_district ??
+            a.district ??
+            null);
+
+        const locality =
+          a.city ?? a.town ?? a.village ?? a.municipality ?? a.county;
+
+        const region = a.state;
+
+        const parts = [specific, locality, region]
+          .filter(Boolean)
+          .filter((v, i, arr) => arr.indexOf(v) === i); // dedupe
+
+        return {
+          lat: item.lat,
+          lon: item.lon,
+          display_name: parts.join(", ") || item.display_name,
+        };
+      });
       cache.set(url, { data: formatted, timestamp: Date.now() });
       return Response.json(formatted);
     }

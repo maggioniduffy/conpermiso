@@ -17,7 +17,7 @@ export default async function Home({ searchParams }: Params) {
 
   const searchCenter =
     lat && lng
-      ? { latitude: parseFloat(lat), longitude: parseFloat(lng) }
+      ? { latitude: parseFloat(lat), longitude: parseFloat(lng), pin: !query }
       : null;
 
   return (
@@ -27,7 +27,7 @@ export default async function Home({ searchParams }: Params) {
 
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-lg z-[1000]">
         <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-300 px-3 py-2 flex items-center gap-2">
-          <SearchForm query={query} />
+          <SearchForm query={query} nearLat={lat} nearLng={lng} />
           {user && (
             <Link
               href="/spot/create"

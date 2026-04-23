@@ -6,7 +6,7 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
-import { createMarkerIcon } from "@/lib/map/icon";
+import { createMarkerIcon, createPlaceMarkerIcon } from "@/lib/map/icon";
 import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import CurrentLocationMarker from "./CurrentLocationMarker";
@@ -21,7 +21,7 @@ interface Props {
     longitude: number;
     accuracy: number;
   } | null;
-  searchCenter?: { latitude: number; longitude: number } | null;
+  searchCenter?: { latitude: number; longitude: number; pin?: boolean } | null;
   zoom?: number;
 }
 
@@ -53,9 +53,14 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       <MapBoundsWatcher onBoundsChange={fetchBaths} />
       <MapRecenter location={location} />
 
-      {/* volar al resultado de búsqueda */}
       {searchCenter && (
         <FlyToCoords lat={searchCenter.latitude} lng={searchCenter.longitude} />
+      )}
+      {searchCenter?.pin && (
+        <Marker
+          position={[searchCenter.latitude, searchCenter.longitude]}
+          icon={createPlaceMarkerIcon()}
+        />
       )}
 
       {baths.map(
