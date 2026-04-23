@@ -93,10 +93,12 @@ export default async function SpotPage({
   } = bath;
   const isOpen = isShiftOpenNow(shifts, timezone ?? "UTC");
 
+  const hasImage = !!images?.[0];
+
   return (
     <div className="h-full bg-mywhite pb-20">
-      <div className="relative w-full h-72 md:h-96">
-        {images?.[0] && (
+      {hasImage ? (
+        <div className="relative w-full h-72 md:h-96">
           <Image
             src={images[0].url}
             alt={images[0].alt || name}
@@ -104,30 +106,53 @@ export default async function SpotPage({
             className="object-cover"
             priority
           />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <Link
-          href="/"
-          className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-all"
-        >
-          <ArrowLeft className="size-5" />
-        </Link>
-        <div className="absolute top-20 right-4">
-          <FavoriteButton bathId={id} />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
-              {name}
-            </h1>
-            <OpenBadge isOpen={isOpen} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <Link
+            href="/"
+            className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-all"
+          >
+            <ArrowLeft className="size-5" />
+          </Link>
+          <div className="absolute top-20 right-4">
+            <FavoriteButton bathId={id} />
           </div>
-          <div className="flex items-center gap-1 mt-1">
-            <MapPin className="size-4 text-white/80 shrink-0" />
-            <p className="text-white/80 text-sm">{trimAddress(address)}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                {name}
+              </h1>
+              <OpenBadge isOpen={isOpen} />
+            </div>
+            <div className="flex items-center gap-1 mt-1">
+              <MapPin className="size-4 text-white/80 shrink-0" />
+              <p className="text-white/80 text-sm">{trimAddress(address)}</p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border-b border-gray-100 px-4 pt-12 pb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-principal text-sm font-medium mb-4"
+          >
+            <ArrowLeft className="size-4" />
+            Volver
+          </Link>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-bold text-jet">{name}</h1>
+                <OpenBadge isOpen={isOpen} />
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <MapPin className="size-4 text-jet-500 shrink-0" />
+                <p className="text-jet-500 text-sm">{trimAddress(address)}</p>
+              </div>
+            </div>
+            <FavoriteButton bathId={id} />
+          </div>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -192,8 +217,8 @@ export default async function SpotPage({
             </div>
           </div>
         )}
+        {images && images.length > 0 && <ImagesSlider images={images} />}
 
-        <ImagesSlider images={images} />
         <ErrorBoundary>
           <ReviewSection bathId={id} />
         </ErrorBoundary>
