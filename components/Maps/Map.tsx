@@ -42,8 +42,8 @@ function PopupFlyTo() {
       const latlng = e.popup?.getLatLng?.();
       if (!latlng) return;
       const currentZoom = map.getZoom();
-      const targetZoom = currentZoom < 15 ? 15 : currentZoom;
-      map.flyTo(latlng, targetZoom, { duration: 0.8 });
+      const targetZoom = currentZoom < 40 ? 40 : currentZoom;
+      map.flyTo(latlng, targetZoom, { duration: 1.5 });
     };
     map.on("popupopen", handler);
     return () => {
