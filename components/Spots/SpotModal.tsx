@@ -108,6 +108,10 @@ const SpotModal = ({
       )}
 
       <div className="flex flex-col gap-3 p-4">
+        <div className="flex items-center gap-1.5">
+          <DollarSign className="size-3 text-jet-800" />
+          <span className="text-xs text-jet-800">{cost ?? "Sin cargo"}</span>
+        </div>
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-4">
           {description}
         </p>
@@ -142,15 +146,6 @@ const SpotModal = ({
           <p className="text-sm text-jet-500 leading-snug">
             {trimAddress(address)}
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-            <DollarSign className="size-3.5 text-principal" />
-          </div>
-          <span className="text-sm font-medium text-jet-500">
-            {cost ?? "Sin cargo"}
-          </span>
         </div>
 
         {shifts && shifts.length > 0 && (
