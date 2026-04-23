@@ -12,7 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
-import OpenStatus from "./OpenStatus";
+
 import FavoriteButton from "./FavoriteButton";
 import { useRef, useEffect } from "react";
 
@@ -135,16 +135,13 @@ const SpotModal = ({
         </div>
         <div className="h-px bg-mywhite" />
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-              <MapPin className="size-3.5 text-principal" />
-            </div>
-            <p className="text-sm text-jet-500 leading-snug">
-              {trimAddress(address)}
-            </p>
+        <div className="flex items-center gap-2">
+          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+            <MapPin className="size-3.5 text-principal" />
           </div>
-          <OpenStatus shifts={shifts} timezone={timezone} />
+          <p className="text-sm text-jet-500 leading-snug">
+            {trimAddress(address)}
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
