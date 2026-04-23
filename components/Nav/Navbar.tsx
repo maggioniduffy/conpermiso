@@ -127,7 +127,7 @@ const Navbar = ({ additionalClass }: Props) => {
                 <div className="size-8 rounded-full bg-principal/10 flex items-center justify-center shrink-0">
                   <User className="size-4 text-principal" />
                 </div>
-                <a className="min-w-0" href="/my-list">
+                <Link className="min-w-0" href="/my-list">
                   {session?.user?.name && (
                     <p className="text-jet text-sm font-semibold truncate">
                       {session.user.name}
@@ -138,7 +138,7 @@ const Navbar = ({ additionalClass }: Props) => {
                       {session.user.email}
                     </p>
                   )}
-                </a>
+                </Link>
               </div>
               <div className="h-px bg-gray-100 mx-2 mb-2" />
               <button
