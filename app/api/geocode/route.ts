@@ -63,6 +63,8 @@ export async function GET(req: NextRequest) {
       const formatted = data.map((item: any) => {
         const a = item.address ?? {};
 
+        const placeName = item.name || null;
+
         const specific = a.road
           ? [a.road, a.house_number].filter(Boolean).join(" ")
           : (a.quarter ??
@@ -77,7 +79,7 @@ export async function GET(req: NextRequest) {
 
         const region = a.state;
 
-        const parts = [specific, locality, region]
+        const parts = [placeName, specific, locality, region]
           .filter(Boolean)
           .filter((v, i, arr) => arr.indexOf(v) === i); // dedupe
 

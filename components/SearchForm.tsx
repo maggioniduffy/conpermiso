@@ -32,10 +32,21 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
   const [pois, setPois] = useState<Poi[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [browserLoc, setBrowserLoc] = useState<{ lat: string; lng: string } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const overpassControllerRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (nearLat && nearLng) return;
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setBrowserLoc({ lat: String(pos.coords.latitude), lng: String(pos.coords.longitude) }),
+      () => {},
+      { maximumAge: 60000, timeout: 8000 },
+    );
+  }, [nearLat, nearLng]);
 
   const hasResults = spots.length > 0 || places.length > 0 || pois.length > 0;
 
@@ -56,9 +67,12 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
 
       // All three fire at the same time.
       // Overpass updates state independently when it resolves (may be slower).
-      if (nearLat && nearLng) {
+      const overpassLat = nearLat ?? browserLoc?.lat;
+      const overpassLng = nearLng ?? browserLoc?.lng;
+
+      if (overpassLat && overpassLng) {
         fetch(
-          `/api/overpass?q=${encodeURIComponent(input)}&lat=${nearLat}&lng=${nearLng}`,
+          `/api/overpass?q=${encodeURIComponent(input)}&lat=${overpassLat}&lng=${overpassLng}`,
           { signal: overpassControllerRef.current.signal },
         )
           .then((r) => r.json())

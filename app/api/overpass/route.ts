@@ -100,6 +100,8 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
 const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 1000 * 60 * 5;
 
+const POI_KEYS = new Set(["amenity", "shop", "tourism", "leisure", "building", "office", "healthcare", "sport"]);
+
 function normalize(s: string) {
   return s
     .trim()
@@ -110,6 +112,10 @@ function normalize(s: string) {
 
 function distSq(lat1: number, lng1: number, lat2: number, lng2: number) {
   return (lat2 - lat1) ** 2 + (lng2 - lng1) ** 2;
+}
+
+function escapeRegex(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export async function GET(req: NextRequest) {
@@ -123,24 +129,30 @@ export async function GET(req: NextRequest) {
   }
 
   const key = normalize(q);
-  const filters = TAG_MAP[key];
-  if (!filters) return Response.json([]);
-
   const latF = parseFloat(lat);
   const lngF = parseFloat(lng);
-  const cacheKey = `${key}:${latF.toFixed(2)}:${lngF.toFixed(2)}`;
+  const filters = TAG_MAP[key];
 
+  const cacheKey = `${key}:${latF.toFixed(2)}:${lngF.toFixed(2)}`;
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return Response.json(cached.data);
   }
 
   const radius = 10000;
-  const lines = filters.flatMap((f) => [
-    `  node[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
-    `  way[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
-  ]);
-  const overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 100;`;
+  let overpassQuery: string;
+
+  if (filters) {
+    const lines = filters.flatMap((f) => [
+      `  node[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
+      `  way[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
+    ]);
+    overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 100;`;
+  } else {
+    // Name-based search for specific place names ("Vieja Barba", "Facultad de Exactas", etc.)
+    const escaped = escapeRegex(key);
+    overpassQuery = `[out:json][timeout:10];\n(\n  node["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n  way["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n);\nout center 15;`;
+  }
 
   try {
     const res = await fetch("https://overpass-api.de/api/interpreter", {
@@ -155,6 +167,7 @@ export async function GET(req: NextRequest) {
 
     const results = (data.elements as any[])
       .filter((el) => el.tags?.name)
+      .filter((el) => filters ? true : Object.keys(el.tags).some((k) => POI_KEYS.has(k)))
       .map((el) => ({
         name: el.tags.name as string,
         lat: (el.lat ?? el.center?.lat) as number,
