@@ -55,7 +55,10 @@ const SpotModal = ({
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative">
+    <div
+      ref={containerRef}
+      className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative"
+    >
       {id && (
         <div className="absolute top-2 right-2 z-10">
           <FavoriteButton bathId={id} size="sm" />
@@ -79,7 +82,7 @@ const SpotModal = ({
           {description}
         </p>
 
-        <div className="h-px bg-gray-100" />
+        <div className="h-px bg-mywhite" />
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

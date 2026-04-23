@@ -41,14 +41,25 @@ function PopupFlyTo() {
     const handler = (e: any) => {
       const latlng = e.popup?.getLatLng?.();
       if (!latlng) return;
+
       const currentZoom = map.getZoom();
-      const targetZoom = currentZoom < 40 ? 40 : currentZoom;
-      map.flyTo(latlng, targetZoom, { duration: 1.5 });
+      const MIN_ZOOM = 15;
+      const shouldZoom = currentZoom < MIN_ZOOM;
+      const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
+
+      // Shift the target point downward in screen space so the popup card
+      // (which renders above the marker pin) appears centered instead of the pin
+      const markerPx = map.project(latlng, targetZoom);
+      const centeredPx = markerPx.add([0, 160]);
+      const centeredLatLng = map.unproject(centeredPx, targetZoom);
+
+      map.flyTo(centeredLatLng, targetZoom, {
+        animate: true,
+        duration: shouldZoom ? 1.0 : 0.45,
+      });
     };
     map.on("popupopen", handler);
-    return () => {
-      map.off("popupopen", handler);
-    };
+    return () => { map.off("popupopen", handler); };
   }, [map]);
   return null;
 }

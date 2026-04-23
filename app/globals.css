@@ -198,3 +198,20 @@ body {
   padding: 0;
   overflow-x: hidden; /* Prevent scroll */
 }
+
+.leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 1rem !important;
+  border: 2px solid #4a90e2 !important;
+  box-shadow: 0 4px 24px rgba(74, 144, 226, 0.25) !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: normal;
+}
+
+.leaflet-popup-tip {
+  background: #4a90e2 !important;
+}
