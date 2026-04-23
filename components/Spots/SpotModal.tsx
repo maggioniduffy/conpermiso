@@ -11,7 +11,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
-import { trimAddress } from "@/lib/utils";
+import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 import OpenStatus from "./OpenStatus";
 import FavoriteButton from "./FavoriteButton";
 import { useRef, useEffect } from "react";
@@ -36,11 +36,12 @@ const SpotModal = ({
   cost = "Sin cargo",
   address = "Astor Piazzola 1845",
   shifts = [],
-  image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
+  image,
   googleMapsLink,
   timezone,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isOpen = shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -64,24 +65,74 @@ const SpotModal = ({
           <FavoriteButton bathId={id} size="sm" />
         </div>
       )}
-      <div className="relative w-full h-44 overflow-hidden shrink-0">
-        <Image
-          src={image}
-          fill
-          alt={title ?? "spot"}
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
-          {title}
-        </h2>
-      </div>
+      {image ? (
+        <div className="relative w-full h-44 overflow-hidden shrink-0">
+          <Image
+            src={image}
+            fill
+            alt={title ?? "spot"}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {isOpen !== null && (
+            <span className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}>
+              {isOpen ? "ABIERTO" : "CERRADO"}
+            </span>
+          )}
+          <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
+            {title}
+          </h2>
+        </div>
+      ) : (
+        <div className="relative w-full h-36 shrink-0 bg-gradient-to-br from-principal-200 via-principal-300 to-principal-400 flex flex-col items-center justify-center gap-2 overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px), radial-gradient(circle at 60% 80%, white 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
+          {isOpen !== null && (
+            <span className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}>
+              {isOpen ? "ABIERTO" : "CERRADO"}
+            </span>
+          )}
+          <div className="bg-white/20 rounded-2xl p-3">
+            <MapPin className="size-7 text-white" />
+          </div>
+          <h2 className="text-white font-bold text-xl drop-shadow-sm leading-tight text-center px-4">
+            {title}
+          </h2>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 p-4">
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-4">
           {description}
         </p>
-
+        <div className="flex flex-col gap-2 mt-1">
+          {googleMapsLink && (
+            <Link
+              href={googleMapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-principal text-principal font-semibold text-sm hover:bg-principal/5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <ExternalLink className="size-4" />
+              Abrir en Google Maps
+            </Link>
+          )}
+          {id && (
+            <Link
+              href={`/spot/${id}`}
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal !text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              VER MÁS
+              <ArrowRight className="size-4 opacity-70" />
+            </Link>
+          )}
+        </div>
         <div className="h-px bg-mywhite" />
 
         <div className="flex items-center justify-between gap-2">
@@ -120,29 +171,6 @@ const SpotModal = ({
             </div>
           </div>
         )}
-
-        <div className="flex flex-col gap-2 mt-1">
-          {googleMapsLink && (
-            <Link
-              href={googleMapsLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-principal text-principal font-semibold text-sm hover:bg-principal/5 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <ExternalLink className="size-4" />
-              Abrir en Google Maps
-            </Link>
-          )}
-          {id && (
-            <Link
-              href={`/spot/${id}`}
-              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal !text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              VER MÁS
-              <ArrowRight className="size-4 opacity-70" />
-            </Link>
-          )}
-        </div>
       </div>
     </div>
   );
