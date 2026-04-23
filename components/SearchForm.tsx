@@ -97,11 +97,11 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
         ]);
 
         setSpots(
-          spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 4) : [],
+          spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 10) : [],
         );
         setPlaces(
           placesRes.status === "fulfilled" && Array.isArray(placesRes.value)
-            ? placesRes.value.slice(0, 3)
+            ? placesRes.value.slice(0, 6)
             : [],
         );
         setOpen(true);
@@ -179,7 +179,7 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
       </div>
 
       {open && (hasResults || loading) && (
-        <div className="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-[1001]">
+        <div className="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto max-h-72 z-[1001]">
           {loading && !hasResults ? (
             <p className="text-xs text-jet-700 px-3 py-2">Buscando...</p>
           ) : (
