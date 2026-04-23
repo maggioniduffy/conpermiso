@@ -46,11 +46,14 @@ const SpotModal = ({
     const el = containerRef.current;
     if (!el) return;
     const stop = (e: TouchEvent) => e.stopPropagation();
+    const stopWheel = (e: WheelEvent) => e.stopPropagation();
     el.addEventListener("touchstart", stop, { passive: true });
     el.addEventListener("touchmove", stop, { passive: true });
+    el.addEventListener("wheel", stopWheel, { passive: true });
     return () => {
       el.removeEventListener("touchstart", stop);
       el.removeEventListener("touchmove", stop);
+      el.removeEventListener("wheel", stopWheel);
     };
   }, []);
 
