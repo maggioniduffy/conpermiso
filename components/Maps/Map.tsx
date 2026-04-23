@@ -37,7 +37,6 @@ function FlyToCoords({ lat, lng }: { lat: number; lng: number }) {
 function PopupFlyTo() {
   const map = useMap();
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (e: any) => {
       const latlng = e.popup?.getLatLng?.();
       if (!latlng) return;
@@ -47,23 +46,32 @@ function PopupFlyTo() {
       const shouldZoom = currentZoom < MIN_ZOOM;
       const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
 
-      // Shift centering target upward so the marker lands below center,
-      // giving the popup (which renders above the pin) top margin.
       const markerPx = map.project(latlng, targetZoom);
       const centeredPx = markerPx.add([0, -250]);
       const centeredLatLng = map.unproject(centeredPx, targetZoom);
 
+      // Deshabilitar interacción durante la animación
+      map.dragging.disable();
+      map.touchZoom.disable();
+
+      const onMoveEnd = () => {
+        // Pequeño delay extra para que iOS estabilice
+        setTimeout(() => {
+          map.dragging.enable();
+          map.touchZoom.enable();
+        }, 100);
+        map.off("moveend", onMoveEnd);
+      };
+      map.on("moveend", onMoveEnd);
+
       if (shouldZoom) {
-        // Zoom + center together, slow animation
         map.flyTo(centeredLatLng, targetZoom, { animate: true, duration: 1.2 });
       } else {
-        // Center only, quick pan
         map.panTo(centeredLatLng, { animate: true, duration: 0.25 });
       }
     };
+
     map.on("popupopen", handler);
-    map.on("popupopen", () => map.dragging.disable());
-    map.on("popupclose", () => map.dragging.enable());
     return () => {
       map.off("popupopen", handler);
     };
