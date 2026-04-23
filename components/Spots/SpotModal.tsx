@@ -40,7 +40,12 @@ const SpotModal = ({
   timezone,
 }: Props) => {
   return (
-    <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white">
+    <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative">
+      {id && (
+        <div className="absolute top-2 right-2 z-10">
+          <FavoriteButton bathId={id} size="sm" />
+        </div>
+      )}
       <div className="relative w-full h-44 overflow-hidden shrink-0">
         <Image
           src={image}
@@ -52,11 +57,6 @@ const SpotModal = ({
         <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
           {title}
         </h2>
-        {id && (
-          <div className="absolute top-2 right-2">
-            <FavoriteButton bathId={id} size="sm" />
-          </div>
-        )}
       </div>
 
       <div className="flex flex-col gap-3 p-4">
