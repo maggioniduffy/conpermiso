@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
+import { Analytics } from "@vercel/analytics/next";
 
 const montserrat = localFont({
   src: [
@@ -75,6 +76,7 @@ export default function RootLayout({
         className={`${montserrat.variable} min-h-screen bg-mywhite flex flex-col`}
       >
         <SessionProvider>{children}</SessionProvider>
+        <Analytics />
       </body>
     </html>
   );
