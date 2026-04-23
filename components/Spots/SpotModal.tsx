@@ -4,7 +4,7 @@ import { Cost, Shift } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, DollarSign, Clock, ArrowRight } from "lucide-react";
+import { MapPin, DollarSign, Clock, ArrowRight, ExternalLink } from "lucide-react";
 import { trimAddress } from "@/lib/utils";
 import OpenStatus from "./OpenStatus";
 import FavoriteButton from "./FavoriteButton";
@@ -18,6 +18,7 @@ interface Props {
   shifts?: Shift[];
   image?: string;
   isFavorite?: boolean;
+  googleMapsLink?: string;
 }
 
 const SpotModal = ({
@@ -28,10 +29,11 @@ const SpotModal = ({
   address = "Astor Piazzola 1845",
   shifts = [],
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
+  googleMapsLink,
 }: Props) => {
   return (
     <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white">
-      <div className="relative w-full h-40 overflow-hidden shrink-0">
+      <div className="relative w-full h-44 overflow-hidden shrink-0">
         <Image
           src={image}
           fill
@@ -49,38 +51,43 @@ const SpotModal = ({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 px-1 py-3">
-        <p className="text-sm text-jet-600 leading-relaxed line-clamp-2">
+      <div className="flex flex-col gap-3 p-4">
+        <p className="text-sm text-jet-600 leading-relaxed line-clamp-4">
           {description}
         </p>
 
         <div className="h-px bg-gray-100" />
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-start gap-2">
-            <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+              <MapPin className="size-3.5 text-principal" />
+            </div>
             <p className="text-sm text-jet-500 leading-snug">
               {trimAddress(address)}
             </p>
           </div>
-          {/* ← cliente: hora local del navegador */}
           <OpenStatus shifts={shifts} />
         </div>
 
         <div className="flex items-center gap-2">
-          <DollarSign className="size-4 text-principal shrink-0" />
+          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+            <DollarSign className="size-3.5 text-principal" />
+          </div>
           <span className="text-sm font-medium text-jet-500">
             {cost ?? "Sin cargo"}
           </span>
         </div>
 
         {shifts && shifts.length > 0 && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
-              <Clock className="size-4 text-principal shrink-0" />
+              <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+                <Clock className="size-3.5 text-principal" />
+              </div>
               <span className="text-sm font-semibold text-jet">Horarios</span>
             </div>
-            <div className="pl-6 flex flex-col">
+            <div className="pl-8 flex flex-col">
               {shifts.map((shift) => (
                 <ShiftVisualizer shift={shift} key={shift.days.toString()} />
               ))}
@@ -88,15 +95,28 @@ const SpotModal = ({
           </div>
         )}
 
-        {id && (
-          <Link
-            href={`/spot/${id}`}
-            className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-principal px-2.5 text-sm font-semibold hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <p className="text-mywhite-800 m-0">Ver detalle</p>
-            <ArrowRight className="size-4 text-white/70" />
-          </Link>
-        )}
+        <div className="flex flex-col gap-2 mt-1">
+          {googleMapsLink && (
+            <Link
+              href={googleMapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-principal text-principal font-semibold text-sm hover:bg-principal/5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <ExternalLink className="size-4" />
+              Abrir en Google Maps
+            </Link>
+          )}
+          {id && (
+            <Link
+              href={`/spot/${id}`}
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Ver detalle
+              <ArrowRight className="size-4 text-white/70" />
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

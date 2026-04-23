@@ -74,6 +74,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
           shifts,
           images,
           isOpenNow,
+          googleMapsLink,
         }: Bath) => (
           <Marker
             key={_id}
@@ -89,6 +90,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
                 shifts={shifts}
                 image={images?.[0]?.url}
                 id={_id}
+                googleMapsLink={googleMapsLink}
               />
             </Popup>
           </Marker>
