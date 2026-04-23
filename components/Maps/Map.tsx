@@ -62,6 +62,8 @@ function PopupFlyTo() {
       }
     };
     map.on("popupopen", handler);
+    map.on("popupopen", () => map.dragging.disable());
+    map.on("popupclose", () => map.dragging.enable());
     return () => {
       map.off("popupopen", handler);
     };
@@ -120,7 +122,12 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
               position={[location.coordinates[1], location.coordinates[0]]}
               icon={createMarkerIcon(isOpen)}
             >
-              <Popup maxHeight={500} maxWidth={250} autoPan={false}>
+              <Popup
+                maxHeight={500}
+                maxWidth={250}
+                autoPan={false}
+                keepInView={false}
+              >
                 <SpotModal
                   title={name}
                   description={description}
