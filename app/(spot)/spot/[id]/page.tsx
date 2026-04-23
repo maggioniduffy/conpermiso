@@ -81,14 +81,22 @@ export default async function SpotPage({
   const bath = await getBath(id);
   if (!bath) return notFound();
 
-  const { name, images, address, description, cost, shifts, googleMapsLink, timezone } =
-    bath;
+  const {
+    name,
+    images,
+    address,
+    description,
+    cost,
+    shifts,
+    googleMapsLink,
+    timezone,
+  } = bath;
   const isOpen = isShiftOpenNow(shifts, timezone ?? "UTC");
 
   return (
     <div className="h-full bg-mywhite pb-20">
       <div className="relative w-full h-72 md:h-96">
-        {images?.[0] ? (
+        {images?.[0] && (
           <Image
             src={images[0].url}
             alt={images[0].alt || name}
@@ -96,8 +104,6 @@ export default async function SpotPage({
             className="object-cover"
             priority
           />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-principal-200 to-principal-400" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <Link

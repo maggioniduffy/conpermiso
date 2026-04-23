@@ -118,10 +118,10 @@ const SpotModal = ({
           {id && (
             <Link
               href={`/spot/${id}`}
-              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal text-white/80 font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal !text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Ver detalle
-              <ArrowRight className="size-4 text-white/80" />
+              <ArrowRight className="size-4 opacity-70" />
             </Link>
           )}
         </div>
