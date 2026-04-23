@@ -224,6 +224,8 @@ body {
 }
 
 .leaflet-popup-content {
+  margin: 0 !important;
+  line-height: normal;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain !important;

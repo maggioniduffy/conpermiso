@@ -59,7 +59,7 @@ function PopupFlyTo() {
         setTimeout(() => {
           map.dragging.enable();
           map.touchZoom.enable();
-        }, 100);
+        }, 1000);
         map.off("moveend", onMoveEnd);
       };
       map.on("moveend", onMoveEnd);
@@ -67,7 +67,7 @@ function PopupFlyTo() {
       if (shouldZoom) {
         map.flyTo(centeredLatLng, targetZoom, { animate: true, duration: 1.2 });
       } else {
-        map.panTo(centeredLatLng, { animate: true, duration: 1.2 });
+        map.panTo(centeredLatLng, { animate: true, duration: 0.8 });
       }
     };
 
