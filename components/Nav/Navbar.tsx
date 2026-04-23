@@ -68,7 +68,7 @@ const Navbar = ({ additionalClass }: Props) => {
       <nav
         className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
       >
-        <div className="w-full shadow-md bg-mywhite border-b border-gray-200 flex items-center px-2 relative h-14">
+        <div className="w-full shadow bg-mywhite border-b border-gray-200 flex items-center px-2 relative h-14">
           {/* left: hamburger + ¿Cómo funciona? */}
           <div className="flex items-center gap-3">
             <div className="relative">
