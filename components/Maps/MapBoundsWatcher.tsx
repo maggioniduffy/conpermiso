@@ -11,11 +11,24 @@ export default function MapBoundsWatcher({ onBoundsChange }: Props) {
   const popupOpen = useRef(false);
 
   const map = useMapEvents({
-    moveend() { schedule(); },
-    zoomend() { schedule(); },
-    load() { schedule(); },
-    popupopen() { popupOpen.current = true; },
-    popupclose() { popupOpen.current = false; },
+    moveend() {
+      schedule();
+    },
+    zoomend() {
+      if (popupOpen.current) return;
+      schedule();
+    },
+    load() {
+      schedule();
+    },
+    popupopen() {
+      popupOpen.current = true;
+      if (timerRef.current) clearTimeout(timerRef.current); // cancelar cualquier fetch pendiente
+    },
+    popupclose() {
+      popupOpen.current = false;
+      schedule(); // refetch al cerrar
+    },
   });
 
   function schedule() {
