@@ -41,7 +41,8 @@ const SpotModal = ({
   timezone,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isOpen = shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
+  const isOpen =
+    shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -75,7 +76,9 @@ const SpotModal = ({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           {isOpen !== null && (
-            <span className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}>
+            <span
+              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}
+            >
               {isOpen ? "ABIERTO" : "CERRADO"}
             </span>
           )}
@@ -84,7 +87,7 @@ const SpotModal = ({
           </h2>
         </div>
       ) : (
-        <div className="relative w-full h-36 shrink-0 bg-gradient-to-br from-principal-200 via-principal-300 to-principal-400 flex flex-col items-center justify-center gap-2 overflow-hidden">
+        <div className="relative w-full h-32 shrink-0 bg-gradient-to-br from-principal-200 via-principal-300 to-principal-400 flex flex-col items-center justify-center gap-2 overflow-hidden">
           <div
             className="absolute inset-0 opacity-10"
             style={{
@@ -94,7 +97,9 @@ const SpotModal = ({
             }}
           />
           {isOpen !== null && (
-            <span className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}>
+            <span
+              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}
+            >
               {isOpen ? "ABIERTO" : "CERRADO"}
             </span>
           )}
