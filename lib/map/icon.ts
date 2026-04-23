@@ -41,10 +41,9 @@ export function createMarkerIcon(isOpen: boolean) {
           z-index: 1;
           width: 36px;
           height: 36px;
-          filter: brightness(0) invert(1)
+          filter: drop-shadow(0 0 3px ${color})
                   drop-shadow(0 0 2px ${color})
-                  drop-shadow(0 0 3px ${color})
-                  drop-shadow(0 1px 4px rgba(0,0,0,.35));
+                  drop-shadow(0 1px 3px rgba(0,0,0,.3));
         " />
       </div>
     `,
