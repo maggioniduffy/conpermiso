@@ -43,14 +43,14 @@ function PopupFlyTo() {
       if (!latlng) return;
 
       const currentZoom = map.getZoom();
-      const MIN_ZOOM = 13;
+      const MIN_ZOOM = 15;
       const shouldZoom = currentZoom < MIN_ZOOM;
       const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
 
       // Shift centering target upward so the marker lands below center,
       // giving the popup (which renders above the pin) top margin.
       const markerPx = map.project(latlng, targetZoom);
-      const centeredPx = markerPx.add([0, -150]);
+      const centeredPx = markerPx.add([0, -200]);
       const centeredLatLng = map.unproject(centeredPx, targetZoom);
 
       if (shouldZoom) {
@@ -62,7 +62,9 @@ function PopupFlyTo() {
       }
     };
     map.on("popupopen", handler);
-    return () => { map.off("popupopen", handler); };
+    return () => {
+      map.off("popupopen", handler);
+    };
   }, [map]);
   return null;
 }
