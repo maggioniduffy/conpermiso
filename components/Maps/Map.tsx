@@ -50,7 +50,7 @@ function PopupFlyTo() {
       // Shift centering target upward so the marker lands below center,
       // giving the popup (which renders above the pin) top margin.
       const markerPx = map.project(latlng, targetZoom);
-      const centeredPx = markerPx.add([0, -225]);
+      const centeredPx = markerPx.add([0, -250]);
       const centeredLatLng = map.unproject(centeredPx, targetZoom);
 
       if (shouldZoom) {
@@ -120,7 +120,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
               position={[location.coordinates[1], location.coordinates[0]]}
               icon={createMarkerIcon(isOpen)}
             >
-              <Popup maxHeight={500} maxWidth={250}>
+              <Popup maxHeight={500} maxWidth={250} autoPan={false}>
                 <SpotModal
                   title={name}
                   description={description}
