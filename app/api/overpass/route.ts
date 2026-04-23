@@ -135,12 +135,12 @@ export async function GET(req: NextRequest) {
     return Response.json(cached.data);
   }
 
-  const radius = 1500;
+  const radius = 10000;
   const lines = filters.flatMap((f) => [
     `  node[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
     `  way[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
   ]);
-  const overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 40;`;
+  const overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 100;`;
 
   try {
     const res = await fetch("https://overpass-api.de/api/interpreter", {

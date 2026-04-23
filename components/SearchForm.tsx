@@ -50,10 +50,26 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      // Abort any in-flight overpass request
       overpassControllerRef.current?.abort();
       overpassControllerRef.current = new AbortController();
       setPois([]);
+
+      // All three fire at the same time.
+      // Overpass updates state independently when it resolves (may be slower).
+      if (nearLat && nearLng) {
+        fetch(
+          `/api/overpass?q=${encodeURIComponent(input)}&lat=${nearLat}&lng=${nearLng}`,
+          { signal: overpassControllerRef.current.signal },
+        )
+          .then((r) => r.json())
+          .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+              setPois(data);
+              setOpen(true);
+            }
+          })
+          .catch(() => {});
+      }
 
       setLoading(true);
       try {
@@ -77,22 +93,6 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
         setOpen(true);
       } finally {
         setLoading(false);
-      }
-
-      // Fire Overpass independently — doesn't block the dropdown
-      if (nearLat && nearLng) {
-        fetch(
-          `/api/overpass?q=${encodeURIComponent(input)}&lat=${nearLat}&lng=${nearLng}`,
-          { signal: overpassControllerRef.current.signal },
-        )
-          .then((r) => r.json())
-          .then((data) => {
-            if (Array.isArray(data) && data.length > 0) {
-              setPois(data);
-              setOpen(true);
-            }
-          })
-          .catch(() => {});
       }
     }, 350);
 
