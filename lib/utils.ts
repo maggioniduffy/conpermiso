@@ -1,5 +1,45 @@
 import { daysMap } from "@/utils/constants";
 import { Day, Shift } from "@/utils/models";
+
+export function isOpenWithTimezone(shifts: Shift[], timezone: string): boolean {
+  try {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "numeric",
+      weekday: "short",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(now);
+    const get = (type: string) =>
+      parts.find((p) => p.type === type)?.value ?? "0";
+
+    const weekdayMap: Record<string, number> = {
+      Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7,
+    };
+
+    const currentDay = weekdayMap[get("weekday")] ?? 1;
+    const hours = parseInt(get("hour"), 10) % 24;
+    const minutes = parseInt(get("minute"), 10);
+    const currentMinutes = hours * 60 + minutes;
+
+    return shifts.some((shift) => {
+      if (!shift.days.includes(currentDay as Day)) return false;
+      if (shift.allDay) return true;
+      if (!shift.from || !shift.to) return false;
+
+      const from = Number(shift.from.hour) * 60 + Number(shift.from.minute);
+      const to = Number(shift.to.hour) * 60 + Number(shift.to.minute);
+
+      if (from > to) return currentMinutes >= from || currentMinutes <= to;
+      return currentMinutes >= from && currentMinutes <= to;
+    });
+  } catch {
+    return false;
+  }
+}
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

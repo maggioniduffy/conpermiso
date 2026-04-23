@@ -41,6 +41,7 @@ export interface Bath {
   avgRating: number;
   reviewsCount: number;
   googleMapsLink?: string;
+  timezone?: string;
   isOpenNow: boolean;
 }
 

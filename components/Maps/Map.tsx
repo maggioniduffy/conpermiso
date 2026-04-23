@@ -14,6 +14,7 @@ import { Bath } from "@/utils/models";
 import { SpotModal } from "../Spots";
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
+import { isOpenWithTimezone } from "@/lib/utils";
 
 interface Props {
   location: {
@@ -73,28 +74,32 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
           address,
           shifts,
           images,
-          isOpenNow,
           googleMapsLink,
-        }: Bath) => (
-          <Marker
-            key={_id}
-            position={[location.coordinates[1], location.coordinates[0]]}
-            icon={createMarkerIcon(isOpenNow ?? false)}
-          >
-            <Popup maxHeight={500} maxWidth={250}>
-              <SpotModal
-                title={name}
-                description={description}
-                cost={cost}
-                address={address}
-                shifts={shifts}
-                image={images?.[0]?.url}
-                id={_id}
-                googleMapsLink={googleMapsLink}
-              />
-            </Popup>
-          </Marker>
-        ),
+          timezone,
+        }: Bath) => {
+          const isOpen = isOpenWithTimezone(shifts, timezone ?? "UTC");
+          return (
+            <Marker
+              key={_id}
+              position={[location.coordinates[1], location.coordinates[0]]}
+              icon={createMarkerIcon(isOpen)}
+            >
+              <Popup maxHeight={500} maxWidth={250}>
+                <SpotModal
+                  title={name}
+                  description={description}
+                  cost={cost}
+                  address={address}
+                  shifts={shifts}
+                  image={images?.[0]?.url}
+                  id={_id}
+                  googleMapsLink={googleMapsLink}
+                  timezone={timezone}
+                />
+              </Popup>
+            </Marker>
+          );
+        },
       )}
 
       <CurrentLocationMarker location={location} />

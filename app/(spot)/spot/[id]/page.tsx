@@ -81,10 +81,9 @@ export default async function SpotPage({
   const bath = await getBath(id);
   if (!bath) return notFound();
 
-  const { name, images, address, description, cost, shifts, googleMapsLink } =
+  const { name, images, address, description, cost, shifts, googleMapsLink, timezone } =
     bath;
-  const timezone = (bath as any).timezone ?? "UTC";
-  const isOpen = isShiftOpenNow(shifts, timezone);
+  const isOpen = isShiftOpenNow(shifts, timezone ?? "UTC");
 
   return (
     <div className="h-full bg-mywhite pb-20">

@@ -25,6 +25,7 @@ interface Props {
   image?: string;
   isFavorite?: boolean;
   googleMapsLink?: string;
+  timezone?: string;
 }
 
 const SpotModal = ({
@@ -36,6 +37,7 @@ const SpotModal = ({
   shifts = [],
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
   googleMapsLink,
+  timezone,
 }: Props) => {
   return (
     <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white">
@@ -73,7 +75,7 @@ const SpotModal = ({
               {trimAddress(address)}
             </p>
           </div>
-          <OpenStatus shifts={shifts} />
+          <OpenStatus shifts={shifts} timezone={timezone} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -116,10 +118,10 @@ const SpotModal = ({
           {id && (
             <Link
               href={`/spot/${id}`}
-              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal text-mywhite font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal text-white/80 font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Ver detalle
-              <ArrowRight className="size-4 text-white/70" />
+              <ArrowRight className="size-4 text-white/80" />
             </Link>
           )}
         </div>
