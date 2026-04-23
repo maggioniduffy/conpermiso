@@ -37,33 +37,29 @@ function FlyToCoords({ lat, lng }: { lat: number; lng: number }) {
 function PopupFlyTo() {
   const map = useMap();
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handler = (e: any) => {
       const latlng = e.popup?.getLatLng?.();
       if (!latlng) return;
+
+      // Solo mover si el marker no está visible en el viewport actual
+      if (map.getBounds().contains(latlng)) return;
 
       const currentZoom = map.getZoom();
       const MIN_ZOOM = 15;
       const shouldZoom = currentZoom < MIN_ZOOM;
       const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
 
-      // Shift centering target upward so the marker lands below center,
-      // giving the popup (which renders above the pin) top margin.
       const markerPx = map.project(latlng, targetZoom);
       const centeredPx = markerPx.add([0, -250]);
       const centeredLatLng = map.unproject(centeredPx, targetZoom);
 
       if (shouldZoom) {
-        // Zoom + center together, slow animation
         map.flyTo(centeredLatLng, targetZoom, { animate: true, duration: 1.2 });
       } else {
-        // Center only, quick pan
         map.panTo(centeredLatLng, { animate: true, duration: 0.25 });
       }
     };
     map.on("popupopen", handler);
-    map.on("popupopen", () => map.dragging.disable());
-    map.on("popupclose", () => map.dragging.enable());
     return () => {
       map.off("popupopen", handler);
     };
