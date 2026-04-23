@@ -109,7 +109,7 @@ const Navbar = ({ additionalClass }: Props) => {
                 height={25}
               />
               {user?.role === "admin" && (
-                <span className="absolute -bottom-1 -right-1 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-full leading-none ring-2 ring-mywhite">
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-full leading-none ring-2 ring-mywhite">
                   ADMIN
                 </span>
               )}

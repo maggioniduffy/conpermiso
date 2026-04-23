@@ -14,6 +14,7 @@ import {
 import { trimAddress } from "@/lib/utils";
 import OpenStatus from "./OpenStatus";
 import FavoriteButton from "./FavoriteButton";
+import { useRef, useEffect } from "react";
 
 interface Props {
   id?: string;
@@ -39,8 +40,22 @@ const SpotModal = ({
   googleMapsLink,
   timezone,
 }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => e.stopPropagation();
+    el.addEventListener("touchstart", stop, { passive: true });
+    el.addEventListener("touchmove", stop, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", stop);
+      el.removeEventListener("touchmove", stop);
+    };
+  }, []);
+
   return (
-    <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative">
+    <div ref={containerRef} className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative">
       {id && (
         <div className="absolute top-2 right-2 z-10">
           <FavoriteButton bathId={id} size="sm" />
