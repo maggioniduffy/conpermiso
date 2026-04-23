@@ -52,7 +52,7 @@ const SpotModal = ({
         </div>
       )}
       {image ? (
-        <div className="relative w-full h-44 overflow-hidden shrink-0">
+        <div className="relative w-full h-32 overflow-hidden shrink-0">
           <Image
             src={image}
             fill
@@ -72,7 +72,7 @@ const SpotModal = ({
           </h2>
         </div>
       ) : (
-        <div className="relative w-full h-32 shrink-0 bg-gradient-to-br from-principal-200 via-principal-300 to-principal-400 flex flex-col items-center justify-center gap-2 overflow-hidden">
+        <div className="relative w-full h-24 shrink-0 bg-gradient-to-br from-principal to-principal-400 flex flex-col items-center justify-center gap-2 overflow-hidden">
           <div
             className="absolute inset-0 opacity-10"
             style={{
@@ -88,10 +88,10 @@ const SpotModal = ({
               {isOpen ? "ABIERTO" : "CERRADO"}
             </span>
           )}
-          <div className="bg-white/20 rounded-2xl p-3">
-            <MapPin className="size-7 text-white" />
+          <div className="bg-white/20 rounded-xl p-2">
+            <MapPin className="size-5 text-white" />
           </div>
-          <h2 className="text-white font-bold text-xl drop-shadow-sm leading-tight text-center px-4">
+          <h2 className="text-white font-bold text-base drop-shadow-sm leading-tight text-center px-4">
             {title}
           </h2>
         </div>
