@@ -34,6 +34,25 @@ function FlyToCoords({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function PopupFlyTo() {
+  const map = useMap();
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = (e: any) => {
+      const latlng = e.popup?.getLatLng?.();
+      if (!latlng) return;
+      const currentZoom = map.getZoom();
+      const targetZoom = currentZoom < 15 ? 15 : currentZoom;
+      map.flyTo(latlng, targetZoom, { duration: 0.8 });
+    };
+    map.on("popupopen", handler);
+    return () => {
+      map.off("popupopen", handler);
+    };
+  }, [map]);
+  return null;
+}
+
 export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const { baths, fetchBaths } = useBathsInBounds();
 
@@ -46,6 +65,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       scrollWheelZoom={true}
       style={{ height: "100%", width: "100%" }}
     >
+      <PopupFlyTo />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
