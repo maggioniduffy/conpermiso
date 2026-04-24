@@ -6,8 +6,14 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   // Nightlife
   bar: [{ key: "amenity", value: "bar" }],
   bares: [{ key: "amenity", value: "bar" }],
-  pub: [{ key: "amenity", value: "pub" }, { key: "amenity", value: "bar" }],
-  pubs: [{ key: "amenity", value: "pub" }, { key: "amenity", value: "bar" }],
+  pub: [
+    { key: "amenity", value: "pub" },
+    { key: "amenity", value: "bar" },
+  ],
+  pubs: [
+    { key: "amenity", value: "pub" },
+    { key: "amenity", value: "bar" },
+  ],
   boliche: [{ key: "amenity", value: "nightclub" }],
   discoteca: [{ key: "amenity", value: "nightclub" }],
   disco: [{ key: "amenity", value: "nightclub" }],
@@ -41,7 +47,10 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   pharmacy: [{ key: "amenity", value: "pharmacy" }],
   clinica: [{ key: "amenity", value: "clinic" }],
   clinic: [{ key: "amenity", value: "clinic" }],
-  medico: [{ key: "amenity", value: "clinic" }, { key: "amenity", value: "hospital" }],
+  medico: [
+    { key: "amenity", value: "clinic" },
+    { key: "amenity", value: "hospital" },
+  ],
   // Shopping
   supermercado: [{ key: "shop", value: "supermarket" }],
   supermercados: [{ key: "shop", value: "supermarket" }],
@@ -72,8 +81,14 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   parque: [{ key: "leisure", value: "park" }],
   parques: [{ key: "leisure", value: "park" }],
   park: [{ key: "leisure", value: "park" }],
-  plaza: [{ key: "leisure", value: "park" }, { key: "place", value: "square" }],
-  plazas: [{ key: "leisure", value: "park" }, { key: "place", value: "square" }],
+  plaza: [
+    { key: "leisure", value: "park" },
+    { key: "place", value: "square" },
+  ],
+  plazas: [
+    { key: "leisure", value: "park" },
+    { key: "place", value: "square" },
+  ],
   gimnasio: [{ key: "leisure", value: "fitness_centre" }],
   gimnasios: [{ key: "leisure", value: "fitness_centre" }],
   gym: [{ key: "leisure", value: "fitness_centre" }],
@@ -83,31 +98,51 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   // Accommodation
   hotel: [{ key: "tourism", value: "hotel" }],
   hoteles: [{ key: "tourism", value: "hotel" }],
-  hostel: [{ key: "tourism", value: "hostel" }, { key: "tourism", value: "guest_house" }],
+  hostel: [
+    { key: "tourism", value: "hostel" },
+    { key: "tourism", value: "guest_house" },
+  ],
   // Religion
   iglesia: [{ key: "amenity", value: "place_of_worship" }],
   iglesias: [{ key: "amenity", value: "place_of_worship" }],
   church: [{ key: "amenity", value: "place_of_worship" }],
   templo: [{ key: "amenity", value: "place_of_worship" }],
   // Transport
-  estacion: [{ key: "railway", value: "station" }, { key: "amenity", value: "bus_station" }],
-  station: [{ key: "railway", value: "station" }, { key: "amenity", value: "bus_station" }],
+  estacion: [
+    { key: "railway", value: "station" },
+    { key: "amenity", value: "bus_station" },
+  ],
+  station: [
+    { key: "railway", value: "station" },
+    { key: "amenity", value: "bus_station" },
+  ],
   subte: [{ key: "railway", value: "subway_entrance" }],
   metro: [{ key: "railway", value: "subway_entrance" }],
   subterraneo: [{ key: "railway", value: "subway_entrance" }],
 };
 
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 1000 * 60 * 5;
+const CACHE_TTL = 1000 * 60 * 15; // 15 minutos
 
-const POI_KEYS = new Set(["amenity", "shop", "tourism", "leisure", "building", "office", "healthcare", "sport"]);
+const OVERPASS_SERVERS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
+
+const POI_KEYS = new Set([
+  "amenity",
+  "shop",
+  "tourism",
+  "leisure",
+  "building",
+  "office",
+  "healthcare",
+  "sport",
+]);
 
 function normalize(s: string) {
-  return s
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
+  return s.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 function distSq(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -116,6 +151,22 @@ function distSq(lat1: number, lng1: number, lat2: number, lng2: number) {
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function fetchOverpass(query: string): Promise<Response> {
+  for (const server of OVERPASS_SERVERS) {
+    try {
+      const res = await fetch(server, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+      if (res.ok) return res;
+    } catch {
+      continue;
+    }
+  }
+  throw new Error("All Overpass servers failed");
 }
 
 export async function GET(req: NextRequest) {
@@ -149,25 +200,19 @@ export async function GET(req: NextRequest) {
     ]);
     overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 100;`;
   } else {
-    // Name-based search for specific place names ("Vieja Barba", "Facultad de Exactas", etc.)
     const escaped = escapeRegex(key);
     overpassQuery = `[out:json][timeout:10];\n(\n  node["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n  way["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n);\nout center 15;`;
   }
 
   try {
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `data=${encodeURIComponent(overpassQuery)}`,
-    });
-
-    if (!res.ok) throw new Error(`Overpass ${res.status}`);
-
+    const res = await fetchOverpass(overpassQuery);
     const data = await res.json();
 
     const results = (data.elements as any[])
       .filter((el) => el.tags?.name)
-      .filter((el) => filters ? true : Object.keys(el.tags).some((k) => POI_KEYS.has(k)))
+      .filter((el) =>
+        filters ? true : Object.keys(el.tags).some((k) => POI_KEYS.has(k)),
+      )
       .map((el) => ({
         name: el.tags.name as string,
         lat: (el.lat ?? el.center?.lat) as number,
@@ -175,7 +220,10 @@ export async function GET(req: NextRequest) {
         category: key,
       }))
       .filter((r) => r.lat && r.lon)
-      .sort((a, b) => distSq(latF, lngF, a.lat, a.lon) - distSq(latF, lngF, b.lat, b.lon))
+      .sort(
+        (a, b) =>
+          distSq(latF, lngF, a.lat, a.lon) - distSq(latF, lngF, b.lat, b.lon),
+      )
       .slice(0, 6);
 
     cache.set(cacheKey, { data: results, timestamp: Date.now() });
