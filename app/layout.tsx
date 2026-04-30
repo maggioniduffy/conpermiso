@@ -3,6 +3,7 @@ import "./globals.css";
 import { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/next";
+import { ServiceWorkerUpdater } from "@/components/ServiceWorkerUpdater";
 
 const montserrat = localFont({
   src: [
@@ -75,6 +76,7 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} bg-mywhite flex flex-col`}
       >
+        <ServiceWorkerUpdater />
         <SessionProvider>{children}</SessionProvider>
         <Analytics />
       </body>
