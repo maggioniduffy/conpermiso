@@ -134,19 +134,21 @@ const SpotModal = ({
             </Link>
           )}
         </div>
-        {shifts && shifts.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-1.5">
-              <Clock className="size-3 text-jet-600" />
-              <span className="text-xs font-semibold text-jet-600">Horarios</span>
-            </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <Clock className="size-3 text-jet-600" />
+            <span className="text-xs font-semibold text-jet-600">Horarios</span>
+          </div>
+          {shifts && shifts.length > 0 ? (
             <div className="flex flex-col">
               {shifts.map((shift) => (
                 <ShiftVisualizer shift={shift} key={shift.days.toString()} />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <span className="text-xs text-jet-500 italic">Indefinido / Desconocido</span>
+          )}
+        </div>
       </div>
     </div>
   );

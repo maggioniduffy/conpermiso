@@ -13,6 +13,7 @@ import {
   AlignLeft,
   XIcon,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
@@ -48,6 +49,9 @@ export default function SpotForm({
 }: Props) {
   const isEdit = !!initialData;
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
+  const [hasShifts, setHasShifts] = useState(
+    isEdit ? (initialData?.shifts?.length ?? 0) > 0 : false,
+  );
 
   const remainingImages = (initialData?.images ?? []).filter(
     (img) => !removedImages.has(img.url),
@@ -165,7 +169,21 @@ export default function SpotForm({
       </SectionCard>
 
       <SectionCard icon={<Clock className="size-4" />} label="Horarios">
-        <ShiftsInput onChange={setShifts} initialValue={initialData?.shifts} />
+        <label className="flex items-center gap-2 cursor-pointer w-fit">
+          <Checkbox
+            checked={hasShifts}
+            onCheckedChange={(checked) => {
+              const val = checked as boolean;
+              setHasShifts(val);
+              if (!val) setShifts([]);
+            }}
+            className="rounded-md border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
+          />
+          <span className="text-sm text-jet font-medium">Agregar horarios</span>
+        </label>
+        {hasShifts && (
+          <ShiftsInput onChange={setShifts} initialValue={initialData?.shifts} />
+        )}
       </SectionCard>
 
       <SectionCard

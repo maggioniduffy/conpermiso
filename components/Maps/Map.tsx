@@ -123,7 +123,10 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
           googleMapsLink,
           timezone,
         }: Bath) => {
-          const isOpen = isOpenWithTimezone(shifts, timezone ?? "UTC");
+          const isOpen =
+            shifts && shifts.length > 0
+              ? isOpenWithTimezone(shifts, timezone ?? "UTC")
+              : null;
           return (
             <Marker
               key={_id}

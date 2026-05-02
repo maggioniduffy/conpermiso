@@ -24,12 +24,18 @@ export function createPlaceMarkerIcon() {
   });
 }
 
-export function createMarkerIcon(isOpen: boolean) {
-  const color = isOpen ? "#22c55e" : "#ef4444";
-  const pulse = isOpen
-    ? `<style>@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.5);opacity:0}}</style>
+export function createMarkerIcon(isOpen: boolean | null) {
+  const color =
+    isOpen === null ? null : isOpen ? "#22c55e" : "#ef4444";
+  const pulse =
+    isOpen === true
+      ? `<style>@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.5);opacity:0}}</style>
        <div style="position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.25) 0%,rgba(34,197,94,0) 70%);animation:pulse 2s infinite;pointer-events:none;"></div>`
-    : "";
+      : "";
+
+  const filter = color
+    ? `drop-shadow(0 0 3px ${color}) drop-shadow(0 0 2px ${color}) drop-shadow(0 1px 3px rgba(0,0,0,.3))`
+    : `drop-shadow(0 1px 3px rgba(0,0,0,.3))`;
 
   return L.divIcon({
     className: "",
@@ -41,9 +47,7 @@ export function createMarkerIcon(isOpen: boolean) {
           z-index: 1;
           width: 36px;
           height: 36px;
-          filter: drop-shadow(0 0 3px ${color})
-                  drop-shadow(0 0 2px ${color})
-                  drop-shadow(0 1px 3px rgba(0,0,0,.3));
+          filter: ${filter};
         " />
       </div>
     `,

@@ -91,7 +91,10 @@ export default async function SpotPage({
     googleMapsLink,
     timezone,
   } = bath;
-  const isOpen = isShiftOpenNow(shifts, timezone ?? "UTC");
+  const isOpen =
+    shifts && shifts.length > 0
+      ? isShiftOpenNow(shifts, timezone ?? "UTC")
+      : null;
 
   const hasImage = !!images?.[0];
 
@@ -200,23 +203,25 @@ export default async function SpotPage({
           )}
         </div>
 
-        {shifts && shifts.length > 0 && (
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-principal/10 p-2 rounded-xl shrink-0">
-                <Clock className="size-5 text-principal" />
-              </div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-                Horarios
-              </p>
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="bg-principal/10 p-2 rounded-xl shrink-0">
+              <Clock className="size-5 text-principal" />
             </div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-jet-700">
+              Horarios
+            </p>
+          </div>
+          {shifts && shifts.length > 0 ? (
             <div className="flex flex-col divide-y divide-gray-100">
               {shifts.map((shift, i) => (
                 <ShiftVisualizer shift={shift} key={i} />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-jet-500 italic">Indefinido / Desconocido</p>
+          )}
+        </div>
         {images && images.length > 0 && <ImagesSlider images={images} />}
 
         <ErrorBoundary>
