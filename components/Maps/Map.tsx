@@ -10,7 +10,7 @@ import { createMarkerIcon, createPlaceMarkerIcon } from "@/lib/map/icon";
 import MapBoundsWatcher from "./MapBoundsWatcher";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import CurrentLocationMarker from "./CurrentLocationMarker";
-import { Bath } from "@/utils/models";
+import { Bath, BathAccess } from "@/utils/models";
 import { SpotModal } from "../Spots";
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
@@ -112,13 +112,17 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
           images,
           googleMapsLink,
           timezone,
+          access,
+          avgRating,
+          reviewsCount,
         }: Bath) => {
           const isOpen = isOpenWithTimezone(shifts, timezone ?? "UTC");
+          const isPublic = access === BathAccess.PUBLIC;
           return (
             <Marker
               key={_id}
               position={[location.coordinates[1], location.coordinates[0]]}
-              icon={createMarkerIcon(isOpen)}
+              icon={createMarkerIcon(isOpen, isPublic)}
             >
               <Popup maxHeight={500} maxWidth={250}>
                 <SpotModal
@@ -131,6 +135,9 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
                   id={_id}
                   googleMapsLink={googleMapsLink}
                   timezone={timezone}
+                  access={access}
+                  avgRating={avgRating}
+                  reviewsCount={reviewsCount}
                 />
               </Popup>
             </Marker>

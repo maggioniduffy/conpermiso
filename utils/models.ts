@@ -1,5 +1,10 @@
 export type Cost = "Sin cargo" | "Con consumicion" | number;
 
+export enum BathAccess {
+  PUBLIC = "PUBLIC",
+  PRIVATE = "PRIVATE",
+}
+
 export type Time = {
   hour?: string;
   minute?: string;
@@ -43,6 +48,7 @@ export interface Bath {
   googleMapsLink?: string;
   timezone?: string;
   isOpenNow: boolean;
+  access?: BathAccess;
 }
 
 export enum BathRequestStatus {

@@ -12,6 +12,8 @@ import {
   Type,
   AlignLeft,
   XIcon,
+  Building2,
+  Star,
 } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -19,7 +21,7 @@ import { Button } from "../ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import ShiftsInput from "./ShiftsInput";
 import Uploader from "./Uploader";
-import { Bath } from "@/utils/models";
+import { Bath, BathAccess } from "@/utils/models";
 import { useSpotForm } from "@/hooks/use-spot-form";
 import { SectionCard } from "./SectionCard";
 
@@ -48,6 +50,9 @@ export default function SpotForm({
 }: Props) {
   const isEdit = !!initialData;
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
 
   const remainingImages = (initialData?.images ?? []).filter(
     (img) => !removedImages.has(img.url),
@@ -56,6 +61,8 @@ export default function SpotForm({
   const {
     costType,
     setCostType,
+    access,
+    setAccess,
     setShifts,
     location,
     address,
@@ -77,6 +84,10 @@ export default function SpotForm({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    if (!isEdit && reviewRating > 0) {
+      formData.append("reviewRating", String(reviewRating));
+      if (reviewComment.trim()) formData.append("reviewComment", reviewComment.trim());
+    }
     await handleSubmit(formData);
   };
 
@@ -164,6 +175,22 @@ export default function SpotForm({
         )}
       </SectionCard>
 
+      <SectionCard icon={<Building2 className="size-4" />} label="Tipo de baño">
+        <ToggleGroup
+          type="single"
+          value={access}
+          onValueChange={(v) => v && setAccess(v as BathAccess)}
+          className="flex gap-2 flex-wrap w-full"
+        >
+          <ToggleGroupItem value={BathAccess.PUBLIC} className={toggleClass}>
+            Público
+          </ToggleGroupItem>
+          <ToggleGroupItem value={BathAccess.PRIVATE} className={toggleClass}>
+            Privado
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </SectionCard>
+
       <SectionCard icon={<Clock className="size-4" />} label="Horarios">
         <ShiftsInput onChange={setShifts} initialValue={initialData?.shifts} />
       </SectionCard>
@@ -232,6 +259,41 @@ export default function SpotForm({
         )}
         <Uploader onChange={setImageFiles} maxFiles={5} />
       </SectionCard>
+
+      {!isEdit && (
+        <SectionCard icon={<Star className="size-4" />} label="Tu reseña (opcional)">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setReviewRating(reviewRating === i ? 0 : i)}
+                onMouseEnter={() => setReviewHover(i)}
+                onMouseLeave={() => setReviewHover(0)}
+                className="p-0.5"
+              >
+                <Star
+                  className={`size-7 transition-colors fill-current ${
+                    i <= (reviewHover || reviewRating)
+                      ? "text-yellow-400"
+                      : "text-gray-200"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          {reviewRating > 0 && (
+            <Textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Comentario (opcional)..."
+              className="bg-mywhite border border-principal/30 rounded-lg resize-none text-sm"
+              rows={2}
+              maxLength={300}
+            />
+          )}
+        </SectionCard>
+      )}
 
       <Button
         type="submit"

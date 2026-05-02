@@ -1,6 +1,6 @@
 "use client";
 
-import { Cost, Shift } from "@/utils/models";
+import { Cost, Shift, BathAccess } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import {
   Clock,
   ArrowRight,
   ExternalLink,
+  Star,
 } from "lucide-react";
 import { trimAddress } from "@/lib/utils";
 import OpenStatus from "./OpenStatus";
@@ -27,6 +28,9 @@ interface Props {
   isFavorite?: boolean;
   googleMapsLink?: string;
   timezone?: string;
+  access?: BathAccess;
+  avgRating?: number;
+  reviewsCount?: number;
 }
 
 const SpotModal = ({
@@ -39,6 +43,9 @@ const SpotModal = ({
   image = "https://images.unsplash.com/photo-1726607424599-db0c41681494?w=500&auto=format&fit=crop&q=60",
   googleMapsLink,
   timezone,
+  access,
+  avgRating,
+  reviewsCount,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +91,16 @@ const SpotModal = ({
 
         <div className="h-px bg-mywhite" />
 
+        {(reviewsCount ?? 0) > 0 && (
+          <div className="flex items-center gap-1.5">
+            <Star className="size-3.5 text-yellow-400 fill-current" />
+            <span className="text-sm font-semibold text-jet">
+              {avgRating?.toFixed(1)}
+            </span>
+            <span className="text-xs text-jet-700">({reviewsCount} {reviewsCount === 1 ? "reseña" : "reseñas"})</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
@@ -93,7 +110,14 @@ const SpotModal = ({
               {trimAddress(address)}
             </p>
           </div>
-          <OpenStatus shifts={shifts} timezone={timezone} />
+          <div className="flex items-center gap-1.5 shrink-0">
+            {access === BathAccess.PUBLIC && (
+              <span className="bg-principal text-white text-[8px] font-bold px-1.5 py-px rounded-full leading-none ring-1 ring-white/30">
+                PÚBLICO
+              </span>
+            )}
+            <OpenStatus shifts={shifts} timezone={timezone} />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/apiFetch";
-import { Shift, Bath, BathImage } from "@/utils/models";
+import { Shift, Bath, BathImage, BathAccess } from "@/utils/models";
 import { sanitizeShifts } from "@/lib/utils";
 
 type CostType = "Sin cargo" | "Con consumicion" | "Precio";
@@ -42,6 +42,9 @@ export function useSpotForm(
     inferCostType(initial?.cost),
   );
   const [shifts, setShifts] = useState<Shift[]>(initial?.shifts ?? []);
+  const [access, setAccess] = useState<BathAccess>(
+    initial?.access ?? BathAccess.PUBLIC,
+  );
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     initial?.location
       ? {
@@ -108,6 +111,7 @@ export function useSpotForm(
       costType === "Precio" ? (formData.get("cost") as string) : costType,
     );
     backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
+    backendForm.append("access", access);
     backendForm.append(
       "location",
       JSON.stringify({
@@ -118,6 +122,13 @@ export function useSpotForm(
     backendForm.append("timezone", timezone);
 
     imageFiles.forEach((file) => backendForm.append("files", file));
+
+    const reviewRating = formData.get("reviewRating");
+    if (reviewRating) {
+      backendForm.append("reviewRating", reviewRating as string);
+      const reviewComment = formData.get("reviewComment");
+      if (reviewComment) backendForm.append("reviewComment", reviewComment as string);
+    }
 
     if (isEdit) {
       backendForm.append(
@@ -203,6 +214,8 @@ export function useSpotForm(
   return {
     costType,
     setCostType,
+    access,
+    setAccess,
     shifts,
     setShifts,
     location,
