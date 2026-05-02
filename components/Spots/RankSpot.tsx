@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "../ui/button";
-import { Send, CheckCircle2 } from "lucide-react";
+import { Send, CheckCircle2, Star } from "lucide-react";
 import { useBackendUser } from "@/hooks";
 import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/apiFetch";
@@ -25,15 +25,7 @@ export default function RankSpot({
   const [error, setError] = useState<string | null>(null);
   const { user } = useBackendUser();
 
-  const emojis = ["😡", "🙁", "😐", "🙂", "😍"];
   const labels = ["Mala", "Regular", "Bien", "Muy Bien", "Excelente"];
-  const colors = [
-    "text-red-500",
-    "text-orange-400",
-    "text-yellow-400",
-    "text-green-400",
-    "text-principal",
-  ];
 
   if (!user) return null;
 
@@ -83,9 +75,14 @@ export default function RankSpot({
         <p className="text-xs font-semibold uppercase tracking-wide text-jet-700">
           ¿Fuiste? Valorá tu experiencia
         </p>
-        <span className="text-3xl transition-all duration-200">
-          {emojis[value[0] - 1]}
-        </span>
+        <div className="flex items-center gap-0.5">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Star
+              key={i}
+              className={`size-6 transition-all duration-200 fill-current ${i <= value[0] ? "text-yellow-400" : "text-gray-200"}`}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -103,7 +100,7 @@ export default function RankSpot({
             <span
               key={i}
               className={`transition-all duration-200 ${
-                value[0] === i + 1 ? `font-bold ${colors[i]}` : "text-jet-800"
+                value[0] === i + 1 ? "font-bold text-yellow-400" : "text-jet-800"
               }`}
             >
               {label}

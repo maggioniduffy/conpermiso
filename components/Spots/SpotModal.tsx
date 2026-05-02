@@ -1,6 +1,6 @@
 "use client";
 
-import { Cost, Shift } from "@/utils/models";
+import { Cost, Shift, BathAccess } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import {
   Clock,
   ArrowRight,
   ExternalLink,
+  Star,
 } from "lucide-react";
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 
@@ -26,6 +27,9 @@ interface Props {
   isFavorite?: boolean;
   googleMapsLink?: string;
   timezone?: string;
+  access?: BathAccess;
+  avgRating?: number;
+  reviewsCount?: number;
 }
 
 const SpotModal = ({
@@ -38,14 +42,15 @@ const SpotModal = ({
   image,
   googleMapsLink,
   timezone,
+  access,
+  avgRating,
+  reviewsCount,
 }: Props) => {
   const isOpen =
     shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
 
   return (
-    <div
-      className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative"
-    >
+    <div className="w-full rounded-2xl overflow-hidden flex flex-col shadow-lg bg-white relative">
       {id && (
         <div className="absolute top-2 right-2 z-10">
           <FavoriteButton bathId={id} size="sm" />
@@ -106,13 +111,74 @@ const SpotModal = ({
           <span className="text-jet-700 text-xs">·</span>
           <div className="flex items-center gap-1.5 min-w-0">
             <MapPin className="size-3 text-jet-600 shrink-0" />
-            <span className="text-xs text-jet-600 truncate">{trimAddress(address)}</span>
+            <span className="text-xs text-jet-600 truncate">
+              {trimAddress(address)}
+            </span>
           </div>
         </div>
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-3">
           {description}
         </p>
-        <div className="flex flex-col gap-2">
+
+        <div className="h-px bg-mywhite" />
+
+        {(reviewsCount ?? 0) > 0 && (
+          <div className="flex items-center gap-1.5">
+            <Star className="size-3.5 text-yellow-400 fill-current" />
+            <span className="text-sm font-semibold text-jet">
+              {avgRating?.toFixed(1)}
+            </span>
+            <span className="text-xs text-jet-700">
+              ({reviewsCount} {reviewsCount === 1 ? "reseña" : "reseñas"})
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+              <MapPin className="size-3.5 text-principal" />
+            </div>
+            <p className="text-sm text-jet-500 leading-snug">
+              {trimAddress(address)}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {access === BathAccess.PUBLIC && (
+              <span className="bg-principal text-white text-[8px] font-bold px-1.5 py-px rounded-full leading-none ring-1 ring-white/30">
+                PÚBLICO
+              </span>
+            )}
+            <OpenStatus shifts={shifts} timezone={timezone} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+            <DollarSign className="size-3.5 text-principal" />
+          </div>
+          <span className="text-sm font-medium text-jet-500">
+            {cost ?? "Sin cargo"}
+          </span>
+        </div>
+
+        {shifts && shifts.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+                <Clock className="size-3.5 text-principal" />
+              </div>
+              <span className="text-sm font-semibold text-jet">Horarios</span>
+            </div>
+            <div className="pl-8 flex flex-col">
+              {shifts.map((shift) => (
+                <ShiftVisualizer shift={shift} key={shift.days.toString()} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 mt-1">
           {googleMapsLink && (
             <Link
               href={googleMapsLink}
@@ -132,21 +198,6 @@ const SpotModal = ({
               VER MÁS
               <ArrowRight className="size-4 opacity-70" />
             </Link>
-          )}
-        </div>
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <Clock className="size-3 text-jet-600" />
-            <span className="text-xs font-semibold text-jet-600">Horarios</span>
-          </div>
-          {shifts && shifts.length > 0 ? (
-            <div className="flex flex-col">
-              {shifts.map((shift) => (
-                <ShiftVisualizer shift={shift} key={shift.days.toString()} />
-              ))}
-            </div>
-          ) : (
-            <span className="text-xs text-jet-500 italic">Indefinido / Desconocido</span>
           )}
         </div>
       </div>

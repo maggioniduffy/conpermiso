@@ -1,7 +1,7 @@
 // app/(spot)/spot/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Bath, Day } from "@/utils/models";
+import { Bath, BathAccess, Day } from "@/utils/models";
 import { trimAddress } from "@/lib/utils";
 import {
   MapPin,
@@ -90,6 +90,7 @@ export default async function SpotPage({
     shifts,
     googleMapsLink,
     timezone,
+    access,
   } = bath;
   const isOpen =
     shifts && shifts.length > 0
@@ -120,10 +121,15 @@ export default async function SpotPage({
             <FavoriteButton bathId={id} />
           </div>
           <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-3 mb-1 flex-wrap">
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
                 {name}
               </h1>
+              {access === BathAccess.PUBLIC && (
+                <span className="bg-principal text-white text-[9px] font-bold px-2 py-0.5 rounded-full leading-none ring-2 ring-white/30">
+                  PÚBLICO
+                </span>
+              )}
               <OpenBadge isOpen={isOpen} />
             </div>
             <div className="flex items-center gap-1 mt-1">
@@ -145,6 +151,11 @@ export default async function SpotPage({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold text-jet">{name}</h1>
+                {access === BathAccess.PUBLIC && (
+                  <span className="bg-principal text-white text-[9px] font-bold px-2 py-0.5 rounded-full leading-none ring-2 ring-principal/20">
+                    PÚBLICO
+                  </span>
+                )}
                 <OpenBadge isOpen={isOpen} />
               </div>
               <div className="flex items-center gap-1 mt-1">
