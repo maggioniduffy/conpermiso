@@ -15,6 +15,7 @@ import {
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 
 import FavoriteButton from "./FavoriteButton";
+import OpenStatus from "./OpenStatus";
 
 interface Props {
   id?: string;
