@@ -1,38 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
-import {
-  Loader,
-  Send,
-  DollarSign,
-  MapPin,
-  Image as ImageIcon,
-  Clock,
-  Type,
-  AlignLeft,
-  XIcon,
-  Building2,
-  Star,
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { Send, Type, AlignLeft } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import ShiftsInput from "./ShiftsInput";
-import Uploader from "./Uploader";
-import { Bath, BathAccess } from "@/utils/models";
+import { Bath } from "@/utils/models";
 import { useSpotForm } from "@/hooks/use-spot-form";
 import { SectionCard } from "./SectionCard";
-
-type CostType = "Sin cargo" | "Con consumicion" | "Precio";
-
-const toggleClass = `
-  px-4 bg-mywhite py-2 rounded-lg border text-sm text-jet transition-all border-principal/30
-  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:shadow-sm data-[state=on]:font-semibold
-  whitespace-normal text-center
-`;
+import { SpotFormCostSection, CostType } from "./SpotFormCostSection";
+import { SpotFormAccessSection } from "./SpotFormAccessSection";
+import { SpotFormScheduleSection } from "./SpotFormScheduleSection";
+import { SpotFormLocationSection } from "./SpotFormLocationSection";
+import { SpotFormImagesSection } from "./SpotFormImagesSection";
+import { SpotFormReviewInput } from "./SpotFormReviewInput";
 
 const Required = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -52,11 +33,7 @@ export default function SpotForm({
   const isEdit = !!initialData;
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
   const [reviewRating, setReviewRating] = useState(0);
-  const [reviewHover, setReviewHover] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
-  const [hasShifts, setHasShifts] = useState(
-    isEdit ? (initialData?.shifts?.length ?? 0) > 0 : false,
-  );
 
   const remainingImages = (initialData?.images ?? []).filter(
     (img) => !removedImages.has(img.url),
@@ -75,15 +52,6 @@ export default function SpotForm({
     handleLocationChange,
     handleSubmit,
   } = useSpotForm(initialData, mode, requestId, remainingImages);
-
-  const MapPicker = useMemo(
-    () =>
-      dynamic(() => import("@/components/Maps/MapPicker"), {
-        loading: () => <Loader className="animate-spin text-principal" />,
-        ssr: false,
-      }),
-    [],
-  );
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -109,11 +77,7 @@ export default function SpotForm({
 
       <SectionCard
         icon={<Type className="size-4" />}
-        label={
-          <>
-            Nombre <Required />
-          </>
-        }
+        label={<>Nombre <Required /></>}
       >
         <Input
           name="name"
@@ -127,11 +91,7 @@ export default function SpotForm({
 
       <SectionCard
         icon={<AlignLeft className="size-4" />}
-        label={
-          <>
-            Descripción <Required />
-          </>
-        }
+        label={<>Descripción <Required /></>}
       >
         <Textarea
           name="description"
@@ -144,180 +104,48 @@ export default function SpotForm({
         />
       </SectionCard>
 
-      <SectionCard icon={<DollarSign className="size-4" />} label="Costo">
-        <ToggleGroup
-          type="single"
-          value={costType}
-          onValueChange={(v) => v && setCostType(v as CostType)}
-          className="flex gap-2 flex-wrap w-full"
-        >
-          {(["Sin cargo", "Con consumicion", "Precio"] as CostType[]).map(
-            (label) => (
-              <ToggleGroupItem
-                key={label}
-                value={label}
-                className={toggleClass}
-              >
-                {label}
-              </ToggleGroupItem>
-            ),
-          )}
-        </ToggleGroup>
-        {costType === "Precio" && (
-          <Input
-            type="number"
-            name="cost"
-            className="bg-mywhite border border-principal/30 rounded-lg w-40"
-            placeholder="$ Precio"
-            min={1}
-            required
-            defaultValue={
-              typeof initialData?.cost === "number"
-                ? initialData.cost
-                : undefined
-            }
-          />
-        )}
-      </SectionCard>
+      <SpotFormCostSection
+        costType={costType as CostType}
+        setCostType={(v) => setCostType(v)}
+        initialCost={typeof initialData?.cost === "number" ? initialData.cost : undefined}
+      />
 
-      <SectionCard icon={<Building2 className="size-4" />} label="Tipo de baño">
-        <ToggleGroup
-          type="single"
-          value={access}
-          onValueChange={(v) => v && setAccess(v as BathAccess)}
-          className="flex gap-2 flex-wrap w-full"
-        >
-          <ToggleGroupItem value={BathAccess.PUBLIC} className={toggleClass}>
-            Público
-          </ToggleGroupItem>
-          <ToggleGroupItem value={BathAccess.PRIVATE} className={toggleClass}>
-            Privado
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </SectionCard>
+      <SpotFormAccessSection access={access} setAccess={(v) => setAccess(v)} />
 
-      <SectionCard icon={<Clock className="size-4" />} label="Horarios">
-        <label className="flex items-center gap-2 cursor-pointer w-fit">
-          <Checkbox
-            checked={hasShifts}
-            onCheckedChange={(checked) => {
-              const val = checked as boolean;
-              setHasShifts(val);
-              if (!val) setShifts([]);
-            }}
-            className="rounded-md border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
-          />
-          <span className="text-sm text-jet font-medium">Agregar horarios</span>
-        </label>
-        {hasShifts && (
-          <ShiftsInput
-            onChange={setShifts}
-            initialValue={initialData?.shifts}
-          />
-        )}
-      </SectionCard>
+      <SpotFormScheduleSection
+        onChange={setShifts}
+        initialShifts={initialData?.shifts}
+      />
 
-      <SectionCard
-        icon={<MapPin className="size-4" />}
-        label={
-          <>
-            Ubicación <Required />
-          </>
+      <SpotFormLocationSection
+        onChange={handleLocationChange}
+        location={location}
+        address={address}
+        initialValue={
+          initialData?.location
+            ? {
+                lat: initialData.location.coordinates[1],
+                lng: initialData.location.coordinates[0],
+                address: initialData.address,
+              }
+            : undefined
         }
-      >
-        <p className="text-xs text-jet-700">
-          Buscá la dirección o hacé click en el mapa
-        </p>
-        <MapPicker
-          onChange={handleLocationChange}
-          initialValue={
-            initialData?.location
-              ? {
-                  lat: initialData.location.coordinates[1],
-                  lng: initialData.location.coordinates[0],
-                  address: initialData.address,
-                }
-              : undefined
-          }
-        />
-        {location ? (
-          <p className="text-xs text-principal font-medium">
-            📍{" "}
-            {address ||
-              `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
-          </p>
-        ) : (
-          <p className="text-xs text-red-400 font-medium">
-            Seleccioná una ubicación para continuar
-          </p>
-        )}
-      </SectionCard>
+      />
 
-      <SectionCard icon={<ImageIcon className="size-4" />} label="Imágenes">
-        {isEdit && remainingImages.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            {remainingImages.map((img) => (
-              <div
-                key={img.url}
-                className="relative aspect-square rounded-xl overflow-hidden"
-              >
-                <img
-                  src={img.url}
-                  alt={img.alt ?? ""}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setRemovedImages((prev) => new Set(prev).add(img.url))
-                  }
-                  className="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-                >
-                  <XIcon className="size-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <Uploader onChange={setImageFiles} maxFiles={5} />
-      </SectionCard>
+      <SpotFormImagesSection
+        isEdit={isEdit}
+        remainingImages={remainingImages}
+        onRemoveImage={(url) => setRemovedImages((prev) => new Set(prev).add(url))}
+        onFilesChange={setImageFiles}
+      />
 
       {!isEdit && (
-        <SectionCard
-          icon={<Star className="size-4" />}
-          label="Tu reseña (opcional)"
-        >
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setReviewRating(reviewRating === i ? 0 : i)}
-                onMouseEnter={() => setReviewHover(i)}
-                onMouseLeave={() => setReviewHover(0)}
-                className="p-0.5"
-              >
-                <Star
-                  className={`size-7 transition-colors fill-current ${
-                    i <= (reviewHover || reviewRating)
-                      ? "text-yellow-400"
-                      : "text-gray-200"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-          {reviewRating > 0 && (
-            <Textarea
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              placeholder="Comentario (opcional)..."
-              className="bg-mywhite border border-principal/30 rounded-lg resize-none text-sm"
-              rows={2}
-              maxLength={300}
-            />
-          )}
-        </SectionCard>
+        <SpotFormReviewInput
+          rating={reviewRating}
+          onRatingChange={setReviewRating}
+          comment={reviewComment}
+          onCommentChange={setReviewComment}
+        />
       )}
 
       <Button
