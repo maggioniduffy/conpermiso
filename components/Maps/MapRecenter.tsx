@@ -1,27 +1,25 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useMap } from "react-leaflet";
 
 interface Props {
-  location: {
-    latitude: number;
-    longitude: number;
-  } | null;
+  location: { latitude: number; longitude: number } | null;
+  mapRef: React.RefObject<any>;
 }
 
-export default function MapRecenter({ location }: Props) {
-  const map = useMap();
-  const hascentered = useRef(false);
+export default function MapRecenter({ location, mapRef }: Props) {
+  const hasCentered = useRef(false);
 
   useEffect(() => {
-    if (location && !hascentered.current) {
-      map.setView([location.latitude, location.longitude], map.getZoom(), {
-        animate: true,
+    if (location && !hasCentered.current && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [location.longitude, location.latitude],
+        zoom: 15,
+        duration: 800,
       });
-      hascentered.current = true;
+      hasCentered.current = true;
     }
-  }, [location, map]);
+  }, [location]);
 
   return null;
 }

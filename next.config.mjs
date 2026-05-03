@@ -89,6 +89,7 @@ const nextConfig = {
       },
     ],
   },
+  transpilePackages: ["react-map-gl"],
   eslint: {
     ignoreDuringBuilds: true,
   },

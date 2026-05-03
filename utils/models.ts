@@ -1,8 +1,8 @@
 export type Cost = "Sin cargo" | "Con consumicion" | number;
 
 export enum BathAccess {
-  PUBLIC = "PUBLICO",
-  PRIVATE = "PRIVADO",
+  PUBLIC = "Publico",
+  PRIVATE = "Privado",
 }
 
 export type Time = {

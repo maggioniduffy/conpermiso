@@ -1,20 +1,18 @@
 "use client";
 
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import Map from "react-map-gl/mapbox";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useState, useCallback, useRef } from "react";
+import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
+import { Bath, BathAccess } from "@/utils/models";
+import { isOpenWithTimezone } from "@/lib/utils";
+import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
 import MapRecenter from "./MapRecenter";
-import { createMarkerIcon, createPlaceMarkerIcon } from "@/lib/map/icon";
-import MapBoundsWatcher from "./MapBoundsWatcher";
-import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
-import CurrentLocationMarker from "./CurrentLocationMarker";
-import { Bath, BathAccess } from "@/utils/models";
-import { SpotModal } from "../Spots";
-import { useEffect } from "react";
-import { useMap } from "react-leaflet";
-import { isOpenWithTimezone } from "@/lib/utils";
+import BathMarker from "./Bathmarker";
+import FlyToCoords from "./Flytocoords";
+import PlaceMarker from "./Placemarker";
+import SpotPopup from "./Spotpopup";
 
 interface Props {
   location: {
@@ -26,140 +24,77 @@ interface Props {
   zoom?: number;
 }
 
-function FlyToCoords({ lat, lng }: { lat: number; lng: number }) {
-  const map = useMap();
-  useEffect(() => {
-    map.flyTo([lat, lng], 17, { duration: 1.2 });
-  }, [lat, lng, map]);
-  return null;
-}
-
-function PopupFlyTo() {
-  const map = useMap();
-  useEffect(() => {
-    const handler = (e: any) => {
-      const latlng = e.popup?.getLatLng?.();
-      if (!latlng) return;
-
-      const currentZoom = map.getZoom();
-      const MIN_ZOOM = 15;
-      const shouldZoom = currentZoom < MIN_ZOOM;
-      const targetZoom = shouldZoom ? MIN_ZOOM : currentZoom;
-
-      const markerPx = map.project(latlng, targetZoom);
-      const centeredPx = markerPx.add([0, -250]);
-      const centeredLatLng = map.unproject(centeredPx, targetZoom);
-
-      // Deshabilitar interacción durante la animación
-      map.dragging.disable();
-      map.touchZoom.disable();
-
-      const onMoveEnd = () => {
-        // Pequeño delay extra para que iOS estabilice
-        setTimeout(() => {
-          map.dragging.enable();
-          map.touchZoom.enable();
-        }, 1000);
-        map.off("moveend", onMoveEnd);
-      };
-      map.on("moveend", onMoveEnd);
-
-      if (shouldZoom) {
-        map.flyTo(centeredLatLng, targetZoom, { animate: true, duration: 1.2 });
-      } else {
-        map.panTo(centeredLatLng, { animate: true, duration: 0.8 });
-      }
-    };
-
-    map.on("popupopen", handler);
-    return () => {
-      map.off("popupopen", handler);
-    };
-  }, [map]);
-  return null;
-}
-
 export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const { baths, fetchBaths } = useBathsInBounds();
+  const [selectedBath, setSelectedBath] = useState<Bath | null>(null);
+  const mapRef = useRef<any>(null);
+
+  const handleMoveEnd = useCallback(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current.getMap();
+    const bounds = map.getBounds();
+    fetchBaths({
+      getSouth: () => bounds.getSouth(),
+      getNorth: () => bounds.getNorth(),
+      getWest: () => bounds.getWest(),
+      getEast: () => bounds.getEast(),
+    } as any);
+  }, [fetchBaths]);
 
   return (
-    <MapContainer
-      center={
-        location ? [location.latitude, location.longitude] : [39.4699, -0.3763]
-      }
-      zoom={zoom}
-      scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%" }}
+    <Map
+      ref={mapRef}
+      initialViewState={{
+        longitude: location?.longitude ?? -0.3763,
+        latitude: location?.latitude ?? 39.4699,
+        zoom,
+      }}
+      style={{ width: "100%", height: "100%" }}
+      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+      onMoveEnd={handleMoveEnd}
     >
-      <PopupFlyTo />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-      />
-
-      <MapBoundsWatcher onBoundsChange={fetchBaths} />
-      <MapRecenter location={location} />
+      <MapRecenter location={location} mapRef={mapRef} />
 
       {searchCenter && (
-        <FlyToCoords lat={searchCenter.latitude} lng={searchCenter.longitude} />
-      )}
-      {searchCenter?.pin && (
-        <Marker
-          position={[searchCenter.latitude, searchCenter.longitude]}
-          icon={createPlaceMarkerIcon()}
+        <FlyToCoords
+          lat={searchCenter.latitude}
+          lng={searchCenter.longitude}
+          mapRef={mapRef}
         />
       )}
 
-      {baths.map(
-        ({
-          _id,
-          location,
-          name,
-          description,
-          cost,
-          address,
-          shifts,
-          images,
-          googleMapsLink,
-          timezone,
-          access,
-          avgRating,
-          reviewsCount,
-        }: Bath) => {
-          const isOpen =
-            shifts && shifts.length > 0
-              ? isOpenWithTimezone(shifts, timezone ?? "UTC")
-              : null;
-          const isPublic = access === BathAccess.PUBLIC;
-          return (
-            <Marker
-              key={_id}
-              position={[location.coordinates[1], location.coordinates[0]]}
-              icon={createMarkerIcon(isOpen, isPublic)}
-            >
-              <Popup maxWidth={250} autoPan={false} keepInView={false}>
-                <SpotModal
-                  title={name}
-                  description={description}
-                  cost={cost}
-                  address={address}
-                  shifts={shifts}
-                  image={images?.[0]?.url}
-                  id={_id}
-                  googleMapsLink={googleMapsLink}
-                  timezone={timezone}
-                  access={access}
-                  avgRating={avgRating}
-                  reviewsCount={reviewsCount}
-                />
-              </Popup>
-            </Marker>
-          );
-        },
+      {searchCenter?.pin && (
+        <PlaceMarker
+          latitude={searchCenter.latitude}
+          longitude={searchCenter.longitude}
+        />
+      )}
+
+      {baths.map((bath: Bath) => {
+        const isOpen =
+          bath.shifts && bath.shifts.length > 0
+            ? isOpenWithTimezone(bath.shifts, bath.timezone ?? "UTC")
+            : null;
+        const isPublic = bath.access === BathAccess.PUBLIC;
+
+        return (
+          <BathMarker
+            key={bath._id}
+            bath={bath}
+            isOpen={isOpen}
+            isPublic={isPublic}
+            onClick={() => setSelectedBath(bath)}
+          />
+        );
+      })}
+
+      {selectedBath && (
+        <SpotPopup bath={selectedBath} onClose={() => setSelectedBath(null)} />
       )}
 
       <CurrentLocationMarker location={location} />
-      <RecenterButton location={location} />
-    </MapContainer>
+      <RecenterButton location={location} mapRef={mapRef} zoom={zoom} />
+    </Map>
   );
 }

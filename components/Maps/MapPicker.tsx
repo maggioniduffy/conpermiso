@@ -1,16 +1,8 @@
 "use client";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  useMap,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import { useEffect, useState, useRef } from "react";
-import { createMarkerIcon } from "@/lib/map/icon";
+
+import Map, { Marker } from "react-map-gl/mapbox";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
@@ -32,56 +24,30 @@ interface NominatimResult {
   display_name: string;
 }
 
-function ClickHandler({
-  onMapClick,
-}: {
-  onMapClick: (coords: Coords) => void;
-}) {
-  useMapEvents({
-    click(e) {
-      onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-  });
-  return null;
-}
-
-function FlyTo({ coords }: { coords: Coords | null }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (coords) map.flyTo([coords.lat, coords.lng], 16);
-  }, [coords?.lat, coords?.lng]);
-
-  return null;
-}
-
 export default function MapPicker({ onChange, initialValue }: Props) {
+  const mapRef = useRef<any>(null);
   const [marker, setMarker] = useState<Coords | null>(
     initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
   );
   const [query, setQuery] = useState(initialValue?.address ?? "");
-  const [address, setAddress] = useState(initialValue?.address ?? "");
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMapClick = async (coords: Coords) => {
-    setMarker(coords);
-    const res = await fetch(`/api/geocode?lat=${coords.lat}&lon=${coords.lng}`);
+  const handleMapClick = async (e: any) => {
+    const { lng, lat } = e.lngLat;
+    setMarker({ lat, lng });
+    const res = await fetch(`/api/geocode?lat=${lat}&lon=${lng}`);
     const data = await res.json();
-    const addr =
-      data.display_name ?? `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
-    setAddress(addr);
+    const addr = data.display_name ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     setQuery(addr);
     setSuggestions([]);
-    onChange({ ...coords, address: addr });
+    onChange({ lat, lng, address: addr });
   };
-
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearch = (value: string) => {
     setQuery(value);
     if (marker) onChange({ ...marker, address: value });
-
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     if (value.length < 3) {
       setSuggestions([]);
@@ -100,10 +66,14 @@ export default function MapPicker({ onChange, initialValue }: Props) {
   const handleSelect = (result: NominatimResult) => {
     const coords = { lat: parseFloat(result.lat), lng: parseFloat(result.lon) };
     setMarker(coords);
-    setAddress(result.display_name);
     setQuery(result.display_name);
     setSuggestions([]);
     onChange({ ...coords, address: result.display_name });
+    mapRef.current?.flyTo({
+      center: [coords.lng, coords.lat],
+      zoom: 16,
+      duration: 800,
+    });
   };
 
   return (
@@ -120,7 +90,6 @@ export default function MapPicker({ onChange, initialValue }: Props) {
             type="button"
             onClick={() => {
               setQuery("");
-              setAddress("");
               setSuggestions([]);
               setMarker(null);
             }}
@@ -145,25 +114,38 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         )}
       </div>
 
-      <MapContainer
-        center={[VALENCIA_CENTER.lat, VALENCIA_CENTER.lng]}
-        zoom={13}
-        style={{ height: "300px", width: "100%", zIndex: 0 }}
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          longitude: initialValue?.lng ?? VALENCIA_CENTER.lng,
+          latitude: initialValue?.lat ?? VALENCIA_CENTER.lat,
+          zoom: 13,
+        }}
+        style={{ height: "300px", width: "100%", borderRadius: 12 }}
+        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+        onClick={handleMapClick}
+        cursor="crosshair"
       >
-        {/* mismo estilo que el mapa principal */}
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        />
-        <ClickHandler onMapClick={handleMapClick} />
-        <FlyTo coords={marker} />
         {marker && (
-          <Marker
-            position={[marker.lat, marker.lng]}
-            icon={createMarkerIcon(false)}
-          />
+          <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="28"
+              height="28"
+            >
+              <path
+                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                fill="#4a90e2"
+                stroke="white"
+                strokeWidth="1.2"
+              />
+              <circle cx="12" cy="9" r="2.5" fill="white" />
+            </svg>
+          </Marker>
         )}
-      </MapContainer>
+      </Map>
     </div>
   );
 }
