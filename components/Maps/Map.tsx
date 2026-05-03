@@ -89,7 +89,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
           bath.shifts && bath.shifts.length > 0
             ? isOpenWithTimezone(bath.shifts, bath.timezone ?? "UTC")
             : null;
-        const isPublic = bath.access === BathAccess.PUBLIC;
+        const isPublic = bath.type === BathAccess.PUBLIC;
 
         return (
           <BathMarker

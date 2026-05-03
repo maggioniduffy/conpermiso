@@ -34,16 +34,17 @@ export default function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
         )}
         {isPublic && (
           <div
-            className="absolute text-white font-bold rounded-full whitespace-nowrap"
+            className="absolute font-bold rounded-full whitespace-nowrap"
             style={{
               top: -14,
               left: "50%",
               transform: "translateX(-50%)",
-              background: "#4a90e2",
+              background: "white",
+              color: "#4a90e2",
               fontSize: 7,
               padding: "1px 5px",
               lineHeight: 1.4,
-              boxShadow: "0 0 0 1.5px white",
+              boxShadow: "0 0 0 1.5px #4a90e2",
             }}
           >
             PÚBLICO

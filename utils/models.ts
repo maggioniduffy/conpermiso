@@ -48,7 +48,7 @@ export interface Bath {
   googleMapsLink?: string;
   timezone?: string;
   isOpenNow: boolean;
-  access?: BathAccess;
+  type?: BathAccess;
 }
 
 export enum BathRequestStatus {

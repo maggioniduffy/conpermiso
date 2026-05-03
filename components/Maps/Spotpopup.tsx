@@ -37,7 +37,7 @@ export default function SpotPopup({ bath, onClose }: Props) {
         id={bath._id}
         googleMapsLink={bath.googleMapsLink}
         timezone={bath.timezone}
-        access={bath.access}
+        access={bath.type}
         avgRating={bath.avgRating}
         reviewsCount={bath.reviewsCount}
       />

@@ -90,7 +90,7 @@ export default async function SpotPage({
     shifts,
     googleMapsLink,
     timezone,
-    access,
+    type: access,
   } = bath;
   const isOpen =
     shifts && shifts.length > 0
@@ -126,7 +126,7 @@ export default async function SpotPage({
                 {name}
               </h1>
               {access === BathAccess.PUBLIC && (
-                <span className="bg-principal text-white text-[9px] font-bold px-2 py-0.5 rounded-full leading-none ring-2 ring-white/30">
+                <span className="bg-white text-principal text-[9px] font-bold px-2 py-0.5 rounded-full leading-none ring-2 ring-principal">
                   PÚBLICO
                 </span>
               )}

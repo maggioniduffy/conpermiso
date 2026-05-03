@@ -148,7 +148,7 @@ const SpotModal = ({
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {access === BathAccess.PUBLIC && (
-              <span className="bg-principal text-white text-[8px] font-bold px-1.5 py-px rounded-full leading-none ring-1 ring-white/30">
+              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-px rounded-full leading-none ring-1 ring-principal">
                 PÚBLICO
               </span>
             )}

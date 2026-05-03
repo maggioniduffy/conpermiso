@@ -43,7 +43,7 @@ export function useSpotForm(
   );
   const [shifts, setShifts] = useState<Shift[]>(initial?.shifts ?? []);
   const [access, setAccess] = useState<BathAccess>(
-    initial?.access ?? BathAccess.PUBLIC,
+    initial?.type ?? BathAccess.PUBLIC,
   );
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     initial?.location
