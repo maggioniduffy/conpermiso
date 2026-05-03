@@ -111,7 +111,7 @@ export function useSpotForm(
       costType === "Precio" ? (formData.get("cost") as string) : costType,
     );
     backendForm.append("shifts", JSON.stringify(sanitizeShifts(shifts)));
-    backendForm.append("access", access);
+    backendForm.append("type", access);
     backendForm.append(
       "location",
       JSON.stringify({
@@ -127,7 +127,8 @@ export function useSpotForm(
     if (reviewRating) {
       backendForm.append("reviewRating", reviewRating as string);
       const reviewComment = formData.get("reviewComment");
-      if (reviewComment) backendForm.append("reviewComment", reviewComment as string);
+      if (reviewComment)
+        backendForm.append("reviewComment", reviewComment as string);
     }
 
     if (isEdit) {
