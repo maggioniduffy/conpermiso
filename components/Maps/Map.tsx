@@ -51,8 +51,11 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
         zoom,
       }}
       style={{ width: "100%", height: "100%" }}
-      mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+      mapStyle="mapbox://styles/mapbox/standard"
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+      onLoad={(e) => {
+        e.target.setConfigProperty("basemap", "lightPreset", "night");
+      }}
       onMoveEnd={handleMoveEnd}
     >
       <MapRecenter location={location} mapRef={mapRef} />

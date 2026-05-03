@@ -122,8 +122,11 @@ export default function MapPicker({ onChange, initialValue }: Props) {
           zoom: 15,
         }}
         style={{ height: "300px", width: "100%", borderRadius: 12 }}
-        mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+        mapStyle="mapbox://styles/mapbox/standard"
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+        onLoad={(e) => {
+          e.target.setConfigProperty("basemap", "lightPreset", "night");
+        }}
         onClick={handleMapClick}
         cursor="crosshair"
       >
