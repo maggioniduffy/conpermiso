@@ -15,7 +15,6 @@ import {
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 
 import FavoriteButton from "./FavoriteButton";
-import OpenStatus from "./OpenStatus";
 
 interface Props {
   id?: string;
@@ -66,13 +65,20 @@ const SpotModal = ({
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          {isOpen !== null && (
-            <span
-              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}
-            >
-              {isOpen ? "ABIERTO" : "CERRADO"}
-            </span>
-          )}
+          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+            {isOpen !== null && (
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}
+              >
+                {isOpen ? "ABIERTO" : "CERRADO"}
+              </span>
+            )}
+            {access === BathAccess.PUBLIC && (
+              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
+                PÚBLICO
+              </span>
+            )}
+          </div>
           <h2 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-md leading-tight">
             {title}
           </h2>
@@ -87,13 +93,20 @@ const SpotModal = ({
               backgroundSize: "40px 40px",
             }}
           />
-          {isOpen !== null && (
-            <span
-              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}
-            >
-              {isOpen ? "ABIERTO" : "CERRADO"}
-            </span>
-          )}
+          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+            {isOpen !== null && (
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}
+              >
+                {isOpen ? "ABIERTO" : "CERRADO"}
+              </span>
+            )}
+            {access === BathAccess.PUBLIC && (
+              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
+                PÚBLICO
+              </span>
+            )}
+          </div>
           <div className="bg-white/20 rounded-xl p-2">
             <MapPin className="size-5 text-white" />
           </div>
@@ -137,23 +150,13 @@ const SpotModal = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-              <MapPin className="size-3.5 text-principal" />
-            </div>
-            <p className="text-sm text-jet-500 leading-snug">
-              {trimAddress(address)}
-            </p>
+        <div className="flex items-center gap-2">
+          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
+            <MapPin className="size-3.5 text-principal" />
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {access === BathAccess.PUBLIC && (
-              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-px rounded-full leading-none ring-1 ring-principal">
-                PÚBLICO
-              </span>
-            )}
-            <OpenStatus shifts={shifts} timezone={timezone} />
-          </div>
+          <p className="text-sm text-jet-500 leading-snug">
+            {trimAddress(address)}
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
