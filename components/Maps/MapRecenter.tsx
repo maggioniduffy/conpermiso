@@ -12,11 +12,18 @@ export default function MapRecenter({ location, mapRef }: Props) {
 
   useEffect(() => {
     if (location && !hasCentered.current && mapRef.current) {
-      mapRef.current.flyTo({
-        center: [location.longitude, location.latitude],
-        zoom: 15,
-        duration: 800,
-      });
+      const center = mapRef.current.getMap().getCenter();
+      const isSamePosition =
+        Math.abs(center.lat - location.latitude) < 0.0001 &&
+        Math.abs(center.lng - location.longitude) < 0.0001;
+
+      if (!isSamePosition) {
+        mapRef.current.flyTo({
+          center: [location.longitude, location.latitude],
+          zoom: 15,
+          duration: 800,
+        });
+      }
       hasCentered.current = true;
     }
   }, [location]);

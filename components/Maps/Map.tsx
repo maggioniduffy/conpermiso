@@ -55,6 +55,15 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       onLoad={(e) => {
         e.target.setConfigProperty("basemap", "lightPreset", "night");
+        const bounds = e.target.getBounds();
+        if (bounds) {
+          fetchBaths({
+            getSouth: () => bounds.getSouth(),
+            getNorth: () => bounds.getNorth(),
+            getWest: () => bounds.getWest(),
+            getEast: () => bounds.getEast(),
+          });
+        }
       }}
       onMoveEnd={handleMoveEnd}
     >

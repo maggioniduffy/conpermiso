@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from "react";
 import { Bath } from "@/utils/models";
 
-const COOLDOWN_MS = 3_000;
 const BOUNDS_PAD = 0.5;
 
 interface Bounds {
@@ -41,7 +40,6 @@ export function useBathsInBounds() {
   const [baths, setBaths] = useState<Bath[]>([]);
   const [loading, setLoading] = useState(false);
   const lastFetchedBounds = useRef<Bounds | null>(null);
-  const lastFetchTime = useRef(0);
 
   const fetchBaths = useCallback(async (bounds: Bounds) => {
     if (
@@ -49,10 +47,6 @@ export function useBathsInBounds() {
       boundsContains(lastFetchedBounds.current, bounds)
     )
       return;
-
-    const now = Date.now();
-    if (now - lastFetchTime.current < COOLDOWN_MS) return;
-    lastFetchTime.current = now;
 
     const padded = padBounds(bounds, BOUNDS_PAD);
     lastFetchedBounds.current = padded;
