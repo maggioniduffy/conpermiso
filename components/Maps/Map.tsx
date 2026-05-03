@@ -51,7 +51,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
         zoom,
       }}
       style={{ width: "100%", height: "100%" }}
-      mapStyle="mapbox://styles/mapbox/streets-v12"
+      mapStyle="mapbox://styles/mapbox/navigation-night-v1"
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       onMoveEnd={handleMoveEnd}
     >
@@ -94,7 +94,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
                 ],
                 zoom: Math.max(mapRef.current.getMap().getZoom(), 15),
                 duration: 800,
-                offset: [0, -200],
+                offset: [0, 200],
               });
             }}
           />

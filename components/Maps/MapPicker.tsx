@@ -122,7 +122,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
           zoom: 15,
         }}
         style={{ height: "300px", width: "100%", borderRadius: 12 }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
+        mapStyle="mapbox://styles/mapbox/navigation-night-v1"
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
         onClick={handleMapClick}
         cursor="crosshair"
