@@ -3,7 +3,8 @@
 import { useState, useCallback, useRef } from "react";
 import { Bath } from "@/utils/models";
 
-const BOUNDS_PAD = 0.5;
+// Fraction of viewport that the center must move to trigger a new fetch.
+const MOVE_THRESHOLD = 0.3;
 
 interface Bounds {
   getSouth: () => number;
@@ -12,52 +13,41 @@ interface Bounds {
   getEast: () => number;
 }
 
-function boundsContains(outer: Bounds, inner: Bounds): boolean {
-  return (
-    outer.getSouth() <= inner.getSouth() &&
-    outer.getNorth() >= inner.getNorth() &&
-    outer.getWest() <= inner.getWest() &&
-    outer.getEast() >= inner.getEast()
-  );
-}
-
-function padBounds(bounds: Bounds, pad: number): Bounds {
-  const latDiff = (bounds.getNorth() - bounds.getSouth()) * pad;
-  const lngDiff = (bounds.getEast() - bounds.getWest()) * pad;
-  const south = bounds.getSouth() - latDiff;
-  const north = bounds.getNorth() + latDiff;
-  const west = bounds.getWest() - lngDiff;
-  const east = bounds.getEast() + lngDiff;
-  return {
-    getSouth: () => south,
-    getNorth: () => north,
-    getWest: () => west,
-    getEast: () => east,
-  };
+interface FetchedState {
+  lat: number;
+  lng: number;
+  latSpan: number;
+  lngSpan: number;
 }
 
 export function useBathsInBounds() {
   const [baths, setBaths] = useState<Bath[]>([]);
   const [loading, setLoading] = useState(false);
-  const lastFetchedBounds = useRef<Bounds | null>(null);
+  const lastFetched = useRef<FetchedState | null>(null);
 
   const fetchBaths = useCallback(async (bounds: Bounds) => {
-    if (
-      lastFetchedBounds.current &&
-      boundsContains(lastFetchedBounds.current, bounds)
-    )
-      return;
+    const lat = (bounds.getNorth() + bounds.getSouth()) / 2;
+    const lng = (bounds.getEast() + bounds.getWest()) / 2;
+    const latSpan = bounds.getNorth() - bounds.getSouth();
+    const lngSpan = bounds.getEast() - bounds.getWest();
 
-    const padded = padBounds(bounds, BOUNDS_PAD);
-    lastFetchedBounds.current = padded;
+    if (lastFetched.current) {
+      const prev = lastFetched.current;
+      const latMoved = Math.abs(lat - prev.lat) / Math.max(latSpan, prev.latSpan);
+      const lngMoved = Math.abs(lng - prev.lng) / Math.max(lngSpan, prev.lngSpan);
+      const zoomSimilar = Math.abs(Math.log2(latSpan / prev.latSpan)) < 0.75;
+      if (latMoved < MOVE_THRESHOLD && lngMoved < MOVE_THRESHOLD && zoomSimilar) return;
+    }
+
+    lastFetched.current = { lat, lng, latSpan, lngSpan };
 
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        swLat: padded.getSouth().toString(),
-        swLng: padded.getWest().toString(),
-        neLat: padded.getNorth().toString(),
-        neLng: padded.getEast().toString(),
+        swLat: bounds.getSouth().toString(),
+        swLng: bounds.getWest().toString(),
+        neLat: bounds.getNorth().toString(),
+        neLng: bounds.getEast().toString(),
       });
       const res = await fetch(`/api/proxy/baths/in-bounds?${params}`);
       if (!res.ok) throw new Error();
