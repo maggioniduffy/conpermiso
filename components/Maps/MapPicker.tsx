@@ -15,7 +15,7 @@ interface Coords {
 
 interface Props {
   onChange: (coords: Coords & { address: string }) => void;
-  initialValue?: { lat: number; lng: number; address: string };
+  initialValue?: { lat: number; lng: number; address?: string };
 }
 
 interface NominatimResult {

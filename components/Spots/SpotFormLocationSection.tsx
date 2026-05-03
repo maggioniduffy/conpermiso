@@ -14,7 +14,12 @@ interface Props {
   initialValue?: { lat: number; lng: number; address?: string };
 }
 
-export function SpotFormLocationSection({ onChange, location, address, initialValue }: Props) {
+export function SpotFormLocationSection({
+  onChange,
+  location,
+  address,
+  initialValue,
+}: Props) {
   const MapPicker = useMemo(
     () =>
       dynamic(() => import("@/components/Maps/MapPicker"), {
@@ -27,13 +32,20 @@ export function SpotFormLocationSection({ onChange, location, address, initialVa
   return (
     <SectionCard
       icon={<MapPin className="size-4" />}
-      label={<>Ubicación <Required /></>}
+      label={
+        <>
+          Ubicación <Required />
+        </>
+      }
     >
-      <p className="text-xs text-jet-700">Buscá la dirección o hacé click en el mapa</p>
+      <p className="text-xs text-jet-700">
+        Buscá la dirección o hacé click en el mapa
+      </p>
       <MapPicker onChange={onChange} initialValue={initialValue} />
       {location ? (
         <p className="text-xs text-principal font-medium">
-          📍 {address || `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
+          📍{" "}
+          {address || `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
         </p>
       ) : (
         <p className="text-xs text-red-400 font-medium">
