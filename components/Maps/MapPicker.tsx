@@ -119,10 +119,10 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         initialViewState={{
           longitude: initialValue?.lng ?? VALENCIA_CENTER.lng,
           latitude: initialValue?.lat ?? VALENCIA_CENTER.lat,
-          zoom: 13,
+          zoom: 15,
         }}
         style={{ height: "300px", width: "100%", borderRadius: 12 }}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
         onClick={handleMapClick}
         cursor="crosshair"

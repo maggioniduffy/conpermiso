@@ -13,6 +13,7 @@ import BathMarker from "./Bathmarker";
 import FlyToCoords from "./Flytocoords";
 import PlaceMarker from "./Placemarker";
 import SpotPopup from "./Spotpopup";
+import ResetOrientationButton from "./ResetOrientation";
 
 interface Props {
   location: {
@@ -50,7 +51,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
         zoom,
       }}
       style={{ width: "100%", height: "100%" }}
-      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapStyle="mapbox://styles/mapbox/streets-v12"
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       onMoveEnd={handleMoveEnd}
     >
@@ -84,7 +85,18 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
             bath={bath}
             isOpen={isOpen}
             isPublic={isPublic}
-            onClick={() => setSelectedBath(bath)}
+            onClick={() => {
+              setSelectedBath(bath);
+              mapRef.current?.flyTo({
+                center: [
+                  bath.location.coordinates[0],
+                  bath.location.coordinates[1],
+                ],
+                zoom: Math.max(mapRef.current.getMap().getZoom(), 15),
+                duration: 800,
+                offset: [0, -200],
+              });
+            }}
           />
         );
       })}
@@ -94,6 +106,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       )}
 
       <CurrentLocationMarker location={location} />
+      <ResetOrientationButton mapRef={mapRef} />
       <RecenterButton location={location} mapRef={mapRef} zoom={zoom} />
     </Map>
   );
