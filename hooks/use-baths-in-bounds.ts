@@ -2,39 +2,68 @@
 
 import { useState, useCallback, useRef } from "react";
 import { Bath } from "@/utils/models";
-import { LatLngBounds } from "leaflet";
 
 const COOLDOWN_MS = 3_000;
 const BOUNDS_PAD = 0.5;
 
+interface Bounds {
+  getSouth: () => number;
+  getNorth: () => number;
+  getWest: () => number;
+  getEast: () => number;
+}
+
+function boundsContains(outer: Bounds, inner: Bounds): boolean {
+  return (
+    outer.getSouth() <= inner.getSouth() &&
+    outer.getNorth() >= inner.getNorth() &&
+    outer.getWest() <= inner.getWest() &&
+    outer.getEast() >= inner.getEast()
+  );
+}
+
+function padBounds(bounds: Bounds, pad: number): Bounds {
+  const latDiff = (bounds.getNorth() - bounds.getSouth()) * pad;
+  const lngDiff = (bounds.getEast() - bounds.getWest()) * pad;
+  const south = bounds.getSouth() - latDiff;
+  const north = bounds.getNorth() + latDiff;
+  const west = bounds.getWest() - lngDiff;
+  const east = bounds.getEast() + lngDiff;
+  return {
+    getSouth: () => south,
+    getNorth: () => north,
+    getWest: () => west,
+    getEast: () => east,
+  };
+}
+
 export function useBathsInBounds() {
   const [baths, setBaths] = useState<Bath[]>([]);
   const [loading, setLoading] = useState(false);
-  const lastFetchedBounds = useRef<LatLngBounds | null>(null);
+  const lastFetchedBounds = useRef<Bounds | null>(null);
   const lastFetchTime = useRef(0);
 
-  const fetchBaths = useCallback(async (bounds: LatLngBounds) => {
-    // Skip if the current viewport is already covered by the last padded fetch
-    if (lastFetchedBounds.current?.contains(bounds)) return;
+  const fetchBaths = useCallback(async (bounds: Bounds) => {
+    if (
+      lastFetchedBounds.current &&
+      boundsContains(lastFetchedBounds.current, bounds)
+    )
+      return;
 
-    // Safety cooldown to prevent bursts that slip through the debounce
     const now = Date.now();
     if (now - lastFetchTime.current < COOLDOWN_MS) return;
     lastFetchTime.current = now;
 
-    // Fetch a larger area so small pans don't immediately trigger another request
-    const padded = bounds.pad(BOUNDS_PAD);
+    const padded = padBounds(bounds, BOUNDS_PAD);
     lastFetchedBounds.current = padded;
 
     setLoading(true);
     try {
-      const sw = padded.getSouthWest();
-      const ne = padded.getNorthEast();
       const params = new URLSearchParams({
-        swLat: sw.lat.toString(),
-        swLng: sw.lng.toString(),
-        neLat: ne.lat.toString(),
-        neLng: ne.lng.toString(),
+        swLat: padded.getSouth().toString(),
+        swLng: padded.getWest().toString(),
+        neLat: padded.getNorth().toString(),
+        neLng: padded.getEast().toString(),
       });
       const res = await fetch(`/api/proxy/baths/in-bounds?${params}`);
       if (!res.ok) throw new Error();
