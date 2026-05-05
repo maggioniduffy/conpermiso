@@ -9,7 +9,6 @@ import { Bath, BathAccess } from "@/utils/models";
 import { isOpenWithTimezone } from "@/lib/utils";
 import CurrentLocationMarker from "./CurrentLocationMarker";
 import RecenterButton from "./RecenterButton";
-import MapRecenter from "./MapRecenter";
 import BathMarker from "./Bathmarker";
 import FlyToCoords from "./Flytocoords";
 import PlaceMarker from "./Placemarker";
@@ -30,13 +29,13 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const { baths, fetchBaths } = useBathsInBounds();
   const [selectedBath, setSelectedBath] = useState<Bath | null>(null);
   const mapRef = useRef<any>(null);
-  const initializedWithLocation = useRef(!!location);
 
   if (!mapboxgl.supported()) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
         <p className="text-sm text-gray-500 text-center px-4">
-          Tu navegador no soporta WebGL. Activá la aceleración por hardware o probá otro navegador.
+          Tu navegador no soporta WebGL. Activá la aceleración por hardware o
+          probá otro navegador.
         </p>
       </div>
     );
@@ -97,12 +96,6 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       }}
       onMoveEnd={handleMoveEnd}
     >
-      <MapRecenter
-        location={location}
-        mapRef={mapRef}
-        initializedWithLocation={initializedWithLocation.current}
-      />
-
       {searchCenter && (
         <FlyToCoords
           lat={searchCenter.latitude}
