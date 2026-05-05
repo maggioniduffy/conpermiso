@@ -1,6 +1,7 @@
 "use client";
 
 import Map from "react-map-gl/mapbox";
+import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
@@ -30,6 +31,16 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const [selectedBath, setSelectedBath] = useState<Bath | null>(null);
   const mapRef = useRef<any>(null);
   const initializedWithLocation = useRef(!!location);
+
+  if (!mapboxgl.supported()) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <p className="text-sm text-gray-500 text-center px-4">
+          Tu navegador no soporta WebGL. Activá la aceleración por hardware o probá otro navegador.
+        </p>
+      </div>
+    );
+  }
 
   const handleMoveEnd = useCallback(() => {
     if (!mapRef.current) return;
@@ -63,6 +74,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   return (
     <Map
       ref={mapRef}
+      reuseMaps
       initialViewState={{
         longitude: location?.longitude ?? -0.3763,
         latitude: location?.latitude ?? 39.4699,

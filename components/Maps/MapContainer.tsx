@@ -1,13 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useGeolocation } from "@/components/GeolocationProvider";
 
-interface Props {
-  searchCenter?: { latitude: number; longitude: number; pin?: boolean } | null;
-}
-
-// Placeholder estático mientras Leaflet carga — mejora el LCP
 function MapPlaceholder() {
   return (
     <div className="w-full h-full relative overflow-hidden">
@@ -26,37 +22,13 @@ function MapPlaceholder() {
     </div>
   );
 }
+
+interface Props {
+  searchCenter?: { latitude: number; longitude: number; pin?: boolean } | null;
+}
+
 export default function MyMapContainer({ searchCenter }: Props) {
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    accuracy: number;
-  } | null>(null);
-  const [locationDenied, setLocationDenied] = useState(false);
-
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
-      },
-      (error) => {
-        if (error.code === 1) setLocationDenied(true);
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 30000,
-        timeout: 15000,
-      },
-    );
-
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  const { location, denied } = useGeolocation();
 
   const Map = useMemo(
     () =>
@@ -69,7 +41,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
 
   return (
     <div className="bg-mywhite h-full w-full z-80">
-      {locationDenied && (
+      {denied && (
         <p className="text-xs text-center text-jet-700 py-2 absolute top-2 left-1/2 -translate-x-1/2 z-[1000] bg-white/80 px-3 rounded-full">
           Activá tu ubicación para ver los baños cercanos
         </p>

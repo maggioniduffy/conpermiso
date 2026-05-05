@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import SearchFormReset from "./SearchFormReset";
 import { Bath } from "@/utils/models";
-import { LocationSearch, Place, Poi } from "./LocationSearch";
+import { LocationSearch, SearchResult } from "./LocationSearch";
+import { useGeolocation } from "@/components/GeolocationProvider";
 
 interface Props {
   query?: string;
@@ -15,23 +16,15 @@ interface Props {
 
 export default function SearchForm({ query, nearLat, nearLng }: Props) {
   const [input, setInput] = useState(query ?? "");
-  const [browserLoc, setBrowserLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const { location } = useGeolocation();
   const router = useRouter();
-
-  useEffect(() => {
-    if (nearLat && nearLng) return;
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setBrowserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {},
-      { maximumAge: 60000, timeout: 8000 },
-    );
-  }, [nearLat, nearLng]);
 
   const userLocation =
     nearLat && nearLng
       ? { lat: parseFloat(nearLat), lng: parseFloat(nearLng) }
-      : browserLoc;
+      : location
+        ? { lat: location.latitude, lng: location.longitude }
+        : null;
 
   function handleSelectSpot(bath: Bath) {
     setInput(bath.name);
@@ -39,14 +32,9 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
     router.push(`/?query=${encodeURIComponent(bath.name)}&lat=${lat}&lng=${lng}`);
   }
 
-  function handleSelectPlace(place: Place) {
-    setInput(place.display_name);
-    router.push(`/?lat=${place.lat}&lng=${place.lon}`);
-  }
-
-  function handleSelectPoi(poi: Poi) {
-    setInput(poi.name);
-    router.push(`/?lat=${poi.lat}&lng=${poi.lon}`);
+  function handleSelectResult(result: SearchResult) {
+    setInput(result.display_name);
+    router.push(`/?lat=${result.lat}&lng=${result.lon}`);
   }
 
   function handleReset() {
@@ -61,8 +49,7 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
       userLocation={userLocation}
       showSpots
       onSelectSpot={handleSelectSpot}
-      onSelectPlace={handleSelectPlace}
-      onSelectPoi={handleSelectPoi}
+      onSelectResult={handleSelectResult}
       placeholder="Buscar..."
       dropdownPosition="top"
       className="flex-1"

@@ -4,6 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { Globe, Building2, MapPin } from "lucide-react";
 import { Bath } from "@/utils/models";
 
+export interface SearchResult {
+  lat: number;
+  lon: number;
+  display_name: string;
+  type: string;
+}
+
+// Keep for external callers that still import these
 export interface Place {
   lat: string;
   lon: string;
@@ -23,6 +31,8 @@ interface Props {
   userLocation?: { lat: number; lng: number } | null;
   showSpots?: boolean;
   onSelectSpot?: (bath: Bath) => void;
+  onSelectResult?: (result: SearchResult) => void;
+  // kept for backward compat
   onSelectPlace?: (place: Place) => void;
   onSelectPoi?: (poi: Poi) => void;
   placeholder?: string;
@@ -40,8 +50,7 @@ export function LocationSearch({
   userLocation,
   showSpots = false,
   onSelectSpot,
-  onSelectPlace,
-  onSelectPoi,
+  onSelectResult,
   placeholder = "Buscar...",
   dropdownPosition = "bottom",
   prefix,
@@ -51,14 +60,15 @@ export function LocationSearch({
   inputClassName,
 }: Props) {
   const [spots, setSpots] = useState<Bath[]>([]);
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [pois, setPois] = useState<Poi[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [locationTrigger, setLocationTrigger] = useState(0);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const userLocationRef = useRef(userLocation);
   const locationWasAvailable = useRef(!!userLocation);
 
@@ -70,13 +80,12 @@ export function LocationSearch({
     }
   }, [userLocation]);
 
-  const hasResults = spots.length > 0 || places.length > 0 || pois.length > 0;
+  const hasResults = spots.length > 0 || results.length > 0;
 
   useEffect(() => {
-    if (!value.trim() || value.length < 2) {
+    if (!value.trim() || value.length <= 3) {
       setSpots([]);
-      setPlaces([]);
-      setPois([]);
+      setResults([]);
       setOpen(false);
       return;
     }
@@ -85,14 +94,14 @@ export function LocationSearch({
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
+      setVisibleCount(6);
 
       const loc = userLocationRef.current;
+      const geocodeUrl = `/api/geocode?q=${encodeURIComponent(value)}${
+        loc ? `&near_lat=${loc.lat}&near_lng=${loc.lng}` : ""
+      }`;
 
       try {
-        const geocodeUrl = `/api/geocode?q=${encodeURIComponent(value)}${
-          loc ? `&near_lat=${loc.lat}&near_lng=${loc.lng}` : ""
-        }`;
-
         if (showSpots) {
           const [spotsRes, geoRes] = await Promise.allSettled([
             fetch(`/api/proxy/baths?search=${encodeURIComponent(value)}`).then(
@@ -106,14 +115,11 @@ export function LocationSearch({
           );
 
           if (geoRes.status === "fulfilled" && Array.isArray(geoRes.value)) {
-            splitResults(geoRes.value);
+            setResults(geoRes.value);
           }
         } else {
           const geoRes = await fetch(geocodeUrl).then((r) => r.json());
-
-          if (Array.isArray(geoRes)) {
-            splitResults(geoRes);
-          }
+          if (Array.isArray(geoRes)) setResults(geoRes);
         }
 
         setOpen(true);
@@ -127,31 +133,6 @@ export function LocationSearch({
     };
   }, [value, showSpots, locationTrigger]);
 
-  function splitResults(data: any[]) {
-    const newPlaces: Place[] = [];
-    const newPois: Poi[] = [];
-
-    data.forEach((item) => {
-      if (item.type === "poi") {
-        newPois.push({
-          name: item.display_name,
-          lat: item.lat,
-          lon: item.lon,
-          category: "poi",
-        });
-      } else {
-        newPlaces.push({
-          lat: item.lat.toString(),
-          lon: item.lon.toString(),
-          display_name: item.display_name,
-        });
-      }
-    });
-
-    setPlaces(newPlaces.slice(0, 6));
-    setPois(newPois.slice(0, 6));
-  }
-
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -164,6 +145,20 @@ export function LocationSearch({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function handleScroll() {
+    const el = dropdownRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+      setVisibleCount((n) => Math.min(n + 5, results.length));
+    }
+  }
+
+  function iconForType(type: string) {
+    if (type === "poi") return <Building2 className="size-4 shrink-0 mt-0.5 text-gray-500" />;
+    if (type === "address") return <MapPin className="size-4 shrink-0 mt-0.5 text-gray-500" />;
+    return <Globe className="size-4 shrink-0 mt-0.5 text-gray-500" />;
+  }
 
   return (
     <div ref={wrapperRef} className={`relative ${className ?? ""}`}>
@@ -181,6 +176,8 @@ export function LocationSearch({
 
       {open && (hasResults || loading) && (
         <div
+          ref={dropdownRef}
+          onScroll={handleScroll}
           className={`absolute left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto max-h-72 z-[1001] ${
             dropdownPosition === "top" ? "bottom-full mb-2" : "top-full mt-1"
           }`}
@@ -191,7 +188,7 @@ export function LocationSearch({
             <>
               {spots.length > 0 && (
                 <>
-                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1 text-gray-400 uppercase tracking-wide">
                     Spots
                   </p>
                   {spots.map((bath) => (
@@ -201,58 +198,36 @@ export function LocationSearch({
                         setOpen(false);
                         onSelectSpot?.(bath);
                       }}
-                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
+                      className="w-full flex gap-2 items-start px-3 py-2.5 hover:bg-gray-50"
                     >
-                      <MapPin className="size-4" />
-                      <div>
+                      <MapPin className="size-4 shrink-0 mt-0.5 text-gray-500" />
+                      <div className="text-left">
                         <p className="text-sm">{bath.name}</p>
-                        <p className="text-xs">{bath.address}</p>
+                        <p className="text-xs text-gray-400">{bath.address}</p>
                       </div>
                     </button>
                   ))}
                 </>
               )}
 
-              {places.length > 0 && (
-                <>
-                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
-                    Lugares
-                  </p>
-                  {places.map((place, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setOpen(false);
-                        onSelectPlace?.(place);
-                      }}
-                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <Globe className="size-4" />
-                      <p className="text-sm">{place.display_name}</p>
-                    </button>
-                  ))}
-                </>
-              )}
+              {results.slice(0, visibleCount).map((r, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setOpen(false);
+                    onSelectResult?.(r);
+                  }}
+                  className="w-full flex gap-2 items-start px-3 py-2.5 hover:bg-gray-50"
+                >
+                  {iconForType(r.type)}
+                  <p className="text-sm text-left">{r.display_name}</p>
+                </button>
+              ))}
 
-              {pois.length > 0 && (
-                <>
-                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
-                    Cerca de aquí
-                  </p>
-                  {pois.map((poi, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setOpen(false);
-                        onSelectPoi?.(poi);
-                      }}
-                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <Building2 className="size-4" />
-                      <p className="text-sm">{poi.name}</p>
-                    </button>
-                  ))}
-                </>
+              {visibleCount < results.length && (
+                <p className="text-[10px] text-center text-gray-400 py-2">
+                  Scroll para ver más
+                </p>
               )}
             </>
           )}
