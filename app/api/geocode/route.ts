@@ -74,12 +74,6 @@ export async function GET(req: NextRequest) {
 
   if (userLat != null && userLng != null) {
     params.set("proximity", `${userLng},${userLat}`);
-    // bbox de ~100km alrededor del usuario
-    const delta = 1.0; // ~100km
-    params.set(
-      "bbox",
-      `${userLng - delta},${userLat - delta},${userLng + delta},${userLat + delta}`,
-    );
   }
 
   const url = `${SUGGEST_URL}?${params.toString()}`;
