@@ -9,6 +9,7 @@ import {
   SearchResult,
 } from "@/components/Search/LocationSearch";
 import { useGeolocation } from "@/components/GeolocationProvider";
+import RecenterButton from "./RecenterButton";
 
 const FALLBACK_CENTER = { lat: 39.4699, lng: -0.3763 };
 
@@ -159,6 +160,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
             </svg>
           </Marker>
         )}
+        <RecenterButton location={location} mapRef={mapRef} zoom={15} />
       </Map>
     </div>
   );
