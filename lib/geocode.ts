@@ -1,5 +1,3 @@
-import { NextRequest } from "next/server";
-
 type OsmFilter = { key: string; value: string };
 
 const TAG_MAP: Record<string, OsmFilter[]> = {
@@ -123,8 +121,8 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   subterraneo: [{ key: "railway", value: "subway_entrance" }],
 };
 
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 1000 * 60 * 15; // 15 minutos
+export const cache = new Map<string, { data: unknown; timestamp: number }>();
+export const CACHE_TTL = 1000 * 60 * 15; // 15 minutos
 
 const OVERPASS_SERVERS = [
   "https://overpass-api.de/api/interpreter",
@@ -132,7 +130,7 @@ const OVERPASS_SERVERS = [
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
-const POI_KEYS = new Set([
+export const POI_KEYS = new Set([
   "amenity",
   "shop",
   "tourism",
@@ -140,29 +138,35 @@ const POI_KEYS = new Set([
   "building",
   "office",
   "healthcare",
-  "s1ort",
+  "sport",
 ]);
 
-function normalize(s: string) {
+export function normalize(s: string) {
   return s.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
-function distSq(lat1: number, lng1: number, lat2: number, lng2: number) {
+export function distSq(lat1: number, lng1: number, lat2: number, lng2: number) {
   return (lat2 - lat1) ** 2 + (lng2 - lng1) ** 2;
 }
 
-function escapeRegex(s: string) {
+export function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-async function fetchOverpass(query: string): Promise<Response> {
+export async function fetchOverpass(query: string): Promise<Response> {
   for (const server of OVERPASS_SERVERS) {
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
       const res = await fetch(server, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(query)}`,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
       if (res.ok) return res;
     } catch (e) {
       console.error("Overpass error:", e);
@@ -172,67 +176,133 @@ async function fetchOverpass(query: string): Promise<Response> {
   throw new Error("All Overpass servers failed");
 }
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
-  const q = searchParams.get("q");
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
+export function resolveCategory(raw: string): OsmFilter[] | undefined {
+  const key = normalize(raw);
 
-  if (!q || !lat || !lng) {
-    return Response.json({ error: "Missing params" }, { status: 400 });
-  }
+  // 1. match exacto
+  if (TAG_MAP[key]) return TAG_MAP[key];
 
-  const key = normalize(q);
-  const latF = parseFloat(lat);
-  const lngF = parseFloat(lng);
-  const filters = TAG_MAP[key];
+  // 2. alias normalizados (singular/plural + inglés/español)
+  const ALIASES: Record<string, string> = {
+    // educación
+    uni: "universidad",
+    univ: "universidad",
+    univers: "universidad",
+    universidad: "universidad",
+    universidades: "universidad",
+    faculty: "facultad",
+    facultad: "facultad",
+    facultades: "facultad",
+    cole: "colegio",
+    colegio: "colegio",
+    colegios: "colegio",
+    school: "school",
+    escuela: "escuela",
+    escuelas: "escuela",
 
-  const cacheKey = `${key}:${latF.toFixed(2)}:${lngF.toFixed(2)}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return Response.json(cached.data);
-  }
+    // comida
+    resto: "restaurant",
+    rest: "restaurant",
+    restaurant: "restaurant",
+    restaurante: "restaurant",
+    restaurantes: "restaurant",
+    comida: "comida",
+    cafe: "cafe",
+    cafeteria: "cafe",
 
-  const radius = 10000;
-  let overpassQuery: string;
+    // nightlife
+    bar: "bar",
+    bares: "bar",
+    pub: "pub",
+    pubs: "pub",
+    boliche: "boliche",
+    disco: "discoteca",
+    discoteca: "discoteca",
+    nightclub: "nightclub",
 
-  if (filters) {
-    const lines = filters.flatMap((f) => [
-      `  node[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
-      `  way[${f.key}=${f.value}](around:${radius},${latF},${lngF});`,
-    ]);
-    overpassQuery = `[out:json][timeout:10];\n(\n${lines.join("\n")}\n);\nout center 100;`;
-  } else {
-    const escaped = escapeRegex(key);
-    overpassQuery = `[out:json][timeout:10];\n(\n  node["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n  way["name"~"${escaped}",i](around:${radius},${latF},${lngF});\n);\nout center 15;`;
-  }
+    // salud
+    hospi: "hospital",
+    hospital: "hospital",
+    hospitales: "hospital",
+    farm: "farmacia",
+    farma: "farmacia",
+    farmacia: "farmacia",
+    farmacias: "farmacia",
+    clinic: "clinica",
+    clinica: "clinica",
+    medico: "medico",
 
-  try {
-    const res = await fetchOverpass(overpassQuery);
-    const data = await res.json();
+    // compras
+    super: "supermercado",
+    supermercado: "supermercado",
+    supermercados: "supermercado",
+    market: "mercado",
+    mercado: "mercado",
+    kiosco: "kiosco",
+    kiosko: "kiosco",
 
-    const results = (data.elements as any[])
-      .filter((el) => el.tags?.name)
-      .filter((el) =>
-        filters ? true : Object.keys(el.tags).some((k) => POI_KEYS.has(k)),
-      )
-      .map((el) => ({
-        name: el.tags.name as string,
-        lat: (el.lat ?? el.center?.lat) as number,
-        lon: (el.lon ?? el.center?.lon) as number,
-        category: key,
-      }))
-      .filter((r) => r.lat && r.lon)
-      .sort(
-        (a, b) =>
-          distSq(latF, lngF, a.lat, a.lon) - distSq(latF, lngF, b.lat, b.lon),
-      )
-      .slice(0, 6);
+    // finanzas
+    banco: "banco",
+    bancos: "banco",
+    bank: "bank",
+    cajero: "atm",
+    atm: "atm",
 
-    cache.set(cacheKey, { data: results, timestamp: Date.now() });
-    return Response.json(results);
-  } catch (e) {
-    console.error("Overpass error:", e);
-    return Response.json([]);
-  }
+    // cultura
+    biblio: "biblioteca",
+    biblioteca: "biblioteca",
+    bibliotecas: "biblioteca",
+    museo: "museo",
+    museos: "museo",
+    teatro: "teatro",
+    teatros: "teatro",
+    cine: "cine",
+    cinema: "cinema",
+
+    // ocio
+    parque: "parque",
+    parques: "parque",
+    plaza: "plaza",
+    plazas: "plaza",
+    gym: "gym",
+    gimnasio: "gimnasio",
+    gimnasios: "gimnasio",
+    pileta: "pileta",
+    piscina: "pileta",
+    pool: "pileta",
+
+    // alojamiento
+    hotel: "hotel",
+    hoteles: "hotel",
+    hostel: "hostel",
+
+    // religión
+    iglesia: "iglesia",
+    iglesias: "iglesia",
+    templo: "templo",
+    church: "church",
+
+    // transporte
+    estacion: "estacion",
+    station: "station",
+    subte: "subte",
+    metro: "metro",
+  };
+
+  const alias = ALIASES[key];
+  if (alias && TAG_MAP[alias]) return TAG_MAP[alias];
+
+  // 3. match por prefijo (dinámico)
+  const prefixMatch = Object.entries(TAG_MAP).find(
+    ([k]) => k.startsWith(key) || key.startsWith(k),
+  );
+  if (prefixMatch) return prefixMatch[1];
+
+  // 4. fuzzy muy leve (para typos cortos)
+  const fuzzyMatch = Object.entries(TAG_MAP).find(
+    ([k]) => k.includes(key) || key.includes(k),
+  );
+  if (fuzzyMatch) return fuzzyMatch[1];
+
+  return undefined;
 }

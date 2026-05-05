@@ -56,8 +56,8 @@ export function LocationSearch({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [locationTrigger, setLocationTrigger] = useState(0);
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const overpassControllerRef = useRef<AbortController | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const userLocationRef = useRef(userLocation);
   const locationWasAvailable = useRef(!!userLocation);
@@ -82,51 +82,40 @@ export function LocationSearch({
     }
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+
     debounceRef.current = setTimeout(async () => {
-      overpassControllerRef.current?.abort();
-      overpassControllerRef.current = new AbortController();
-      setPois([]);
+      setLoading(true);
 
       const loc = userLocationRef.current;
 
-      if (loc) {
-        fetch(
-          `/api/overpass?q=${encodeURIComponent(value)}&lat=${loc.lat}&lng=${loc.lng}`,
-          { signal: overpassControllerRef.current.signal },
-        )
-          .then((r) => r.json())
-          .then((data) => {
-            if (Array.isArray(data) && data.length > 0) {
-              setPois(data);
-              setOpen(true);
-            }
-          })
-          .catch(() => {});
-      }
-
-      setLoading(true);
       try {
-        const geocodeUrl = `/api/geocode?q=${encodeURIComponent(value)}${loc ? `&near_lat=${loc.lat}&near_lng=${loc.lng}` : ""}`;
+        const geocodeUrl = `/api/geocode?q=${encodeURIComponent(value)}${
+          loc ? `&near_lat=${loc.lat}&near_lng=${loc.lng}` : ""
+        }`;
 
         if (showSpots) {
-          const [spotsRes, placesRes] = await Promise.allSettled([
-            fetch(`/api/proxy/baths?search=${encodeURIComponent(value)}`).then((r) => r.json()),
+          const [spotsRes, geoRes] = await Promise.allSettled([
+            fetch(`/api/proxy/baths?search=${encodeURIComponent(value)}`).then(
+              (r) => r.json(),
+            ),
             fetch(geocodeUrl).then((r) => r.json()),
           ]);
-          setSpots(spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 10) : []);
-          setPlaces(
-            placesRes.status === "fulfilled" && Array.isArray(placesRes.value)
-              ? placesRes.value.slice(0, 6)
-              : [],
+
+          setSpots(
+            spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 10) : [],
           );
+
+          if (geoRes.status === "fulfilled" && Array.isArray(geoRes.value)) {
+            splitResults(geoRes.value);
+          }
         } else {
-          const [placesRes] = await Promise.allSettled([fetch(geocodeUrl).then((r) => r.json())]);
-          setPlaces(
-            placesRes.status === "fulfilled" && Array.isArray(placesRes.value)
-              ? placesRes.value.slice(0, 6)
-              : [],
-          );
+          const geoRes = await fetch(geocodeUrl).then((r) => r.json());
+
+          if (Array.isArray(geoRes)) {
+            splitResults(geoRes);
+          }
         }
+
         setOpen(true);
       } finally {
         setLoading(false);
@@ -138,13 +127,37 @@ export function LocationSearch({
     };
   }, [value, showSpots, locationTrigger]);
 
-  useEffect(() => {
-    return () => overpassControllerRef.current?.abort();
-  }, []);
+  function splitResults(data: any[]) {
+    const newPlaces: Place[] = [];
+    const newPois: Poi[] = [];
+
+    data.forEach((item) => {
+      if (item.type === "poi") {
+        newPois.push({
+          name: item.display_name,
+          lat: item.lat,
+          lon: item.lon,
+          category: "poi",
+        });
+      } else {
+        newPlaces.push({
+          lat: item.lat.toString(),
+          lon: item.lon.toString(),
+          display_name: item.display_name,
+        });
+      }
+    });
+
+    setPlaces(newPlaces.slice(0, 6));
+    setPois(newPois.slice(0, 6));
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
@@ -178,19 +191,22 @@ export function LocationSearch({
             <>
               {spots.length > 0 && (
                 <>
-                  <p className="text-[10px] font-semibold text-jet-700 uppercase tracking-wide px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
                     Spots
                   </p>
                   {spots.map((bath) => (
                     <button
                       key={bath._id}
-                      onClick={() => { setOpen(false); onSelectSpot?.(bath); }}
-                      className="w-full flex items-start gap-2 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                      onClick={() => {
+                        setOpen(false);
+                        onSelectSpot?.(bath);
+                      }}
+                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
                     >
-                      <MapPin className="size-4 text-principal shrink-0 mt-0.5" />
+                      <MapPin className="size-4" />
                       <div>
-                        <p className="text-sm font-medium text-jet">{bath.name}</p>
-                        <p className="text-xs text-jet-700">{bath.address}</p>
+                        <p className="text-sm">{bath.name}</p>
+                        <p className="text-xs">{bath.address}</p>
                       </div>
                     </button>
                   ))}
@@ -199,18 +215,20 @@ export function LocationSearch({
 
               {places.length > 0 && (
                 <>
-                  {spots.length > 0 && <div className="border-t border-gray-100 mx-3" />}
-                  <p className="text-[10px] font-semibold text-jet-700 uppercase tracking-wide px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
                     Lugares
                   </p>
                   {places.map((place, i) => (
                     <button
                       key={i}
-                      onClick={() => { setOpen(false); onSelectPlace?.(place); }}
-                      className="w-full flex items-start gap-2 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                      onClick={() => {
+                        setOpen(false);
+                        onSelectPlace?.(place);
+                      }}
+                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
                     >
-                      <Globe className="size-4 text-jet-700 shrink-0 mt-0.5" />
-                      <p className="text-sm text-jet">{place.display_name}</p>
+                      <Globe className="size-4" />
+                      <p className="text-sm">{place.display_name}</p>
                     </button>
                   ))}
                 </>
@@ -218,20 +236,20 @@ export function LocationSearch({
 
               {pois.length > 0 && (
                 <>
-                  {(spots.length > 0 || places.length > 0) && (
-                    <div className="border-t border-gray-100 mx-3" />
-                  )}
-                  <p className="text-[10px] font-semibold text-jet-700 uppercase tracking-wide px-3 pt-2 pb-1">
+                  <p className="text-[10px] font-semibold px-3 pt-2 pb-1">
                     Cerca de aquí
                   </p>
                   {pois.map((poi, i) => (
                     <button
                       key={i}
-                      onClick={() => { setOpen(false); onSelectPoi?.(poi); }}
-                      className="w-full flex items-start gap-2 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                      onClick={() => {
+                        setOpen(false);
+                        onSelectPoi?.(poi);
+                      }}
+                      className="w-full flex gap-2 px-3 py-2.5 hover:bg-gray-50"
                     >
-                      <Building2 className="size-4 text-amber-500 shrink-0 mt-0.5" />
-                      <p className="text-sm text-jet">{poi.name}</p>
+                      <Building2 className="size-4" />
+                      <p className="text-sm">{poi.name}</p>
                     </button>
                   ))}
                 </>
