@@ -25,6 +25,7 @@ interface Props {
 export default function MapPicker({ onChange, initialValue }: Props) {
   const mapRef = useRef<any>(null);
   const { location } = useGeolocation();
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [marker, setMarker] = useState<Coords | null>(
     location
       ? { lat: location.latitude, lng: location.longitude }
@@ -46,7 +47,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
 
   // Cuando llega la ubicación por primera vez y no hay valor inicial, centrar el mapa
   useEffect(() => {
-    if (!initialValue && location && !mapCenter) {
+    if (!initialValue && location && isMapLoaded) {
       const loc = { lat: location.latitude, lng: location.longitude };
       setMapCenter(loc);
       mapRef.current?.flyTo({
@@ -55,7 +56,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         duration: 800,
       });
     }
-  }, [location]);
+  }, [location, isMapLoaded, initialValue]);
 
   const handleMapClick = async (e: any) => {
     const { lng, lat } = e.lngLat;
@@ -131,6 +132,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
         onLoad={(e) => {
           e.target.setConfigProperty("basemap", "lightPreset", "night");
+          setIsMapLoaded(true);
         }}
         onClick={handleMapClick}
         onMoveEnd={(e) => {
