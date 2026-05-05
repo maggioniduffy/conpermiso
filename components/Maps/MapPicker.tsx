@@ -62,12 +62,14 @@ export default function MapPicker({ onChange, initialValue }: Props) {
     onChange({ lat, lng, address: addr });
   };
 
-  const handleSelectResult = (result: {
-    lat: number;
-    lon: number;
-    display_name: string;
-  }) => {
-    const coords = { lat: result.lat, lng: result.lon };
+  const handleSelectResult = (result: SearchResult) => {
+    if (result.lat == null || result.lon == null) return;
+
+    const coords: Coords = {
+      lat: Number(result.lat),
+      lng: Number(result.lon),
+    };
+
     setMarker(coords);
     setQuery(result.display_name);
     onChange({ ...coords, address: result.display_name });
