@@ -4,7 +4,10 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { LocationSearch, SearchResult } from "@/components/LocationSearch";
+import {
+  LocationSearch,
+  SearchResult,
+} from "@/components/Search/LocationSearch";
 import { useGeolocation } from "@/components/GeolocationProvider";
 
 const FALLBACK_CENTER = { lat: 39.4699, lng: -0.3763 };

@@ -29,7 +29,9 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
   function handleSelectSpot(bath: Bath) {
     setInput(bath.name);
     const [lng, lat] = bath.location.coordinates;
-    router.push(`/?query=${encodeURIComponent(bath.name)}&lat=${lat}&lng=${lng}`);
+    router.push(
+      `/?query=${encodeURIComponent(bath.name)}&lat=${lat}&lng=${lng}`,
+    );
   }
 
   function handleSelectResult(result: SearchResult) {

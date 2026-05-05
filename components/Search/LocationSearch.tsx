@@ -33,11 +33,7 @@ interface Props {
   userLocation?: { lat: number; lng: number } | null;
   showSpots?: boolean;
   onSelectSpot?: (bath: Bath) => void;
-  onSelectResult?: (result: {
-    lat: number;
-    lon: number;
-    display_name: string;
-  }) => void;
+  onSelectResult?: (result: SearchResult) => void;
   onSelectPlace?: (place: Place) => void;
   onSelectPoi?: (poi: Poi) => void;
   placeholder?: string;
@@ -170,6 +166,7 @@ export function LocationSearch({
         lat: suggestion.lat,
         lon: suggestion.lon,
         display_name: suggestion.display_name,
+        type: suggestion.type,
       });
       return;
     }
@@ -187,6 +184,7 @@ export function LocationSearch({
             lat: data.lat,
             lon: data.lon,
             display_name: data.display_name,
+            type: data.type,
           });
         }
       } finally {

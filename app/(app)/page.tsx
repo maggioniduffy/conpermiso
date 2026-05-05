@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import MyMapContainer from "@/components/Maps/MapContainer";
-import SearchForm from "@/components/SearchForm";
+import SearchForm from "@/components/Search/SearchForm";
 import GeolocationBanner from "@/components/Maps/GeolocationBanner";
 
 interface Params {
