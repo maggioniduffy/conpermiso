@@ -39,6 +39,8 @@ const TAG_MAP: Record<string, OsmFilter[]> = {
   university: [{ key: "amenity", value: "university" }],
   jardin: [{ key: "amenity", value: "kindergarten" }],
   kindergarten: [{ key: "amenity", value: "kindergarten" }],
+  facultad: [{ key: "amenity", value: "university" }],
+  facultades: [{ key: "amenity", value: "university" }],
   // Health
   hospital: [{ key: "amenity", value: "hospital" }],
   hospitales: [{ key: "amenity", value: "hospital" }],
@@ -138,7 +140,7 @@ const POI_KEYS = new Set([
   "building",
   "office",
   "healthcare",
-  "sport",
+  "s1ort",
 ]);
 
 function normalize(s: string) {
@@ -162,7 +164,8 @@ async function fetchOverpass(query: string): Promise<Response> {
         body: `data=${encodeURIComponent(query)}`,
       });
       if (res.ok) return res;
-    } catch {
+    } catch (e) {
+      console.error("Overpass error:", e);
       continue;
     }
   }

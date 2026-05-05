@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import { Marker } from "react-map-gl/mapbox";
 import { Bath } from "@/utils/models";
 
@@ -6,10 +7,10 @@ interface Props {
   bath: Bath;
   isOpen: boolean | null;
   isPublic: boolean;
-  onClick: () => void;
+  onClick: (bath: Bath) => void;
 }
 
-export default function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
+function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
   const color = isOpen === null ? "#858585" : isOpen ? "#22c55e" : "#ef4444";
 
   return (
@@ -19,7 +20,7 @@ export default function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
       anchor="bottom"
       onClick={(e) => {
         e.originalEvent.stopPropagation();
-        onClick();
+        onClick(bath);
       }}
     >
       <div
@@ -61,3 +62,5 @@ export default function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
     </Marker>
   );
 }
+
+export default memo(BathMarker);

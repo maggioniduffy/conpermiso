@@ -50,7 +50,7 @@ export default function MyMapContainer({ searchCenter }: Props) {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 0,
+        maximumAge: 30000,
         timeout: 15000,
       },
     );

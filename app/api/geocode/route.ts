@@ -21,9 +21,11 @@ export async function GET(req: NextRequest) {
 
   // Forward geocoding — query → results
   if (q) {
-    // Centrar resultados en Valencia por defecto
-    const proximity = "-0.3763,39.4699";
-    const url = `${BASE_URL}/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&language=es&limit=6&proximity=${proximity}&country=es,ar&types=poi,address,place,neighborhood`;
+    const nearLat = searchParams.get("near_lat");
+    const nearLng = searchParams.get("near_lng");
+    const proximity = nearLat && nearLng ? `${nearLng},${nearLat}` : undefined;
+    const proximityParam = proximity ? `&proximity=${proximity}` : "";
+    const url = `${BASE_URL}/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&language=es&limit=6${proximityParam}&country=es,ar&types=poi,address,place,neighborhood`;
     const res = await fetch(url);
     const data = await res.json();
 

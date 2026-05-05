@@ -2,7 +2,7 @@
 
 import Map from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useBathsInBounds } from "@/hooks/use-baths-in-bounds";
 import { Bath, BathAccess } from "@/utils/models";
 import { isOpenWithTimezone } from "@/lib/utils";
@@ -29,6 +29,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
   const { baths, fetchBaths } = useBathsInBounds();
   const [selectedBath, setSelectedBath] = useState<Bath | null>(null);
   const mapRef = useRef<any>(null);
+  const initializedWithLocation = useRef(!!location);
 
   const handleMoveEnd = useCallback(() => {
     if (!mapRef.current) return;
@@ -41,6 +42,23 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       getEast: () => bounds.getEast(),
     } as any);
   }, [fetchBaths]);
+
+  const handleBathClick = useCallback((bath: Bath) => {
+    setSelectedBath(bath);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedBath || !mapRef.current) return;
+    mapRef.current.flyTo({
+      center: [
+        selectedBath.location.coordinates[0],
+        selectedBath.location.coordinates[1],
+      ],
+      zoom: Math.max(mapRef.current.getMap().getZoom(), 15),
+      duration: 800,
+      offset: [0, 200],
+    });
+  }, [selectedBath]);
 
   return (
     <Map
@@ -67,7 +85,11 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
       }}
       onMoveEnd={handleMoveEnd}
     >
-      <MapRecenter location={location} mapRef={mapRef} />
+      <MapRecenter
+        location={location}
+        mapRef={mapRef}
+        initializedWithLocation={initializedWithLocation.current}
+      />
 
       {searchCenter && (
         <FlyToCoords
@@ -97,18 +119,7 @@ export default function MyMap({ location, zoom = 15, searchCenter }: Props) {
             bath={bath}
             isOpen={isOpen}
             isPublic={isPublic}
-            onClick={() => {
-              setSelectedBath(bath);
-              mapRef.current?.flyTo({
-                center: [
-                  bath.location.coordinates[0],
-                  bath.location.coordinates[1],
-                ],
-                zoom: Math.max(mapRef.current.getMap().getZoom(), 15),
-                duration: 800,
-                offset: [0, 200],
-              });
-            }}
+            onClick={handleBathClick}
           />
         );
       })}

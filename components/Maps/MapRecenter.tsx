@@ -5,15 +5,16 @@ import { useEffect, useRef } from "react";
 interface Props {
   location: { latitude: number; longitude: number } | null;
   mapRef: React.RefObject<any>;
+  // True when Map mounted with location already available — initialViewState
+  // already centered the map, no flyTo needed ever.
+  initializedWithLocation: boolean;
 }
 
-export default function MapRecenter({ location, mapRef }: Props) {
-  const hasCentered = useRef(false);
+export default function MapRecenter({ location, mapRef, initializedWithLocation }: Props) {
+  const hasCentered = useRef(initializedWithLocation);
 
   useEffect(() => {
     if (!location || hasCentered.current) return;
-    // Mark done immediately — even if the map isn't loaded yet.
-    // If mapRef isn't ready, initialViewState already has the location.
     hasCentered.current = true;
     if (!mapRef.current) return;
     const center = mapRef.current.getMap().getCenter();
