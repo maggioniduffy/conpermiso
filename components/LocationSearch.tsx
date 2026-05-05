@@ -5,13 +5,15 @@ import { Globe, Building2, MapPin } from "lucide-react";
 import { Bath } from "@/utils/models";
 
 export interface SearchResult {
-  lat: number;
-  lon: number;
+  mapbox_id?: string;
+  lat: number | null;
+  lon: number | null;
   display_name: string;
+  name?: string;
+  place_formatted?: string;
   type: string;
 }
 
-// Keep for external callers that still import these
 export interface Place {
   lat: string;
   lon: string;
@@ -31,8 +33,11 @@ interface Props {
   userLocation?: { lat: number; lng: number } | null;
   showSpots?: boolean;
   onSelectSpot?: (bath: Bath) => void;
-  onSelectResult?: (result: SearchResult) => void;
-  // kept for backward compat
+  onSelectResult?: (result: {
+    lat: number;
+    lon: number;
+    display_name: string;
+  }) => void;
   onSelectPlace?: (place: Place) => void;
   onSelectPoi?: (poi: Poi) => void;
   placeholder?: string;
@@ -43,6 +48,12 @@ interface Props {
   containerClassName?: string;
   inputClassName?: string;
 }
+
+// Session token fijo por sesión de browser — agrupa requests para billing
+const SESSION_TOKEN =
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
 
 export function LocationSearch({
   value,
@@ -60,32 +71,25 @@ export function LocationSearch({
   inputClassName,
 }: Props) {
   const [spots, setSpots] = useState<Bath[]>([]);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [locationTrigger, setLocationTrigger] = useState(0);
+  const [retrieving, setRetrieving] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const userLocationRef = useRef(userLocation);
-  const locationWasAvailable = useRef(!!userLocation);
 
   useEffect(() => {
     userLocationRef.current = userLocation;
-    if (userLocation && !locationWasAvailable.current) {
-      locationWasAvailable.current = true;
-      setLocationTrigger((n) => n + 1);
-    }
   }, [userLocation]);
 
-  const hasResults = spots.length > 0 || results.length > 0;
+  const hasResults = spots.length > 0 || suggestions.length > 0;
 
   useEffect(() => {
-    if (!value.trim() || value.length <= 3) {
+    if (!value.trim() || value.length <= 2) {
       setSpots([]);
-      setResults([]);
+      setSuggestions([]);
       setOpen(false);
       return;
     }
@@ -94,12 +98,18 @@ export function LocationSearch({
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      setVisibleCount(6);
 
       const loc = userLocationRef.current;
-      const geocodeUrl = `/api/geocode?q=${encodeURIComponent(value)}${
-        loc ? `&near_lat=${loc.lat}&near_lng=${loc.lng}` : ""
-      }`;
+      const geoParams = new URLSearchParams({
+        q: value,
+        session_token: SESSION_TOKEN,
+      });
+      if (loc) {
+        geoParams.set("near_lat", loc.lat.toString());
+        geoParams.set("near_lng", loc.lng.toString());
+      }
+
+      console.log("LOCATION: ", loc);
 
       try {
         if (showSpots) {
@@ -107,19 +117,23 @@ export function LocationSearch({
             fetch(`/api/proxy/baths?search=${encodeURIComponent(value)}`).then(
               (r) => r.json(),
             ),
-            fetch(geocodeUrl).then((r) => r.json()),
+            fetch(`/api/geocode?${geoParams}`).then((r) => r.json()),
           ]);
 
           setSpots(
-            spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 10) : [],
+            spotsRes.status === "fulfilled" ? spotsRes.value.slice(0, 5) : [],
           );
-
-          if (geoRes.status === "fulfilled" && Array.isArray(geoRes.value)) {
-            setResults(geoRes.value);
-          }
+          setSuggestions(
+            geoRes.status === "fulfilled" && Array.isArray(geoRes.value)
+              ? geoRes.value
+              : [],
+          );
         } else {
-          const geoRes = await fetch(geocodeUrl).then((r) => r.json());
-          if (Array.isArray(geoRes)) setResults(geoRes);
+          console.log(geoParams.toString());
+          const geoRes = await fetch(`/api/geocode?${geoParams}`).then((r) =>
+            r.json(),
+          );
+          setSuggestions(Array.isArray(geoRes) ? geoRes : []);
         }
 
         setOpen(true);
@@ -131,7 +145,7 @@ export function LocationSearch({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [value, showSpots, locationTrigger]);
+  }, [value, showSpots]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -146,17 +160,46 @@ export function LocationSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  function handleScroll() {
-    const el = dropdownRef.current;
-    if (!el) return;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
-      setVisibleCount((n) => Math.min(n + 5, results.length));
+  async function handleSelectSuggestion(suggestion: SearchResult) {
+    setOpen(false);
+    onChange(suggestion.name ?? suggestion.display_name);
+
+    // Si ya tiene coordenadas (raro en suggest) usarlas directo
+    if (suggestion.lat != null && suggestion.lon != null) {
+      onSelectResult?.({
+        lat: suggestion.lat,
+        lon: suggestion.lon,
+        display_name: suggestion.display_name,
+      });
+      return;
+    }
+
+    // Si tiene mapbox_id, hacer retrieve para obtener coordenadas
+    if (suggestion.mapbox_id) {
+      setRetrieving(true);
+      try {
+        const res = await fetch(
+          `/api/geocode?mapbox_id=${suggestion.mapbox_id}&session_token=${SESSION_TOKEN}`,
+        );
+        const data = await res.json();
+        if (data?.lat != null && data?.lon != null) {
+          onSelectResult?.({
+            lat: data.lat,
+            lon: data.lon,
+            display_name: data.display_name,
+          });
+        }
+      } finally {
+        setRetrieving(false);
+      }
     }
   }
 
   function iconForType(type: string) {
-    if (type === "poi") return <Building2 className="size-4 shrink-0 mt-0.5 text-gray-500" />;
-    if (type === "address") return <MapPin className="size-4 shrink-0 mt-0.5 text-gray-500" />;
+    if (type === "poi")
+      return <Building2 className="size-4 shrink-0 mt-0.5 text-gray-500" />;
+    if (type === "address")
+      return <MapPin className="size-4 shrink-0 mt-0.5 text-gray-500" />;
     return <Globe className="size-4 shrink-0 mt-0.5 text-gray-500" />;
   }
 
@@ -171,13 +214,15 @@ export function LocationSearch({
           placeholder={placeholder}
           className={inputClassName}
         />
-        {suffix}
+        {retrieving ? (
+          <div className="size-4 border-2 border-principal border-t-transparent rounded-full animate-spin shrink-0" />
+        ) : (
+          suffix
+        )}
       </div>
 
       {open && (hasResults || loading) && (
         <div
-          ref={dropdownRef}
-          onScroll={handleScroll}
           className={`absolute left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto max-h-72 z-[1001] ${
             dropdownPosition === "top" ? "bottom-full mb-2" : "top-full mt-1"
           }`}
@@ -186,6 +231,7 @@ export function LocationSearch({
             <p className="text-xs text-jet-700 px-3 py-2">Buscando...</p>
           ) : (
             <>
+              {/* Spots */}
               {spots.length > 0 && (
                 <>
                   <p className="text-[10px] font-semibold px-3 pt-2 pb-1 text-gray-400 uppercase tracking-wide">
@@ -200,9 +246,9 @@ export function LocationSearch({
                       }}
                       className="w-full flex gap-2 items-start px-3 py-2.5 hover:bg-gray-50"
                     >
-                      <MapPin className="size-4 shrink-0 mt-0.5 text-gray-500" />
+                      <MapPin className="size-4 shrink-0 mt-0.5 text-principal" />
                       <div className="text-left">
-                        <p className="text-sm">{bath.name}</p>
+                        <p className="text-sm font-medium">{bath.name}</p>
                         <p className="text-xs text-gray-400">{bath.address}</p>
                       </div>
                     </button>
@@ -210,24 +256,32 @@ export function LocationSearch({
                 </>
               )}
 
-              {results.slice(0, visibleCount).map((r, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setOpen(false);
-                    onSelectResult?.(r);
-                  }}
-                  className="w-full flex gap-2 items-start px-3 py-2.5 hover:bg-gray-50"
-                >
-                  {iconForType(r.type)}
-                  <p className="text-sm text-left">{r.display_name}</p>
-                </button>
-              ))}
-
-              {visibleCount < results.length && (
-                <p className="text-[10px] text-center text-gray-400 py-2">
-                  Scroll para ver más
-                </p>
+              {/* Lugares */}
+              {suggestions.length > 0 && (
+                <>
+                  {spots.length > 0 && (
+                    <p className="text-[10px] font-semibold px-3 pt-2 pb-1 text-gray-400 uppercase tracking-wide">
+                      Lugares
+                    </p>
+                  )}
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={s.mapbox_id ?? i}
+                      onClick={() => handleSelectSuggestion(s)}
+                      className="w-full flex gap-2 items-start px-3 py-2.5 hover:bg-gray-50"
+                    >
+                      {iconForType(s.type)}
+                      <div className="text-left">
+                        <p className="text-sm">{s.name ?? s.display_name}</p>
+                        {s.place_formatted && (
+                          <p className="text-xs text-gray-400">
+                            {s.place_formatted}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </>
               )}
             </>
           )}

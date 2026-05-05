@@ -4,9 +4,10 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { LocationSearch, Place, Poi } from "@/components/LocationSearch";
+import { LocationSearch, SearchResult } from "@/components/LocationSearch";
+import { useGeolocation } from "@/components/GeolocationProvider";
 
-const INITIAL_CENTER = { lat: 39.4699, lng: -0.3763 };
+const FALLBACK_CENTER = { lat: 39.4699, lng: -0.3763 };
 
 interface Coords {
   lat: number;
@@ -20,27 +21,33 @@ interface Props {
 
 export default function MapPicker({ onChange, initialValue }: Props) {
   const mapRef = useRef<any>(null);
+  const { location } = useGeolocation();
   const [marker, setMarker] = useState<Coords | null>(
     initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
   );
   const [query, setQuery] = useState(initialValue?.address ?? "");
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(
-    initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
+  const [mapCenter, setMapCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(
+    initialValue
+      ? { lat: initialValue.lat, lng: initialValue.lng }
+      : location
+        ? { lat: location.latitude, lng: location.longitude }
+        : null,
   );
 
+  // Cuando llega la ubicación por primera vez y no hay valor inicial, centrar el mapa
   useEffect(() => {
-    if (initialValue) return;
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setMapCenter(loc);
-        mapRef.current?.flyTo({ center: [loc.lng, loc.lat], zoom: 15, duration: 800 });
-      },
-      () => {},
-      { maximumAge: 60000, timeout: 8000 },
-    );
-  }, []);
+    if (initialValue || !location || mapCenter) return;
+    const loc = { lat: location.latitude, lng: location.longitude };
+    setMapCenter(loc);
+    mapRef.current?.flyTo({
+      center: [loc.lng, loc.lat],
+      zoom: 15,
+      duration: 800,
+    });
+  }, [location]);
 
   const handleMapClick = async (e: any) => {
     const { lng, lat } = e.lngLat;
@@ -52,23 +59,20 @@ export default function MapPicker({ onChange, initialValue }: Props) {
     onChange({ lat, lng, address: addr });
   };
 
-  const handleSelectPlace = (place: Place) => {
-    const coords = { lat: parseFloat(place.lat), lng: parseFloat(place.lon) };
+  const handleSelectResult = (result: {
+    lat: number;
+    lon: number;
+    display_name: string;
+  }) => {
+    const coords = { lat: result.lat, lng: result.lon };
     setMarker(coords);
-    setQuery(place.display_name);
-    onChange({ ...coords, address: place.display_name });
-    mapRef.current?.flyTo({ center: [coords.lng, coords.lat], zoom: 16, duration: 800 });
-  };
-
-  const handleSelectPoi = async (poi: Poi) => {
-    const coords = { lat: poi.lat, lng: poi.lon };
-    setMarker(coords);
-    setQuery(poi.name);
-    mapRef.current?.flyTo({ center: [coords.lng, coords.lat], zoom: 16, duration: 800 });
-    const res = await fetch(`/api/geocode?lat=${poi.lat}&lon=${poi.lon}`);
-    const data = await res.json();
-    const addr = data.display_name ?? poi.name;
-    onChange({ ...coords, address: addr });
+    setQuery(result.display_name);
+    onChange({ ...coords, address: result.display_name });
+    mapRef.current?.flyTo({
+      center: [coords.lng, coords.lat],
+      zoom: 16,
+      duration: 800,
+    });
   };
 
   const handleClear = () => {
@@ -76,14 +80,18 @@ export default function MapPicker({ onChange, initialValue }: Props) {
     setMarker(null);
   };
 
+  const initialLng =
+    initialValue?.lng ?? location?.longitude ?? FALLBACK_CENTER.lng;
+  const initialLat =
+    initialValue?.lat ?? location?.latitude ?? FALLBACK_CENTER.lat;
+
   return (
     <div className="flex flex-col gap-2">
       <LocationSearch
         value={query}
         onChange={setQuery}
         userLocation={mapCenter}
-        onSelectPlace={handleSelectPlace}
-        onSelectPoi={handleSelectPoi}
+        onSelectResult={handleSelectResult}
         placeholder="Buscar dirección..."
         dropdownPosition="bottom"
         suffix={
@@ -104,8 +112,8 @@ export default function MapPicker({ onChange, initialValue }: Props) {
       <Map
         ref={mapRef}
         initialViewState={{
-          longitude: initialValue?.lng ?? INITIAL_CENTER.lng,
-          latitude: initialValue?.lat ?? INITIAL_CENTER.lat,
+          longitude: initialLng,
+          latitude: initialLat,
           zoom: 15,
         }}
         style={{ height: "300px", width: "100%", borderRadius: 12 }}
@@ -123,7 +131,12 @@ export default function MapPicker({ onChange, initialValue }: Props) {
       >
         {marker && (
           <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="28"
+              height="28"
+            >
               <path
                 d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
                 fill="#4a90e2"
