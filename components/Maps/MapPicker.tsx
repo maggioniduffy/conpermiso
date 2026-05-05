@@ -26,30 +26,35 @@ export default function MapPicker({ onChange, initialValue }: Props) {
   const mapRef = useRef<any>(null);
   const { location } = useGeolocation();
   const [marker, setMarker] = useState<Coords | null>(
-    initialValue ? { lat: initialValue.lat, lng: initialValue.lng } : null,
+    location
+      ? { lat: location.latitude, lng: location.longitude }
+      : initialValue
+        ? { lat: initialValue.lat, lng: initialValue.lng }
+        : null,
   );
   const [query, setQuery] = useState(initialValue?.address ?? "");
   const [mapCenter, setMapCenter] = useState<{
     lat: number;
     lng: number;
   } | null>(
-    initialValue
-      ? { lat: initialValue.lat, lng: initialValue.lng }
-      : location
-        ? { lat: location.latitude, lng: location.longitude }
+    location
+      ? { lat: location.latitude, lng: location.longitude }
+      : initialValue
+        ? { lat: initialValue.lat, lng: initialValue.lng }
         : null,
   );
 
   // Cuando llega la ubicación por primera vez y no hay valor inicial, centrar el mapa
   useEffect(() => {
-    if (initialValue || !location || mapCenter) return;
-    const loc = { lat: location.latitude, lng: location.longitude };
-    setMapCenter(loc);
-    mapRef.current?.flyTo({
-      center: [loc.lng, loc.lat],
-      zoom: 15,
-      duration: 800,
-    });
+    if (!initialValue && location && !mapCenter) {
+      const loc = { lat: location.latitude, lng: location.longitude };
+      setMapCenter(loc);
+      mapRef.current?.flyTo({
+        center: [loc.lng, loc.lat],
+        zoom: 15,
+        duration: 800,
+      });
+    }
   }, [location]);
 
   const handleMapClick = async (e: any) => {
@@ -86,9 +91,9 @@ export default function MapPicker({ onChange, initialValue }: Props) {
   };
 
   const initialLng =
-    initialValue?.lng ?? location?.longitude ?? FALLBACK_CENTER.lng;
+    location?.longitude ?? initialValue?.lng ?? FALLBACK_CENTER.lng;
   const initialLat =
-    initialValue?.lat ?? location?.latitude ?? FALLBACK_CENTER.lat;
+    location?.latitude ?? initialValue?.lat ?? FALLBACK_CENTER.lat;
 
   return (
     <div className="flex flex-col gap-2">
