@@ -12,25 +12,29 @@ const page = async () => {
   const user = session.user;
 
   return (
-    <div className="w-full pt-20 flex gap-5 min-w-screen bg-mywhite h-screen">
-      <div className="flex flex-1 flex-col w-full gap-5 place-items-center">
-        <div className="flex flex-col w-full md:w-3xl p-8 gap-5">
-          <h3 className="font-semibold text-2xl drop-shadow-xl">
+    <div className="w-full flex flex-col bg-mywhite overflow-hidden h-[calc(100dvh-3.5rem)]">
+      <div className="flex flex-1 flex-col min-h-0 w-full md:w-3xl mx-auto px-4 py-3 gap-3">
+        <div className="flex flex-col min-h-0 flex-1">
+          <h3 className="font-semibold text-xl drop-shadow-xl pb-2">
             Mis Guardados
           </h3>
-          <ErrorBoundary>
-            <FavoritesList />
-          </ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <ErrorBoundary>
+              <FavoritesList />
+            </ErrorBoundary>
+          </div>
         </div>
 
         {user && (
-          <div className="flex flex-col w-full md:w-3xl p-8 gap-5">
-            <h3 className="font-semibold text-2xl drop-shadow-xl">
+          <div className="flex flex-col min-h-0 flex-1">
+            <h3 className="font-semibold text-xl drop-shadow-xl pb-2">
               Agregados por mi
             </h3>
-            <ErrorBoundary>
-              <MyOwnList />
-            </ErrorBoundary>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <ErrorBoundary>
+                <MyOwnList />
+              </ErrorBoundary>
+            </div>
           </div>
         )}
       </div>
