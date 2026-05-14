@@ -1,5 +1,6 @@
 import { MapPin, Heart, Linkedin, Globe } from "lucide-react";
 import Link from "next/link";
+import FeedbackButton from "./ui/FeedbackButton";
 
 export default function AppFooter() {
   return (
@@ -10,7 +11,7 @@ export default function AppFooter() {
           <MapPin className="size-4 text-principal" />
           <span className="font-semibold text-jet text-sm">KKapp</span>
         </div>
-
+        <FeedbackButton />
         {/* Tagline */}
         <p className="text-[11px] text-jet-700 text-center">
           Encontrá baños cerca tuyo.
