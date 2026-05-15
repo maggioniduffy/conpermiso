@@ -13,28 +13,24 @@ const page = async () => {
 
   return (
     <div className="w-full flex flex-col bg-mywhite overflow-hidden h-[calc(100dvh-3.5rem)]">
-      <div className="flex flex-1 flex-col min-h-0 w-full md:w-3xl mx-auto px-4 py-3 gap-3">
-        <div className="flex flex-col min-h-0 flex-1">
+      <div className="flex-1 min-h-0 overflow-y-auto w-full md:w-3xl mx-auto px-4 py-3 flex flex-col gap-3">
+        <div>
           <h3 className="font-semibold text-xl drop-shadow-xl pb-2">
             Mis Guardados
           </h3>
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <ErrorBoundary>
-              <FavoritesList />
-            </ErrorBoundary>
-          </div>
+          <ErrorBoundary>
+            <FavoritesList />
+          </ErrorBoundary>
         </div>
 
         {user && (
-          <div className="flex flex-col min-h-0 flex-1">
+          <div>
             <h3 className="font-semibold text-xl drop-shadow-xl pb-2">
               Agregados por mi
             </h3>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <ErrorBoundary>
-                <MyOwnList />
-              </ErrorBoundary>
-            </div>
+            <ErrorBoundary>
+              <MyOwnList />
+            </ErrorBoundary>
           </div>
         )}
       </div>
