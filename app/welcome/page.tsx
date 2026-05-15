@@ -32,11 +32,12 @@ export default function WelcomePage() {
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 gap-6">
         <Image
-          src="/longlogo_white.png"
-          alt="KKapp logo"
-          width={200}
-          height={60}
-          className="mb-2"
+          src="/logo-lockup-3x.png"
+          alt="KKapp"
+          width={560}
+          height={144}
+          className="h-12 w-auto mb-2"
+          priority
         />
         <h1 className="text-4xl md:text-5xl font-bold text-jet leading-tight max-w-xl">
           Encontrá baños cerca tuyo,{" "}

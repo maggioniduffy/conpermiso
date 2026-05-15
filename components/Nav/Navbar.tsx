@@ -16,7 +16,7 @@ interface Props {
 }
 
 const Navbar = ({ additionalClass }: Props) => {
-  const { user, loading } = useBackendUser();
+  const { user } = useBackendUser();
   const { data: session } = useSession();
   const [open, setOpen] = useState<boolean>(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -88,10 +88,12 @@ const Navbar = ({ additionalClass }: Props) => {
           {/* logo — absolutely centered */}
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
             <Image
-              src="/longlogo_white.png"
-              alt="Logo"
-              width={150}
-              height={120}
+              src="/logo-lockup-3x.png"
+              alt="KKapp"
+              width={560}
+              height={144}
+              className="h-8 w-auto"
+              priority
             />
           </Link>
 

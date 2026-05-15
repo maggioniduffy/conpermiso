@@ -42,11 +42,11 @@ const AuthModal = ({ open, onClose }: Props) => {
         {/* Header */}
         <div className="text-center space-y-1 pt-2">
           <Image
-            src="/longlogo_white.png"
-            width={140}
-            height={70}
-            className="mx-auto mb-3"
-            alt="logo"
+            src="/logo-lockup-3x.png"
+            width={560}
+            height={144}
+            className="mx-auto mb-3 h-8 w-auto"
+            alt="KKapp"
           />
           <h2 className="text-jet font-bold text-lg">Bienvenido</h2>
           <p className="text-jet-700 text-sm">

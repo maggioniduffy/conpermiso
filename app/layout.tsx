@@ -30,19 +30,24 @@ const montserrat = localFont({
 export const metadata: Metadata = {
   title: "KKapp",
   description: "Encontrá baños disponibles cerca tuyo!",
+  metadataBase: new URL("https://kkapp.es"),
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "KKapp",
   },
   icons: {
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon-16.png", sizes: "16x16" },
+      { url: "/favicon-32.png", sizes: "32x32" },
+    ],
+    apple: "/apple-icon.png",
   },
   openGraph: {
     title: "KKapp",
     description: "Encontrá baños cerca tuyo, cuando más lo necesitás.",
     url: "https://kkapp.es",
-    images: [{ url: "https://kkapp.es/og.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
     siteName: "KKapp",
     type: "website",
     locale: "es_ES",
@@ -51,7 +56,7 @@ export const metadata: Metadata = {
     title: "KKapp",
     description: "Encontrá baños cerca tuyo, cuando más lo necesitás.",
     card: "summary_large_image",
-    images: ["https://kkapp.es/og.jpg"],
+    images: ["/twitter-image.png"],
   },
 };
 
@@ -70,9 +75,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-      </head>
       <body
         className={`${montserrat.variable} bg-mywhite flex flex-col`}
       >
