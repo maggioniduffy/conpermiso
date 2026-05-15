@@ -21,7 +21,6 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/screenshots/map.png",
         sizes: "390x844",
         type: "image/png",
-        // @ts-expect-error – Next.js types don't expose form_factor yet
         form_factor: "narrow",
         label: "Mapa de baños cercanos",
       },
