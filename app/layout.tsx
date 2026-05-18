@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "KKapp",
     description: "Encontrá baños cerca tuyo, cuando más lo necesitás.",
     url: "https://kkapp.es",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+    images: [{ url: "/opengraph-image.png?v=2", width: 1200, height: 630 }],
     siteName: "KKapp",
     type: "website",
     locale: "es_ES",
