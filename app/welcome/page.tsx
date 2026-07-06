@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Search, Star, ShieldCheck, Smartphone, Building2, Globe } from "lucide-react";
+import { MapPin, Search, Star, ShieldCheck, Smartphone, Building2, Globe, Info } from "lucide-react";
 import AppFooter from "@/components/Footer";
 
 const steps = [
@@ -45,7 +45,8 @@ export default function WelcomePage() {
         </h1>
         <p className="text-jet-600 text-lg max-w-md">
           KKapp es una app colaborativa que te muestra baños públicos o privados
-          en tiempo real, con horarios y costos actualizados por la comunidad.
+          en tiempo real, con horarios y costos actualizados por la comunidad y
+          baños públicos de fuentes abiertas como OpenStreetMap.
         </p>
         <div className="flex gap-3 flex-wrap justify-center">
           <Link
@@ -144,7 +145,7 @@ export default function WelcomePage() {
               <div>
                 <h3 className="font-semibold text-jet mb-0.5">Spots</h3>
                 <p className="text-sm text-jet-600 leading-relaxed">
-                  Baños registrados en KKapp por la comunidad. Son los resultados más relevantes: tienen dirección, horarios y costo cargados.
+                  Baños registrados en KKapp por la comunidad, junto con baños públicos que sumamos automáticamente desde fuentes abiertas como OpenStreetMap. Son los resultados más relevantes: tienen dirección, horarios y costo cargados.
                 </p>
               </div>
             </div>
@@ -172,6 +173,19 @@ export default function WelcomePage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Disclaimer — datos de fuentes públicas */}
+          <div className="flex gap-3 items-start bg-amber-50 border border-amber-200 rounded-2xl p-5 mt-8">
+            <Info className="size-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800 leading-relaxed">
+              Algunos baños provienen de fuentes públicas (como OpenStreetMap)
+              y todavía no fueron verificados por nuestro equipo: su
+              información podría estar incompleta, desactualizada o ser
+              incorrecta. Los vas a reconocer porque muestran un aviso como
+              este. Si encontrás un dato erróneo, podés ayudarnos sugiriendo
+              la corrección desde la app.
+            </p>
           </div>
         </div>
       </section>
