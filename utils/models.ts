@@ -5,6 +5,11 @@ export enum BathAccess {
   PRIVATE = "Privado",
 }
 
+export enum BathSource {
+  COMMUNITY = "community",
+  OPENSTREETMAP = "openstreetmap",
+}
+
 export type Time = {
   hour?: string;
   minute?: string;
@@ -49,6 +54,8 @@ export interface Bath {
   timezone?: string;
   isOpenNow: boolean;
   type?: BathAccess;
+  source?: BathSource;
+  isVerified?: boolean;
 }
 
 export enum BathRequestStatus {

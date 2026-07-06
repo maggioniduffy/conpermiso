@@ -1,7 +1,8 @@
 // app/(spot)/spot/[id]/page.tsx
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Bath, BathAccess, Day } from "@/utils/models";
+import { auth } from "@/auth";
+import { Bath, BathAccess, BathSource, Day } from "@/utils/models";
 import { trimAddress } from "@/lib/utils";
 import {
   MapPin,
@@ -9,9 +10,12 @@ import {
   Clock,
   ArrowLeft,
   ExternalLink,
+  Info,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
+import DeleteSpotButton from "@/components/Spots/DeleteSpotButton";
 import ReviewSection from "@/components/Spots/ReviewSection";
 import OpenBadge from "@/components/Spots/OpenBadge";
 import FavoriteButton from "@/components/Spots/FavoriteButton";
@@ -80,6 +84,10 @@ export default async function SpotPage({
   const { id } = await params;
   const bath = await getBath(id);
   if (!bath) return notFound();
+
+  const session = await auth();
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === "admin";
+  const isOsmBath = bath.source === BathSource.OPENSTREETMAP;
 
   const {
     name,
@@ -169,6 +177,29 @@ export default async function SpotPage({
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+        {isOsmBath && !bath.isVerified && (
+          <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+            <Info className="size-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-amber-800 text-sm leading-relaxed">
+              Este dato proviene de una fuente pública (OpenStreetMap) y puede
+              estar incompleto o desactualizado.
+            </p>
+          </div>
+        )}
+
+        {isAdmin && isOsmBath && (
+          <div className="flex gap-3">
+            <Link
+              href={`/spot/edit/${id}`}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white text-principal font-semibold text-sm border border-principal/30 hover:bg-principal/5 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <Pencil className="size-4" />
+              Editar
+            </Link>
+            <DeleteSpotButton bathId={id} bathName={name} />
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
           <p className="text-jet-500 leading-relaxed">{description}</p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Cost, Shift, BathAccess } from "@/utils/models";
+import { Cost, Shift, BathAccess, BathSource } from "@/utils/models";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ExternalLink,
   Star,
+  Info,
 } from "lucide-react";
 import { trimAddress, isOpenWithTimezone } from "@/lib/utils";
 
@@ -30,6 +31,8 @@ interface Props {
   access?: BathAccess;
   avgRating?: number;
   reviewsCount?: number;
+  source?: BathSource;
+  isVerified?: boolean;
 }
 
 const SpotModal = ({
@@ -45,6 +48,8 @@ const SpotModal = ({
   access,
   avgRating,
   reviewsCount,
+  source,
+  isVerified,
 }: Props) => {
   const isOpen =
     shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
@@ -133,6 +138,16 @@ const SpotModal = ({
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-3">
           {description}
         </p>
+
+        {source === BathSource.OPENSTREETMAP && !isVerified && (
+          <div className="flex items-start gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
+            <Info className="size-3 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-amber-800 leading-snug">
+              Este dato proviene de una fuente pública (OpenStreetMap) y puede
+              estar incompleto o desactualizado.
+            </p>
+          </div>
+        )}
 
         {(reviewsCount ?? 0) > 0 && (
           <div className="h-px bg-mywhite" />

@@ -40,6 +40,8 @@ export default function SpotPopup({ bath, onClose }: Props) {
         access={bath.type}
         avgRating={bath.avgRating}
         reviewsCount={bath.reviewsCount}
+        source={bath.source}
+        isVerified={bath.isVerified}
       />
     </Popup>
   );
