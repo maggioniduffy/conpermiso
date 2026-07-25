@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.fausmaggioni.mobile",
+      "sha256_cert_fingerprints": [
+        "F3:51:D4:90:B7:7B:23:61:48:C3:6F:67:94:C0:91:E1:45:0A:43:F8:F5:89:37:6A:A0:FA:4C:96:41:89:D2:2B"
+      ]
+    }
+  }
+]

@@ -93,6 +93,19 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        // Android App Links: Google verifica este archivo server-side y
+        // exige Content-Type application/json, sin redirects ni rewrites.
+        source: "/.well-known/assetlinks.json",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(pwaConfig(nextConfig), {
