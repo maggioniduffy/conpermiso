@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import FavoritesList from "@/components/User/FavoritesList";
 import MyOwnList from "@/components/User/MyOwnList";
 import UserProfileCard from "@/components/User/UserProfileCard";
+import BlockedUsersList from "@/components/User/BlockedUsersList";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const page = async () => {
@@ -18,6 +19,11 @@ const page = async () => {
         {/* Perfil de Usuario */}
         <ErrorBoundary>
           <UserProfileCard user={user} />
+        </ErrorBoundary>
+
+        {/* Lista de Usuarios Bloqueados */}
+        <ErrorBoundary>
+          <BlockedUsersList />
         </ErrorBoundary>
 
         <div>
