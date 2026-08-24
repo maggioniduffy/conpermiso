@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
-import { Flag, Trash2, CheckCircle2, Star } from "lucide-react";
+import { Flag, Trash2, CheckCircle2, Star, XCircle, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -60,12 +60,12 @@ export default function AdminReportsList() {
       const res = await apiFetch(`/reviews/reports/${reportId}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Error al descartar el reporte.");
+      if (!res.ok) throw new Error("Error al desestimar el reporte.");
 
       setReports((prev) => prev.filter((r) => r._id !== reportId));
-      toast.success("Reporte descartado correctamente.");
+      toast.success("Reporte desestimado correctamente. El comentario se mantendrá.");
     } catch (error: any) {
-      toast.error(error.message || "No se pudo descartar el reporte.");
+      toast.error(error.message || "No se pudo desestimar el reporte.");
     } finally {
       setActioningId(null);
     }
@@ -81,7 +81,7 @@ export default function AdminReportsList() {
 
       // Remover del estado todos los reportes asociados a este comentario
       setReports((prev) => prev.filter((r) => r.comment?._id !== commentId));
-      toast.success("Comentario y sus reportes fueron eliminados.");
+      toast.success("Reporte aceptado. Comentario eliminado definitivamente.");
     } catch (error: any) {
       toast.error(error.message || "No se pudo eliminar el comentario.");
     } finally {
@@ -115,9 +115,9 @@ export default function AdminReportsList() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-xl font-bold text-jet flex items-center gap-2">
           <Flag className="size-5 text-amber-500" />
-          Reportes de Comentarios
+          Moderación de Comentarios
           <span className="text-sm font-normal text-jet-700">
-            ({reports.length})
+            ({reports.length} pendientes)
           </span>
         </h1>
       </div>
@@ -129,7 +129,7 @@ export default function AdminReportsList() {
             No hay reportes pendientes
           </p>
           <p className="text-xs text-jet-700">
-            Todos los comentarios reportados han sido atendidos.
+            Todos los comentarios reportados han sido revisados.
           </p>
         </div>
       ) : (
@@ -152,8 +152,9 @@ export default function AdminReportsList() {
                       Reportado por <strong className="text-jet">{reporterName}</strong>
                     </span>
                   </div>
-                  <span className="text-xs font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60">
-                    {report.reason}
+                  <span className="text-xs font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60 flex items-center gap-1">
+                    <ShieldAlert className="size-3 text-amber-600" />
+                    Motivo: {report.reason}
                   </span>
                 </div>
 
@@ -200,14 +201,17 @@ export default function AdminReportsList() {
 
                 {/* Acciones de Moderación */}
                 <div className="flex items-center justify-end gap-2 pt-1">
+                  {/* Desestimar reporte */}
                   <button
                     disabled={actioningId === report._id}
                     onClick={() => handleDismissReport(report._id)}
-                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-jet-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-jet-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer disabled:opacity-50"
                   >
-                    Descartar reporte
+                    <XCircle className="size-3.5 text-gray-500" />
+                    Desestimar reporte
                   </button>
 
+                  {/* Aceptar reporte y eliminar comentario */}
                   {commentId && (
                     <ConfirmDialog
                       trigger={
@@ -216,11 +220,11 @@ export default function AdminReportsList() {
                           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-all cursor-pointer disabled:opacity-50"
                         >
                           <Trash2 className="size-3.5" />
-                          Eliminar comentario
+                          Aceptar y eliminar comentario
                         </button>
                       }
-                      title="¿Eliminar este comentario?"
-                      description="El comentario se borrará permanentemente del lugar y de la plataforma. Esta acción no se puede deshacer."
+                      title="¿Aceptar reporte y eliminar comentario?"
+                      description="El comentario incumple las normas y se borrará definitivamente del lugar y de la plataforma. Esta acción no se puede deshacer."
                       confirmLabel="Eliminar comentario"
                       onConfirm={() => handleDeleteComment(report._id, commentId)}
                     />
