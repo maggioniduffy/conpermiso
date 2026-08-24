@@ -4,7 +4,8 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { handleEmailSignIn } from "@/app/actions/authActions";
+import OtpLoginForm from "./OtpLoginForm";
+import { useRouter } from "next/navigation";
 
 interface Props {
   open: boolean;
@@ -12,6 +13,13 @@ interface Props {
 }
 
 const AuthModal = ({ open, onClose }: Props) => {
+  const router = useRouter();
+
+  const handleSuccess = () => {
+    onClose();
+    router.refresh();
+  };
+
   return (
     <div
       className={`fixed inset-0 z-[1002] flex items-end sm:items-center justify-center transition-all duration-200 ${
@@ -54,27 +62,8 @@ const AuthModal = ({ open, onClose }: Props) => {
           </p>
         </div>
 
-        {/* Email form */}
-        <form action={handleEmailSignIn} className="space-y-3">
-          <div>
-            <label className="text-xs font-semibold text-jet-600 block mb-1.5 uppercase tracking-wide">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              name="email"
-              placeholder="tu@email.com"
-              className="w-full px-3.5 py-2.5 text-jet bg-white outline-none border border-gray-200 focus:border-principal focus:ring-2 focus:ring-principal/20 shadow-sm rounded-xl transition-all text-sm placeholder:text-jet-800"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-2.5 text-white font-semibold bg-principal hover:bg-principal-400 active:bg-principal-300 rounded-xl transition-colors text-sm shadow-sm"
-          >
-            Continuar con Email
-          </button>
-        </form>
+        {/* OTP Email form */}
+        <OtpLoginForm onSuccess={handleSuccess} />
 
         {/* Divider */}
         <div className="flex items-center gap-3">
@@ -87,7 +76,7 @@ const AuthModal = ({ open, onClose }: Props) => {
         <button
           type="button"
           onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 rounded-xl shadow-sm transition-colors text-sm font-medium text-jet-500"
+          className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 rounded-xl shadow-sm transition-colors text-sm font-medium text-jet-500 cursor-pointer"
         >
           <GoogleIcon />
           Continuar con Google

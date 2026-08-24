@@ -1,5 +1,6 @@
-import { signIn } from "@/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
 
@@ -8,22 +9,15 @@ const AuthAlternatives = () => {
     <>
       <div className="relative">
         <span className="block w-full h-px bg-gray-300"></span>
-        <p className="inline-block w-fit text-sm bg-white px-2 absolute -top-2 inset-x-0 mx-auto">
-          O continua con
+        <p className="inline-block w-fit text-sm bg-mywhite px-2 absolute -top-2 inset-x-0 mx-auto text-gray-500">
+          O continuá con
         </p>
       </div>
-      <form
-        className="space-y-4 text-sm font-medium"
-        action={async () => {
-          "use server";
-          await signIn("google", {
-            redirectTo: "/",
-          });
-        }}
-      >
+      <div className="space-y-4 text-sm font-medium">
         <button
-          type="submit"
-          className="w-full bg-white flex hover:bg-gray-300 hover:font-semibold items-center justify-center gap-x-3 py-2.5 border shadow-lg rounded-lg duration-150 active:bg-gray-100"
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="w-full bg-white flex hover:bg-gray-50 active:bg-gray-100 items-center justify-center gap-x-3 py-2.5 border border-gray-200 shadow-sm rounded-xl duration-150 text-gray-700 cursor-pointer"
         >
           <svg
             className="w-5 h-5"
@@ -57,10 +51,10 @@ const AuthAlternatives = () => {
           </svg>
           Continuar con Google
         </button>
-      </form>
+      </div>
       <div className="text-center">
-        <Link href="/" className="text-principal-400 hover:text-principal-300">
-          Seguir como invitado
+        <Link href="/" className="text-xs text-jet-800 hover:text-principal transition-colors">
+          Seguir como invitado →
         </Link>
       </div>
     </>
