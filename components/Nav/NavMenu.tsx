@@ -12,6 +12,7 @@ import {
   Shield,
   Users,
   HelpCircle,
+  Flag,
 } from "lucide-react";
 import { useBackendUser } from "@/hooks";
 
@@ -105,6 +106,18 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
               </span>
               <span className="flex-1">Solicitudes pendientes</span>
               {badge}
+            </button>
+          )}
+
+          {role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/reports")}
+              className={linkClass}
+            >
+              <span className={iconClass}>
+                <Flag className="size-4" />
+              </span>
+              <span className="flex-1">Reportes de comentarios</span>
             </button>
           )}
 
