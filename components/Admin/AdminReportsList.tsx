@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
-import { Flag, Trash2, CheckCircle2, Star, MessageSquare } from "lucide-react";
+import { Flag, Trash2, CheckCircle2, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import useBackendUser from "@/hooks/use-backend-user";
 
 interface ReportItem {
   _id: string;
@@ -23,27 +24,35 @@ interface ReportItem {
 }
 
 export default function AdminReportsList() {
+  const { user: currentAdmin, loading: userLoading } = useBackendUser();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
 
-  function fetchReports() {
+  const fetchReports = useCallback(async () => {
     setLoading(true);
-    apiFetch("/reviews/reports")
-      .then((r) => (r.ok ? r.json() : Promise.resolve([])))
-      .then((data: ReportItem[]) => {
-        setReports(data || []);
-      })
-      .catch(() => {
-        setReports([]);
-        toast.error("Error al cargar la lista de reportes.");
-      })
-      .finally(() => setLoading(false));
-  }
+    try {
+      const r = await apiFetch("/reviews/reports");
+      if (!r.ok) {
+        const errData = await r.json().catch(() => ({}));
+        throw new Error(errData.message || `Error HTTP ${r.status}`);
+      }
+      const data: ReportItem[] = await r.json();
+      setReports(data || []);
+    } catch (error: any) {
+      console.error("Error al cargar reportes:", error);
+      setReports([]);
+      toast.error(error.message || "Error al cargar la lista de reportes.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchReports();
-  }, []);
+    if (!userLoading && currentAdmin) {
+      fetchReports();
+    }
+  }, [userLoading, currentAdmin, fetchReports]);
 
   async function handleDismissReport(reportId: string) {
     setActioningId(reportId);
@@ -80,7 +89,7 @@ export default function AdminReportsList() {
     }
   }
 
-  if (loading) {
+  if (userLoading || loading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
         <Skeleton className="h-7 w-48 rounded-md" />
