@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import FavoritesList from "@/components/User/FavoritesList";
 import MyOwnList from "@/components/User/MyOwnList";
+import UserProfileCard from "@/components/User/UserProfileCard";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const page = async () => {
@@ -13,7 +14,12 @@ const page = async () => {
 
   return (
     <div className="w-full flex flex-col bg-mywhite overflow-hidden h-[calc(100dvh-3.5rem)]">
-      <div className="flex-1 min-h-0 overflow-y-auto w-full md:w-3xl mx-auto px-4 py-3 flex flex-col gap-3">
+      <div className="flex-1 min-h-0 overflow-y-auto w-full md:w-3xl mx-auto px-4 py-3 flex flex-col gap-4">
+        {/* Perfil de Usuario */}
+        <ErrorBoundary>
+          <UserProfileCard user={user} />
+        </ErrorBoundary>
+
         <div>
           <h3 className="font-semibold text-xl drop-shadow-xl pb-2">
             Mis Guardados
