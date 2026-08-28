@@ -29,6 +29,46 @@ function TimeInput({
   onChange: (val: { hour?: string; minute?: string }) => void;
   label: string;
 }) {
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value.replace(/[^0-9]/g, "");
+    if (text === "") {
+      onChange({ ...value, hour: "" });
+      return;
+    }
+    const num = parseInt(text, 10);
+    const val = num > 23 ? "23" : text.slice(0, 2);
+    onChange({ ...value, hour: val });
+  };
+
+  const handleHourBlur = () => {
+    if (value?.hour && value.hour !== "") {
+      const formatted = value.hour.padStart(2, "0");
+      if (formatted !== value.hour) {
+        onChange({ ...value, hour: formatted });
+      }
+    }
+  };
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value.replace(/[^0-9]/g, "");
+    if (text === "") {
+      onChange({ ...value, minute: "" });
+      return;
+    }
+    const num = parseInt(text, 10);
+    const val = num > 59 ? "59" : text.slice(0, 2);
+    onChange({ ...value, minute: val });
+  };
+
+  const handleMinuteBlur = () => {
+    if (value?.minute && value.minute !== "") {
+      const formatted = value.minute.padStart(2, "0");
+      if (formatted !== value.minute) {
+        onChange({ ...value, minute: formatted });
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <span className="text-xs font-semibold text-jet-700">{label}</span>
@@ -40,10 +80,8 @@ function TimeInput({
           placeholder="00"
           className="w-8 text-sm text-center bg-transparent outline-none text-jet font-medium"
           value={value?.hour ?? ""}
-          onChange={(e) => {
-            const v = Math.max(0, Math.min(23, Number(e.target.value)));
-            onChange({ ...value, hour: v.toString().padStart(2, "0") });
-          }}
+          onChange={handleHourChange}
+          onBlur={handleHourBlur}
         />
         <span className="text-principal font-bold text-sm">:</span>
         <input
@@ -53,10 +91,8 @@ function TimeInput({
           placeholder="00"
           className="w-8 text-sm text-center bg-transparent outline-none text-jet font-medium"
           value={value?.minute ?? ""}
-          onChange={(e) => {
-            const v = Math.max(0, Math.min(59, Number(e.target.value)));
-            onChange({ ...value, minute: v.toString().padStart(2, "0") });
-          }}
+          onChange={handleMinuteChange}
+          onBlur={handleMinuteBlur}
         />
       </div>
     </div>
