@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import {
   MapPin,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import AppFooter from "@/components/Footer";
 import StoreBadges from "@/components/StoreBadges";
+import ScreenshotCarousel from "@/components/ScreenshotCarousel";
 
 const title = "KKapp — Encontrá baños cerca tuyo";
 const description =
@@ -83,7 +83,7 @@ const steps = [
   {
     icon: <KeyRound className="size-6 text-principal" />,
     title: "3. Entrá en segundos",
-    desc: "Ingresá con Apple, Google, un código por email o como invitado, sin crear una cuenta.",
+    desc: "Ingresá con Apple (en la app de iPhone), Google, un código por email o como invitado, sin crear una cuenta.",
   },
   {
     icon: <ShieldCheck className="size-6 text-principal" />,
@@ -106,7 +106,7 @@ const features = [
   {
     icon: <KeyRound className="size-5 text-principal" />,
     title: "Ingresá como quieras",
-    desc: "Con Apple, con Google, con un código de 6 dígitos por email o como invitado, sin cuenta.",
+    desc: "Con Apple (en la app de iPhone), con Google, con un código de 6 dígitos por email o como invitado, sin cuenta.",
   },
   {
     icon: <Clock className="size-5 text-principal" />,
@@ -161,15 +161,7 @@ export default function WelcomePage() {
           KKapp es la plataforma colaborativa que te muestra baños públicos y privados
           con horarios, opiniones y costos actualizados. Ya está disponible en iPhone y en la web.
         </p>
-        <div className="flex flex-col items-center gap-4">
-          <StoreBadges />
-          <Link
-            href="/"
-            className="text-principal font-semibold underline-offset-4 hover:underline"
-          >
-            Usar la versión web
-          </Link>
-        </div>
+        <StoreBadges showWeb />
       </section>
 
       {/* Capturas */}
@@ -182,28 +174,7 @@ export default function WelcomePage() {
             Deslizá para ver más →
           </p>
           <div className="hidden md:block mb-8" />
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {screenshots.map((shot) => (
-              <figure
-                key={shot.src}
-                className="snap-center shrink-0 w-[180px] md:w-[220px] flex flex-col items-center gap-3"
-              >
-                <div className="w-full aspect-[739/1600] rounded-[2.5rem] border-8 border-jet overflow-hidden shadow-lg bg-white">
-                  <Image
-                    src={shot.src}
-                    alt={shot.alt}
-                    width={739}
-                    height={1600}
-                    sizes="220px"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <figcaption className="text-sm text-jet-600 text-center">
-                  {shot.caption}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+          <ScreenshotCarousel items={screenshots} />
         </div>
       </section>
 
@@ -429,13 +400,7 @@ export default function WelcomePage() {
         <p className="mb-6 text-principal-800">
           Es gratis, sin anuncios y 100% colaborativa.
         </p>
-        <StoreBadges variant="light" className="mb-6" />
-        <Link
-          href="/"
-          className="bg-white text-principal px-8 py-3 rounded-xl font-semibold hover:bg-mywhite transition-all inline-block"
-        >
-          Abrir el mapa →
-        </Link>
+        <StoreBadges variant="light" showWeb />
       </section>
 
       <AppFooter />

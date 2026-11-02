@@ -12,12 +12,14 @@ vi.mock("next/link", () => ({
     href,
     children,
     className,
+    "aria-label": ariaLabel,
   }: {
     href: string;
     children: React.ReactNode;
     className?: string;
+    "aria-label"?: string;
   }) => (
-    <a href={href} className={className}>
+    <a href={href} className={className} aria-label={ariaLabel}>
       {children}
     </a>
   ),
@@ -53,5 +55,14 @@ describe("WelcomePage", () => {
     render(<WelcomePage />);
     expect(screen.queryByText(/Cluster/i)).toBeNull();
     expect(screen.getByText(/Gris — Horario desconocido/)).toBeInTheDocument();
+  });
+
+  it("has no legacy web CTAs and offers the web link", () => {
+    render(<WelcomePage />);
+    expect(screen.queryByText(/Abrir el mapa/)).toBeNull();
+    expect(screen.queryByText(/Usar la versión web/)).toBeNull();
+    expect(
+      screen.getAllByRole("link", { name: "Abrir KKapp en la web" }).length,
+    ).toBe(2);
   });
 });

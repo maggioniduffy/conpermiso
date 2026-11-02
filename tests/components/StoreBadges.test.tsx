@@ -22,4 +22,16 @@ describe("StoreBadges", () => {
     expect(play.closest("[aria-disabled='true']")).not.toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
+
+  it("renders a web link to / only when showWeb is set", () => {
+    const { unmount } = render(<StoreBadges showWeb />);
+    expect(
+      screen.getByRole("link", { name: "Abrir KKapp en la web" }),
+    ).toHaveAttribute("href", "/");
+    unmount();
+    render(<StoreBadges />);
+    expect(
+      screen.queryByRole("link", { name: "Abrir KKapp en la web" }),
+    ).toBeNull();
+  });
 });

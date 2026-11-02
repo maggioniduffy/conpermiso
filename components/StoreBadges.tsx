@@ -1,8 +1,11 @@
+import Link from "next/link";
+import { Globe } from "lucide-react";
 import { APP_STORE_URL } from "@/lib/store";
 
 type StoreBadgesProps = {
   variant?: "dark" | "light";
   className?: string;
+  showWeb?: boolean;
 };
 
 function AppleLogo({ className }: { className?: string }) {
@@ -37,6 +40,7 @@ function PlayLogo({ className }: { className?: string }) {
 export default function StoreBadges({
   variant = "dark",
   className = "",
+  showWeb = false,
 }: StoreBadgesProps) {
   const light = variant === "light";
   const appStoreStyle = light
@@ -45,6 +49,10 @@ export default function StoreBadges({
   const playStyle = light
     ? "bg-white/20 text-white/70 border border-white/30"
     : "bg-gray-100 text-jet-600 border border-gray-200";
+
+  const webStyle = light
+    ? "border border-white text-white hover:bg-white/10"
+    : "border border-principal text-principal hover:bg-principal/10";
 
   return (
     <div
@@ -73,6 +81,19 @@ export default function StoreBadges({
           <span className="text-lg font-semibold -mt-0.5">Google Play</span>
         </span>
       </div>
+      {showWeb && (
+        <Link
+          href="/"
+          aria-label="Abrir KKapp en la web"
+          className={`h-12 px-4 rounded-xl inline-flex items-center gap-2.5 transition-colors ${webStyle}`}
+        >
+          <Globe className="size-6" aria-hidden="true" />
+          <span className="flex flex-col items-start leading-none text-left">
+            <span className="text-[10px]">Abrir en la</span>
+            <span className="text-lg font-semibold -mt-0.5">Web</span>
+          </span>
+        </Link>
+      )}
     </div>
   );
 }
