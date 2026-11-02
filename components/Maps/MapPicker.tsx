@@ -4,6 +4,7 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   LocationSearch,
   SearchResult,
@@ -26,6 +27,7 @@ interface Props {
 
 export default function MapPicker({ onChange, initialValue }: Props) {
   const mapRef = useRef<any>(null);
+  const { t } = useTranslation();
   const { location } = useGeolocation();
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [marker, setMarker] = useState<Coords | null>(
@@ -105,7 +107,7 @@ export default function MapPicker({ onChange, initialValue }: Props) {
         onChange={setQuery}
         userLocation={mapCenter}
         onSelectResult={handleSelectResult}
-        placeholder="Buscar dirección..."
+        placeholder={t("map.search.addressPlaceholder")}
         dropdownPosition="bottom"
         suffix={
           query ? (

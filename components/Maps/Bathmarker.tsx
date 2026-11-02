@@ -10,55 +10,43 @@ interface Props {
   onClick: (bath: Bath) => void;
 }
 
+// Los PNG miden 66x92 (1x) y la punta del pin cae al 68.48% del alto: el
+// resto es sombra. Se dibuja un poco más chico que en el celular.
+const PIN_W = 54;
+const PIN_H = 75;
+const TIP_Y = 0.6848;
+const TIP_OFFSET = Math.round(PIN_H * (1 - TIP_Y));
+
+export function markerSrc(isOpen: boolean | null, isPublic: boolean) {
+  const state = isOpen === null ? "unknown" : isOpen ? "open" : "closed";
+  const base = `/markers/spot-${state}${isPublic ? "-public" : ""}`;
+  return { src: `${base}.png`, srcSet: `${base}.png 1x, ${base}@2x.png 2x` };
+}
+
 function BathMarker({ bath, isOpen, isPublic, onClick }: Props) {
-  const color = isOpen === null ? "#858585" : isOpen ? "#22c55e" : "#ef4444";
+  const { src, srcSet } = markerSrc(isOpen, isPublic);
 
   return (
     <Marker
       longitude={bath.location.coordinates[0]}
       latitude={bath.location.coordinates[1]}
       anchor="bottom"
+      offset={[0, TIP_OFFSET]}
       onClick={(e) => {
         e.originalEvent.stopPropagation();
         onClick(bath);
       }}
     >
-      <div
-        className="relative cursor-pointer flex flex-col items-center"
-        style={{ width: 36 }}
-      >
-        {isOpen === true && (
-          <div
-            className="absolute rounded-full animate-ping"
-            style={{ background: "rgba(34,197,94,0.25)", inset: "-6px", top: 0, width: 36, height: 36 }}
-          />
-        )}
-        <img
-          src="/bath_pointer.png"
-          style={{
-            width: 36,
-            height: 36,
-            filter: `drop-shadow(0 0 3px ${color}) drop-shadow(0 1px 3px rgba(0,0,0,.3))`,
-          }}
-          alt="baño"
-        />
-        {isPublic && (
-          <div
-            className="font-bold rounded-full whitespace-nowrap"
-            style={{
-              background: "white",
-              color: "#4a90e2",
-              fontSize: 7,
-              padding: "1px 5px",
-              lineHeight: 1.4,
-              boxShadow: "0 0 0 1.5px #4a90e2",
-              marginTop: 2,
-            }}
-          >
-            PÚBLICO
-          </div>
-        )}
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        srcSet={srcSet}
+        width={PIN_W}
+        height={PIN_H}
+        alt={bath.name}
+        draggable={false}
+        className="block cursor-pointer select-none"
+      />
     </Marker>
   );
 }

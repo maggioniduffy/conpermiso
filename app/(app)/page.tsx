@@ -1,10 +1,6 @@
 // app/(app)/page.tsx
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { auth } from "@/auth";
-import MyMapContainer from "@/components/Maps/MapContainer";
-import SearchForm from "@/components/Search/SearchForm";
-import GeolocationBanner from "@/components/Maps/GeolocationBanner";
+import HomeMapScreen from "@/components/Maps/HomeMapScreen";
 
 interface Params {
   searchParams: Promise<{ query?: string; lat?: string; lng?: string }>;
@@ -13,7 +9,6 @@ interface Params {
 export default async function Home({ searchParams }: Params) {
   const { query, lat, lng } = await searchParams;
   const session = await auth();
-  const user = session?.user;
 
   const searchCenter =
     lat && lng
@@ -21,24 +16,12 @@ export default async function Home({ searchParams }: Params) {
       : null;
 
   return (
-    <div className="w-full h-full relative">
-      <MyMapContainer searchCenter={searchCenter} />
-      <GeolocationBanner />
-
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-lg z-[1000]">
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-300 px-3 py-2 flex items-center gap-2">
-          <SearchForm query={query} nearLat={lat} nearLng={lng} />
-          {user && (
-            <Link
-              href="/spot/create"
-              title="Agregar spot"
-              className="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-principal text-white hover:bg-principal-400 hover:scale-110 transition-all shadow-sm"
-            >
-              <PlusIcon className="size-5" />
-            </Link>
-          )}
-        </div>
-      </div>
-    </div>
+    <HomeMapScreen
+      searchCenter={searchCenter}
+      query={query}
+      lat={lat}
+      lng={lng}
+      isLoggedIn={!!session?.user}
+    />
   );
 }

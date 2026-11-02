@@ -9,6 +9,7 @@ import DropdownMenu from "./DropdownMenu";
 import NavMenu from "./NavMenu";
 import { apiFetch } from "@/lib/apiFetch";
 import { LogOut, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import AuthModal from "@/components/Auth/AuthModal";
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const Navbar = ({ additionalClass }: Props) => {
+  const { t } = useTranslation();
   const { user } = useBackendUser();
   const { data: session } = useSession();
   const [open, setOpen] = useState<boolean>(false);
@@ -69,27 +71,19 @@ const Navbar = ({ additionalClass }: Props) => {
         className={`w-full z-[1001] bg-transparent flex justify-start items-center h-fit ${additionalClass}`}
       >
         <div className="w-full shadow bg-mywhite border-b border-gray-200 flex items-center px-2 relative h-14">
-          {/* left: hamburger + ¿Cómo funciona? */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <DropdownMenu open={open} toggle={toggle} />
-              {!open && user?.role === "admin" && pendingCount > 0 && (
-                <span className="absolute top-1 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-mywhite pointer-events-none" />
-              )}
-            </div>
-            <Link
-              href="/welcome"
-              className="text-xs text-jet-600 hover:text-principal transition-colors font-medium hidden sm:block"
-            >
-              ¿Cómo funciona?
-            </Link>
+          {/* left: hamburger */}
+          <div className="relative">
+            <DropdownMenu open={open} toggle={toggle} />
+            {!open && user?.role === "admin" && pendingCount > 0 && (
+              <span className="absolute top-1 right-1 size-2.5 rounded-full bg-red-500 ring-2 ring-mywhite pointer-events-none" />
+            )}
           </div>
 
           {/* logo — absolutely centered */}
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
             <Image
               src="/logo-lockup-3x.png"
-              alt="KKapp"
+              alt="KKApp"
               width={560}
               height={144}
               className="h-8 w-auto"
@@ -102,17 +96,29 @@ const Navbar = ({ additionalClass }: Props) => {
             <button
               onClick={handleAvatarClick}
               className="relative cursor-pointer rounded-full hover:ring-2 hover:ring-principal/30 transition-all p-0.5"
-              aria-label="Cuenta"
+              aria-label={user ? t("nav.openProfile") : t("nav.signIn")}
             >
-              <Image
-                src="/icons/cool_avatar.png"
-                alt="Account"
-                width={35}
-                height={25}
-              />
+              {user?.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.image}
+                  alt="Account"
+                  width={34}
+                  height={34}
+                  className="size-[34px] rounded-full object-cover"
+                />
+              ) : (
+                <Image
+                  src="/icons/cool_avatar.png"
+                  alt="Account"
+                  width={34}
+                  height={34}
+                  className="size-[34px] rounded-full"
+                />
+              )}
               {user?.role === "admin" && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-full leading-none ring-2 ring-mywhite">
-                  ADMIN
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-principal text-white text-[8px] font-bold px-1 py-px rounded-[4px] leading-none ring-1 ring-mywhite">
+                  {t("nav.adminBadge")}
                 </span>
               )}
             </button>
@@ -152,7 +158,7 @@ const Navbar = ({ additionalClass }: Props) => {
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-jet-600 hover:bg-red-50 hover:text-red-500 transition-colors font-medium"
               >
                 <LogOut className="size-4 shrink-0" />
-                Cerrar sesión
+                {t("nav.signOut")}
               </button>
             </div>
           </div>

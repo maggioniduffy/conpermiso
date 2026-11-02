@@ -7,8 +7,10 @@ global.fetch = mockFetch;
 
 function makeBounds(sw: { lat: number; lng: number }, ne: { lat: number; lng: number }) {
   return {
-    getSouthWest: () => sw,
-    getNorthEast: () => ne,
+    getSouth: () => sw.lat,
+    getWest: () => sw.lng,
+    getNorth: () => ne.lat,
+    getEast: () => ne.lng,
   };
 }
 

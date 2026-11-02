@@ -52,12 +52,11 @@ export default function SearchForm({ query, nearLat, nearLng }: Props) {
       showSpots
       onSelectSpot={handleSelectSpot}
       onSelectResult={handleSelectResult}
-      placeholder="Buscar..."
-      dropdownPosition="top"
+      dropdownPosition="bottom"
       className="flex-1"
       prefix={<Search className="size-4 text-jet-800 shrink-0" />}
       suffix={input ? <SearchFormReset onReset={handleReset} /> : undefined}
-      containerClassName="flex items-center gap-2 bg-mywhite rounded-xl px-3 h-9 border border-gray-200 focus-within:border-principal transition-colors"
+      containerClassName="flex items-center gap-2 bg-white rounded-xl px-3 h-10 transition-colors"
       inputClassName="flex-1 bg-transparent text-sm text-jet placeholder:text-jet-800 outline-none h-full"
     />
   );

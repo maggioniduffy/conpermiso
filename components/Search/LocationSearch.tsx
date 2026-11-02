@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Globe, Building2, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Bath } from "@/utils/models";
 
 export interface SearchResult {
@@ -58,7 +59,7 @@ export function LocationSearch({
   showSpots = false,
   onSelectSpot,
   onSelectResult,
-  placeholder = "Buscar...",
+  placeholder,
   dropdownPosition = "bottom",
   prefix,
   suffix,
@@ -66,6 +67,7 @@ export function LocationSearch({
   containerClassName,
   inputClassName,
 }: Props) {
+  const { t } = useTranslation();
   const [spots, setSpots] = useState<Bath[]>([]);
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -209,7 +211,7 @@ export function LocationSearch({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => hasResults && setOpen(true)}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("common.search")}
           className={inputClassName}
         />
         {retrieving ? (
@@ -226,14 +228,14 @@ export function LocationSearch({
           }`}
         >
           {loading && !hasResults ? (
-            <p className="text-xs text-jet-700 px-3 py-2">Buscando...</p>
+            <p className="text-xs text-jet-700 px-3 py-2">{t("common.searching")}</p>
           ) : (
             <>
               {/* Spots */}
               {spots.length > 0 && (
                 <>
                   <p className="text-[10px] font-semibold px-3 pt-2 pb-1 text-gray-400 uppercase tracking-wide">
-                    Spots
+                    {t("map.search.spots")}
                   </p>
                   {spots.map((bath) => (
                     <button
@@ -259,7 +261,7 @@ export function LocationSearch({
                 <>
                   {spots.length > 0 && (
                     <p className="text-[10px] font-semibold px-3 pt-2 pb-1 text-gray-400 uppercase tracking-wide">
-                      Lugares
+                      {t("map.search.places")}
                     </p>
                   )}
                   {suggestions.map((s, i) => (

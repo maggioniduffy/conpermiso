@@ -1,40 +1,46 @@
 "use client";
 
 import { Crosshair } from "lucide-react";
+import type { MapRef } from "react-map-gl/mapbox";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   location: { latitude: number; longitude: number } | null;
-  mapRef: React.RefObject<any>;
+  mapRef: React.RefObject<MapRef | null>;
   zoom?: number;
+  /** false: lo posiciona el contenedor (pila de botones del home). */
+  positioned?: boolean;
 }
 
-export default function RecenterButton({ location, mapRef, zoom = 15 }: Props) {
+export default function RecenterButton({
+  location,
+  mapRef,
+  zoom = 15,
+  positioned = true,
+}: Props) {
+  const { t } = useTranslation();
   const handleClick = () => {
     if (!location || !mapRef.current) return;
     mapRef.current.flyTo({
       center: [location.longitude, location.latitude],
       zoom,
-      duration: 1200,
+      duration: 800,
     });
   };
 
-  return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 150,
-        right: 20,
-        zIndex: 10,
-      }}
+  const button = (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={!location}
+      title={t("nav.myLocation")}
+      aria-label={t("nav.myLocation")}
+      className="flex size-11 items-center justify-center rounded-full border border-gray-200 bg-white text-principal shadow-md transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
     >
-      <button
-        onClick={handleClick}
-        disabled={!location}
-        title="Centrar en mi ubicación"
-        className="flex items-center justify-center w-11 h-11 rounded-full bg-white shadow-lg border border-gray-100 transition-all duration-200 hover:bg-principal hover:text-white hover:border-principal hover:scale-110 disabled:opacity-40 disabled:cursor-not-allowed text-principal"
-      >
-        <Crosshair className="size-5" />
-      </button>
-    </div>
+      <Crosshair className="size-5" />
+    </button>
   );
+
+  if (!positioned) return button;
+  return <div className="absolute bottom-[150px] right-5 z-10">{button}</div>;
 }

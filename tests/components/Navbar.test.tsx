@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import "@/lib/i18n";
 
 vi.mock("@/hooks", () => ({
   useBackendUser: vi.fn(),
@@ -39,7 +40,28 @@ describe("Navbar", () => {
   it("renders the logo", () => {
     mockUseBackendUser.mockReturnValue({ user: null, loading: false });
     render(<Navbar />);
-    expect(screen.getByAltText("Logo")).toBeInTheDocument();
+    expect(screen.getByAltText("KKApp")).toBeInTheDocument();
+  });
+
+  it("does not render the old ¿Cómo funciona? header link", () => {
+    mockUseBackendUser.mockReturnValue({ user: null, loading: false });
+    render(<Navbar />);
+    expect(screen.queryByText("¿Cómo funciona?")).not.toBeInTheDocument();
+  });
+
+  it("falls back to the cool avatar when the user has no image", () => {
+    mockUseBackendUser.mockReturnValue({ user: { role: "user" }, loading: false });
+    render(<Navbar />);
+    expect(screen.getByAltText("Account")).toHaveAttribute("src", "/icons/cool_avatar.png");
+  });
+
+  it("shows the user image in the avatar when available", () => {
+    mockUseBackendUser.mockReturnValue({
+      user: { role: "user", image: "https://img.test/a.png" },
+      loading: false,
+    });
+    render(<Navbar />);
+    expect(screen.getByAltText("Account")).toHaveAttribute("src", "https://img.test/a.png");
   });
 
   it("renders the hamburger button", () => {
@@ -114,15 +136,15 @@ describe("Navbar", () => {
     mockUseBackendUser.mockReturnValue({ user: null, loading: false });
     render(<Navbar />);
     const avatar = screen.getByAltText("Account");
-    fireEvent.click(avatar.closest("div")!);
-    expect(screen.getByText(/Entra a tu cuenta/i)).toBeInTheDocument();
+    fireEvent.click(avatar.closest("button")!);
+    expect(screen.getByText(/Bienvenido/i)).toBeInTheDocument();
   });
 
   it("shows sign out button when authenticated user clicks avatar", () => {
     mockUseBackendUser.mockReturnValue({ user: { role: "user", name: "Ana" }, loading: false });
     render(<Navbar />);
     const avatar = screen.getByAltText("Account");
-    fireEvent.click(avatar.closest("div")!);
-    expect(screen.getByText(/Cerrar sesion/i)).toBeInTheDocument();
+    fireEvent.click(avatar.closest("button")!);
+    expect(screen.getByText(/Cerrar sesión/i)).toBeInTheDocument();
   });
 });

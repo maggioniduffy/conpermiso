@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import DropdownMenu from "./DropdownMenu";
 import { useRouter } from "next/navigation";
 import NavMenuFooter from "./NavMenuFooter";
-import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 import {
   MapPin,
   Bookmark,
@@ -13,8 +12,11 @@ import {
   Users,
   HelpCircle,
   Flag,
+  Globe,
 } from "lucide-react";
 import { useBackendUser } from "@/hooks";
+import LanguageToggle from "@/components/LanguageToggle";
+import { requestRecenter } from "@/components/Maps/recenter";
 
 interface Props {
   open: boolean;
@@ -23,7 +25,7 @@ interface Props {
 }
 
 const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
-  const { data: session } = useSession();
+  const { t } = useTranslation();
   const { user } = useBackendUser();
   const role = user?.role;
   const router = useRouter();
@@ -33,10 +35,17 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
     router.push(href);
   };
 
+  // Vuelve al mapa y le pide que recentre en la ubicación del usuario.
+  const goToMyLocation = () => {
+    toggle();
+    router.push("/");
+    requestRecenter();
+  };
+
   const linkClass =
     "flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium text-left w-full group";
   const iconClass =
-    "text-principal/60 group-hover:text-principal transition-colors";
+    "text-principal group-hover:text-principal transition-colors";
 
   const badge = pendingCount > 0 && (
     <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
@@ -64,35 +73,35 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
         {/* header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <span className="text-jet font-bold text-lg tracking-tight">
-            Menú
+            {t("nav.menu")}
           </span>
           <DropdownMenu open={open} toggle={toggle} />
         </div>
 
         {/* nav links */}
         <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
-          <button onClick={() => navigate("/")} className={linkClass}>
+          <button onClick={goToMyLocation} className={linkClass}>
             <span className={iconClass}>
-              <MapPin className="size-4" />
+              <MapPin className="size-[18px]" />
             </span>
-            Mi Ubicación
+            {t("nav.myLocation")}
           </button>
 
-          {session?.user && (
+          {user && (
             <button onClick={() => navigate("/my-list")} className={linkClass}>
               <span className={iconClass}>
-                <Bookmark className="size-4" />
+                <Bookmark className="size-[18px]" />
               </span>
-              Mis Guardados
+              {t("nav.saved")}
             </button>
           )}
 
           {role === "user" && (
             <button onClick={() => navigate("/requests")} className={linkClass}>
               <span className={iconClass}>
-                <ClipboardList className="size-4" />
+                <ClipboardList className="size-[18px]" />
               </span>
-              Mis Solicitudes
+              {t("nav.myRequests")}
             </button>
           )}
 
@@ -102,9 +111,9 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
               className={linkClass}
             >
               <span className={iconClass}>
-                <Shield className="size-4" />
+                <Shield className="size-[18px]" />
               </span>
-              <span className="flex-1">Solicitudes pendientes</span>
+              <span className="flex-1">{t("nav.pendingRequests")}</span>
               {badge}
             </button>
           )}
@@ -115,9 +124,9 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
               className={linkClass}
             >
               <span className={iconClass}>
-                <Flag className="size-4" />
+                <Flag className="size-[18px]" />
               </span>
-              <span className="flex-1">Reportes de comentarios</span>
+              <span className="flex-1">{t("nav.reports")}</span>
             </button>
           )}
 
@@ -127,30 +136,33 @@ const NavMenu = ({ open, toggle, pendingCount = 0 }: Props) => {
               className={linkClass}
             >
               <span className={iconClass}>
-                <Users className="size-4" />
+                <Users className="size-[18px]" />
               </span>
-              <span className="flex-1">Usuarios</span>
+              <span className="flex-1">{t("nav.users")}</span>
             </button>
           )}
         </nav>
 
-        {/* ¿Cómo funciona? — visible solo en mobile */}
-        <div className="pt-3 mt-1 px-3">
-          <Link
-            href="/welcome"
-            onClick={toggle}
-            className="flex items-center gap-3 px-3 py-3 rounded-xl text-jet-500 hover:bg-principal/5 hover:text-principal transition-all text-sm font-medium w-full"
-          >
-            <span className="text-principal/60">
-              <HelpCircle className="size-4" />
+        {/* Idioma + ¿Cómo funciona? — para todos, logueados o no */}
+        <div className="px-3 pb-2">
+          <div className="flex items-center gap-3 px-3 py-3 text-sm font-medium text-jet-500">
+            <span className={iconClass}>
+              <Globe className="size-[18px]" />
             </span>
-            ¿Cómo funciona?
-          </Link>
+            <span className="flex-1">{t("language.label")}</span>
+            <LanguageToggle />
+          </div>
+          <button onClick={() => navigate("/welcome")} className={linkClass}>
+            <span className={iconClass}>
+              <HelpCircle className="size-[18px]" />
+            </span>
+            {t("nav.howItWorks")}
+          </button>
         </div>
 
         {/* footer */}
         <div className="border-t border-gray-100 px-4 py-4">
-          <NavMenuFooter session={session} />
+          <NavMenuFooter onNavigate={navigate} />
         </div>
       </div>
     </div>
