@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerUpdater } from "@/components/ServiceWorkerUpdater";
 import { AppLinkBanner } from "@/components/AppLinkBanner";
+import I18nProvider from "@/components/I18nProvider";
 
 const montserrat = localFont({
   src: [
@@ -79,6 +80,7 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} bg-mywhite flex flex-col`}
       >
+        <I18nProvider>
         <ServiceWorkerUpdater />
         {/* Banner "Abrir en la app" (solo Android). Para excluirlo de rutas
             específicas, mover la lógica dentro de AppLinkBanner comparando
@@ -86,6 +88,7 @@ export default function RootLayout({
         <AppLinkBanner />
         <SessionProvider>{children}</SessionProvider>
         <Analytics />
+        </I18nProvider>
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+import type { SuggestionField, SuggestionValues } from "./edit-suggestion";
 export type Cost = "Sin cargo" | "Con consumicion" | number;
 
 export enum BathAccess {
@@ -56,6 +57,11 @@ export interface Bath {
   type?: BathAccess;
   source?: BathSource;
   isVerified?: boolean;
+  // No viene en baños viejos ni de OSM: ausente = no pide código.
+  requiresCode?: boolean;
+  accessCode?: string | null;
+  accessCodeExpiresAt?: string | null;
+  accessCodeUpdatedAt?: string | null;
 }
 
 export enum BathRequestStatus {
@@ -64,8 +70,13 @@ export enum BathRequestStatus {
   REJECTED = "REJECTED",
 }
 
+// "create": propone un baño nuevo. "edit": sugiere cambios a uno existente.
+// Las solicitudes viejas no traen kind: ausente = "create".
+export type RequestKind = "create" | "edit";
+
 export interface BathRequest {
   _id: string;
+  kind?: RequestKind;
   name: string;
   address: string;
   description: string;
@@ -75,6 +86,17 @@ export interface BathRequest {
   shifts?: Shift[];
   images?: { url: string; alt?: string }[];
   location?: { type: string; coordinates: [number, number] };
+  requiresCode?: boolean;
+  accessCode?: string | null;
+  accessCodeExpiresAt?: string | null;
+  // Sugerencias de edición
+  bath?: (Partial<Bath> & { _id: string }) | null;
+  changes?: SuggestionValues;
+  original?: SuggestionValues;
+  comment?: string;
+  /** Sólo en la lista del admin: campos que cambiaron en el baño desde que se sugirió. */
+  staleFields?: SuggestionField[];
+  resolvedAt?: string;
   user: { name: string; email: string };
   resolvedBy?: { name?: string; email: string };
   createdAt: string;
@@ -97,6 +119,9 @@ export interface PendingAction {
 }
 
 export type StatusFilter = "PENDING" | "APPROVED" | "REJECTED" | "ALL";
+
+// Filtro por tipo de solicitud (parámetro `kind` del backend).
+export type KindFilter = "all" | "create" | "edit";
 
 export const PAGE_SIZE = 10;
 
