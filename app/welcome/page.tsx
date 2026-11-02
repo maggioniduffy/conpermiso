@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,16 +10,70 @@ import {
   Globe,
   Info,
   KeyRound,
-  Layers,
   Bookmark,
+  Map as MapIcon,
+  SlidersHorizontal,
+  Clock,
+  Star,
+  PencilLine,
+  Languages,
+  Download,
 } from "lucide-react";
 import AppFooter from "@/components/Footer";
+import StoreBadges from "@/components/StoreBadges";
+
+const title = "KKapp — Encontrá baños cerca tuyo";
+const description =
+  "KKapp es la app colaborativa para encontrar baños públicos y de comercios cerca tuyo, con horarios, costos y opiniones. Disponible en iPhone y en la web.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    images: ["/opengraph-image.png"],
+  },
+};
+
+const screenshots = [
+  {
+    src: "/screenshots/map.webp",
+    caption: "Mapa con baños cercanos",
+    alt: "Pantalla del mapa de KKapp con baños cercanos",
+  },
+  {
+    src: "/screenshots/filters.webp",
+    caption: "Filtros por tipo y precio",
+    alt: "Pantalla de filtros por tipo y precio",
+  },
+  {
+    src: "/screenshots/spot-detail.webp",
+    caption: "Detalle: costo, horarios y cómo llegar",
+    alt: "Pantalla de detalle de un baño con costo y horarios",
+  },
+  {
+    src: "/screenshots/new-spot.webp",
+    caption: "Sumá un baño nuevo",
+    alt: "Pantalla para sumar un baño nuevo",
+  },
+  {
+    src: "/screenshots/requests.webp",
+    caption: "Seguí tus solicitudes",
+    alt: "Pantalla de seguimiento de solicitudes",
+  },
+  {
+    src: "/screenshots/profile.webp",
+    caption: "Tu perfil, guardados e idioma",
+    alt: "Pantalla de perfil con guardados e idioma",
+  },
+];
 
 const steps = [
   {
-    icon: <MapPin className="size-6 text-principal" />,
-    title: "1. Abrí la app",
-    desc: "El mapa detecta automáticamente tu ubicación actual para mostrarte las opciones más cercanas.",
+    icon: <Download className="size-6 text-principal" />,
+    title: "1. Descargá la app o abrí la web",
+    desc: "Bajala del App Store en tu iPhone (Android próximamente) o usá KKapp directamente desde el navegador.",
   },
   {
     icon: <Search className="size-6 text-principal" />,
@@ -27,46 +82,61 @@ const steps = [
   },
   {
     icon: <KeyRound className="size-6 text-principal" />,
-    title: "3. Accedé sin contraseña",
-    desc: "Creá tu cuenta gratis o iniciá sesión al instante recibiendo un código de 6 dígitos (OTP) en tu email.",
+    title: "3. Entrá en segundos",
+    desc: "Ingresá con Apple, Google, un código por email o como invitado, sin crear una cuenta.",
   },
   {
     icon: <ShieldCheck className="size-6 text-principal" />,
     title: "4. Sumate a la comunidad",
-    desc: "Sugerí nuevos baños, guardá tus favoritos, calificá espacios y colaborá para mantener la información actualizada.",
+    desc: "Sugerí nuevos baños o ediciones, guardá tus favoritos, valorá espacios y colaborá para mantener la información actualizada.",
   },
 ];
 
 const features = [
   {
-    icon: <Layers className="size-5 text-principal" />,
-    title: "Mapa interactivo e inteligente",
-    desc: "Visualizá el estado en tiempo real (abierto o cerrado) y navegá áreas con alta densidad mediante agrupación de marcadores (clustering).",
+    icon: <MapIcon className="size-5 text-principal" />,
+    title: "Mapa nativo",
+    desc: "Apple Maps en iPhone y Google Maps en Android, con etiquetas \"PÚBLICO\" y agrupación de pines cercanos dentro de la app.",
+  },
+  {
+    icon: <SlidersHorizontal className="size-5 text-principal" />,
+    title: "Filtros a tu medida",
+    desc: "Filtrá por tipo (Públicos / Comercios) y por precio (Gratis / Pago) para encontrar justo lo que necesitás.",
   },
   {
     icon: <KeyRound className="size-5 text-principal" />,
-    title: "Ingreso sin contraseñas",
-    desc: "Acceso simple y directo con códigos OTP enviados a tu email, garantizando máxima seguridad sin claves difíciles de recordar.",
+    title: "Ingresá como quieras",
+    desc: "Con Apple, con Google, con un código de 6 dígitos por email o como invitado, sin cuenta.",
   },
   {
-    icon: <Globe className="size-5 text-principal" />,
-    title: "Datos comunitarios y abiertos",
-    desc: "Combinamos aportes de usuarios verificados con datos públicos de OpenStreetMap para ofrecer la cobertura más amplia posible.",
+    icon: <Clock className="size-5 text-principal" />,
+    title: "Toda la info del baño",
+    desc: "Costo (Sin cargo, Con consumición o Precio), si pide código (\"¿Pide código?\"), horarios y \"Abrir en Google Maps\".",
+  },
+  {
+    icon: <Star className="size-5 text-principal" />,
+    title: "Valoraciones y comentarios",
+    desc: "Calificá de 1 a 5 estrellas y dejá comentarios. Podés reportar y bloquear contenido inapropiado.",
+  },
+  {
+    icon: <PencilLine className="size-5 text-principal" />,
+    title: "Sugerí ediciones y nuevos baños",
+    desc: "Un admin las revisa y vos seguís el estado en \"Mis Solicitudes\" (Pendientes / Aprobadas / Rechazadas).",
   },
   {
     icon: <Bookmark className="size-5 text-principal" />,
-    title: "Guardados y favoritos",
-    desc: "Organizá tu lista personal de baños frecuentes para acceder a ellos rápidamente en cualquier momento.",
+    title: "Guardados y aportes",
+    desc: "Tus baños guardados y los \"Agregados por mí\" quedan a mano en tu perfil.",
   },
   {
-    icon: <ShieldCheck className="size-5 text-principal" />,
-    title: "Comunidad segura y moderada",
-    desc: "Sistemas integrados para reportar datos obsoletos, moderar comentarios inapropiados y gestionar bloqueos.",
+    icon: <Languages className="size-5 text-principal" />,
+    title: "App en español e inglés",
+    desc: "Cambiá el idioma cuando quieras desde Configuración.",
   },
   {
-    icon: <Smartphone className="size-5 text-principal" />,
-    title: "Experiencia Web y Móvil",
-    desc: "Usala directamente en la web, instalala como PWA en tu pantalla de inicio o abrí enlaces integrados en las apps nativas.",
+    icon: <Globe className="size-5 text-principal" />,
+    title: "Datos abiertos",
+    desc: "Combinamos aportes de la comunidad con datos públicos de OpenStreetMap para ofrecer la cobertura más amplia posible.",
   },
 ];
 
@@ -89,21 +159,51 @@ export default function WelcomePage() {
         </h1>
         <p className="text-jet-600 text-lg max-w-md">
           KKapp es la plataforma colaborativa que te muestra baños públicos y privados
-          en tiempo real, con horarios, opiniones y costos actualizados.
+          con horarios, opiniones y costos actualizados. Ya está disponible en iPhone y en la web.
         </p>
-        <div className="flex gap-3 flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <StoreBadges />
           <Link
             href="/"
-            className="bg-principal text-white px-6 py-3 rounded-xl font-semibold hover:bg-principal-400 transition-all"
+            className="text-principal font-semibold underline-offset-4 hover:underline"
           >
-            Abrir el mapa
+            Usar la versión web
           </Link>
-          <Link
-            href="/auth"
-            className="border border-principal text-principal px-6 py-3 rounded-xl font-semibold hover:bg-principal-900 transition-all"
-          >
-            Crear cuenta gratis
-          </Link>
+        </div>
+      </section>
+
+      {/* Capturas */}
+      <section className="px-6 py-16 bg-mywhite border-t border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-jet text-center mb-2">
+            Así se ve KKapp
+          </h2>
+          <p className="text-center text-jet-600 text-sm mb-8 md:hidden">
+            Deslizá para ver más →
+          </p>
+          <div className="hidden md:block mb-8" />
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {screenshots.map((shot) => (
+              <figure
+                key={shot.src}
+                className="snap-center shrink-0 w-[180px] md:w-[220px] flex flex-col items-center gap-3"
+              >
+                <div className="w-full aspect-[739/1600] rounded-[2.5rem] border-8 border-jet overflow-hidden shadow-lg bg-white">
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    width={739}
+                    height={1600}
+                    sizes="220px"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="text-sm text-jet-600 text-center">
+                  {shot.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -174,7 +274,7 @@ export default function WelcomePage() {
             ¿Qué significan los íconos del mapa?
           </h2>
           <p className="text-center text-jet-600 text-sm mb-10">
-            Cada marcador en el mapa indica el estado y la densidad de baños en la zona.
+            Cada marcador en el mapa indica si el baño está abierto en este momento.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
@@ -206,17 +306,29 @@ export default function WelcomePage() {
             </div>
 
             <div className="flex gap-4 p-5 rounded-2xl border border-gray-100 bg-mywhite">
-              <div className="mt-0.5 shrink-0 size-10 rounded-xl bg-principal-900 flex items-center justify-center">
-                <span className="size-6 rounded-full bg-principal text-white text-xs font-bold flex items-center justify-center">
-                  5+
-                </span>
+              <div className="mt-0.5 shrink-0 size-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                <span className="relative inline-flex rounded-full size-4 bg-gray-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-jet mb-1">Azul — Grupo (Cluster)</h3>
+                <h3 className="font-semibold text-jet mb-1">Gris — Horario desconocido</h3>
                 <p className="text-sm text-jet-600 leading-relaxed">
-                  Agrupa varios baños cercanos. Hacé clic o acercá el zoom para desplegarlos individualmente.
+                  Todavía no hay horarios cargados para este baño. Si los sabés, podés sugerirlos desde la app.
                 </p>
               </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 p-5 rounded-2xl border border-gray-100 bg-mywhite items-start mb-12">
+            <div className="mt-0.5 shrink-0 size-10 rounded-xl bg-principal-900 flex items-center justify-center">
+              <span className="bg-white text-principal text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                PÚBLICO
+              </span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-jet mb-1">Etiqueta PÚBLICO</h3>
+              <p className="text-sm text-jet-600 leading-relaxed">
+                Los baños públicos llevan una pequeña etiqueta blanca &quot;PÚBLICO&quot; sobre el marcador, para distinguirlos de los de comercios.
+              </p>
             </div>
           </div>
 
@@ -247,7 +359,7 @@ export default function WelcomePage() {
               <div>
                 <h3 className="font-semibold text-jet mb-0.5">Lugares</h3>
                 <p className="text-sm text-jet-600 leading-relaxed">
-                  Direcciones y localidades del mundo para reubicar el mapa en una zona específica antes de explorar.
+                  Direcciones y localidades del mundo, con resultados de Google, para reubicar el mapa en una zona específica antes de explorar.
                 </p>
               </div>
             </div>
@@ -259,7 +371,7 @@ export default function WelcomePage() {
               <div>
                 <h3 className="font-semibold text-jet mb-0.5">Cerca de aquí</h3>
                 <p className="text-sm text-jet-600 leading-relaxed">
-                  Comercios y puntos de interés próximos (estaciones, shoppings, locales). Disponible al compartir tu ubicación.
+                  Comercios y puntos de interés próximos (estaciones, shoppings, locales), con resultados de Google. Disponible al compartir tu ubicación.
                 </p>
               </div>
             </div>
@@ -275,34 +387,36 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* PWA */}
+      {/* Descarga */}
       <section className="px-6 py-16 bg-mywhite border-t border-gray-100">
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-8">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
               <Smartphone className="size-5 text-principal" />
               <span className="text-xs font-semibold text-principal tracking-widest uppercase">
-                PWA e Integración Móvil
+                iPhone, Android y web
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-jet mb-3">
-              Disponible en la web y en tu celular
-            </h2>
-            <p className="text-jet-600 leading-relaxed">
-              Accedé a KKapp desde cualquier navegador web o instalala directamente en la pantalla de inicio de tu smartphone iOS o Android.
+            <h2 className="text-2xl font-bold text-jet mb-3">Descargá KKapp</h2>
+            <p className="text-jet-600 leading-relaxed mb-4">
+              Ya está disponible en el App Store para iPhone. En Android llega pronto a Google Play.
+            </p>
+            <StoreBadges className="!justify-start" />
+            <p className="text-xs text-jet-600 mt-4">
+              Por ahora la cobertura principal está en Valencia, España, y sigue creciendo con cada aporte.
             </p>
           </div>
           <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 flex flex-col gap-3">
-            <p className="text-sm font-semibold text-jet">En iOS (Safari):</p>
+            <p className="text-sm font-semibold text-jet">En Android (Chrome):</p>
             <p className="text-sm text-jet-600">
-              Tocá el botón compartir → "Agregar a la pantalla de inicio"
+              Mientras llega la app, instalá la versión web: tocá el menú → &quot;Instalar aplicación&quot;
             </p>
             <div className="border-t border-gray-100 pt-3">
               <p className="text-sm font-semibold text-jet">
-                En Android (Chrome):
+                Alternativa en iOS (Safari):
               </p>
               <p className="text-sm text-jet-600">
-                Tocá el menú → "Instalar aplicación"
+                Tocá Compartir → &quot;Agregar a la pantalla de inicio&quot;
               </p>
             </div>
           </div>
@@ -315,6 +429,7 @@ export default function WelcomePage() {
         <p className="mb-6 text-principal-800">
           Es gratis, sin anuncios y 100% colaborativa.
         </p>
+        <StoreBadges variant="light" className="mb-6" />
         <Link
           href="/"
           className="bg-white text-principal px-8 py-3 rounded-xl font-semibold hover:bg-mywhite transition-all inline-block"

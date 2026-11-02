@@ -19,7 +19,7 @@ export default function manifest(): MetadataRoute.Manifest {
     screenshots: [
       {
         src: "/screenshots/map.png",
-        sizes: "390x844",
+        sizes: "739x1600",
         type: "image/png",
         form_factor: "narrow",
         label: "Mapa de baños cercanos",
