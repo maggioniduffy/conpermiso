@@ -5,7 +5,8 @@ import Image from "next/image";
 import { apiFetch } from "@/lib/apiFetch";
 import { UserCheck, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
+import { apiErrorMessage } from "@/lib/i18n/api-errors";
 
 interface BlockedUserItem {
   _id: string;
@@ -15,6 +16,7 @@ interface BlockedUserItem {
 }
 
 export default function BlockedUsersList() {
+  const { t } = useTranslation();
   const [blockedUsers, setBlockedUsers] = useState<BlockedUserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
@@ -47,14 +49,14 @@ export default function BlockedUsersList() {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Error al desbloquear usuario.");
+        const err = await res.json().catch(() => null);
+        throw new Error(apiErrorMessage(err, t, t("profile.blocked.unblockFailed")));
       }
 
       setBlockedUsers((prev) => prev.filter((u) => u._id !== userId));
-      toast.success("Usuario desbloqueado correctamente.");
-    } catch (error: any) {
-      toast.error(error.message || "No se pudo desbloquear al usuario.");
+      toast.success(t("profile.blocked.unblocked"));
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : t("profile.blocked.unblockFailed"));
     } finally {
       setUnblockingId(null);
     }
@@ -72,7 +74,7 @@ export default function BlockedUsersList() {
     <div className="flex flex-col gap-2.5 w-full">
       <h3 className="font-semibold text-xl drop-shadow-xl pb-1 text-jet flex items-center gap-2">
         <ShieldAlert className="size-5 text-amber-500" />
-        Usuarios Bloqueados
+        {t("profile.blocked.title")}
         <span className="text-sm font-normal text-jet-700">
           ({blockedUsers.length})
         </span>
@@ -87,14 +89,14 @@ export default function BlockedUsersList() {
             <div className="flex items-center gap-3 min-w-0">
               <Image
                 src={user.image || "/icons/cool_avatar.png"}
-                alt={user.name || "Avatar"}
+                alt={user.name || t("common.user")}
                 width={40}
                 height={40}
                 className="rounded-full ring-2 ring-gray-100 shrink-0"
               />
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold text-jet truncate">
-                  {user.name || "Usuario"}
+                  {user.name || t("common.user")}
                 </span>
                 {user.email && (
                   <span className="text-xs text-jet-700 truncate">
@@ -110,7 +112,7 @@ export default function BlockedUsersList() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-jet-800 bg-gray-100 hover:bg-gray-200 transition-all shrink-0 cursor-pointer disabled:opacity-50"
             >
               <UserCheck className="size-3.5 text-emerald-600" />
-              Desbloquear
+              {t("profile.blocked.unblock")}
             </button>
           </div>
         ))}

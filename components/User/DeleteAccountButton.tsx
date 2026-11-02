@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
-import { UserX, Loader2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/apiFetch";
+import { apiErrorMessage } from "@/lib/i18n/api-errors";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function DeleteAccountButton() {
+  const { t } = useTranslation();
   const [isPending, setIsPending] = useState(false);
 
   async function handleDeleteAccount() {
@@ -19,10 +22,8 @@ export default function DeleteAccountButton() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        const msg =
-          body?.message || "Ocurrió un error al intentar eliminar tu cuenta.";
-        toast.error("Error al eliminar cuenta", {
-          description: Array.isArray(msg) ? msg.join(" · ") : msg,
+        toast.error(t("common.error"), {
+          description: apiErrorMessage(body, t, t("profile.deleteAccountFailed")),
         });
         setIsPending(false);
         return;
@@ -31,16 +32,15 @@ export default function DeleteAccountButton() {
       // Limpieza de accessToken en localStorage
       localStorage.removeItem("accessToken");
 
-      toast.success("Cuenta eliminada", {
-        description: "Tu cuenta ha sido eliminada y tus datos anonimizados.",
+      toast.success(t("profile.accountDeletedTitle"), {
+        description: t("profile.accountDeletedBody"),
       });
 
       // Limpieza de sesión de NextAuth y redirección al home
       await signOut({ callbackUrl: "/" });
     } catch {
-      toast.error("Error de conexión", {
-        description:
-          "No se pudo conectar con el servidor para eliminar la cuenta.",
+      toast.error(t("common.connectionErrorTitle"), {
+        description: t("common.connectionErrorBody"),
       });
       setIsPending(false);
     }
@@ -50,20 +50,21 @@ export default function DeleteAccountButton() {
     <ConfirmDialog
       trigger={
         <button
+          type="button"
           disabled={isPending}
-          className="flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 px-4 rounded-xl bg-red-50 text-red-600 font-semibold text-sm border border-red-200 hover:bg-red-100 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           {isPending ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (
-            <UserX className="size-4" />
+            <Trash2 className="size-4" />
           )}
-          {isPending ? "Eliminando cuenta..." : "Eliminar cuenta"}
+          {t("profile.deleteAccount")}
         </button>
       }
-      title="¿Eliminar tu cuenta definitivamente?"
-      description="Esta acción eliminará tu cuenta y cerrará tu sesión. Los baños y comentarios que hayas creado permanecerán visibles en la plataforma de manera 100% anonimizada. Esta acción NO se puede deshacer."
-      confirmLabel="Eliminar mi cuenta"
+      title={t("profile.deleteAccountTitle")}
+      description={t("profile.deleteAccountBody")}
+      confirmLabel={t("profile.deleteAccountConfirm")}
       onConfirm={handleDeleteAccount}
     />
   );

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import i18n from "@/lib/i18n";
 import DeleteAccountButton from "@/components/User/DeleteAccountButton";
 import { apiFetch } from "@/lib/apiFetch";
 import { signOut } from "next-auth/react";
@@ -20,21 +21,25 @@ vi.mock("sonner", () => ({
 }));
 
 describe("DeleteAccountButton", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders trigger button correctly", () => {
     render(<DeleteAccountButton />);
-    expect(screen.getByText("Eliminar cuenta")).toBeInTheDocument();
+    expect(screen.getByText("Eliminar Cuenta")).toBeInTheDocument();
   });
 
   it("opens confirmation dialog when clicked", () => {
     render(<DeleteAccountButton />);
-    fireEvent.click(screen.getByText("Eliminar cuenta"));
+    fireEvent.click(screen.getByText("Eliminar Cuenta"));
 
     expect(
-      screen.getByText("¿Eliminar tu cuenta definitivamente?"),
+      screen.getByText("¿Eliminar tu cuenta?"),
     ).toBeInTheDocument();
   });
 
@@ -45,7 +50,7 @@ describe("DeleteAccountButton", () => {
     });
 
     render(<DeleteAccountButton />);
-    fireEvent.click(screen.getByText("Eliminar cuenta"));
+    fireEvent.click(screen.getByText("Eliminar Cuenta"));
 
     const confirmBtn = screen.getByText("Eliminar mi cuenta");
     fireEvent.click(confirmBtn);

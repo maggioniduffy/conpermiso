@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import DeleteAccountButton from "./DeleteAccountButton";
+import { useTranslation } from "react-i18next";
 
 interface UserProfileCardProps {
   user: {
@@ -12,34 +12,28 @@ interface UserProfileCardProps {
   };
 }
 
+// Avatar + nombre/email. OTP puede dejar el nombre vacío: en ese caso el
+// email pasa a ser la línea principal y no se repite abajo.
 export default function UserProfileCard({ user }: UserProfileCardProps) {
-  return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <Image
-          src={user.image || "/icons/cool_avatar.png"}
-          alt={user.name || "Avatar"}
-          width={56}
-          height={56}
-          className="rounded-full ring-2 ring-principal/20 shrink-0"
-        />
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-jet truncate">
-              {user.name || "Usuario"}
-            </h2>
-            {user.role === "admin" && (
-              <span className="text-[10px] font-bold bg-principal/10 text-principal px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Admin
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-jet-700 truncate">{user.email}</p>
-        </div>
-      </div>
+  const { t } = useTranslation();
+  const displayName = user.name?.trim();
 
-      <div className="sm:w-auto w-full">
-        <DeleteAccountButton />
+  return (
+    <div className="flex items-center gap-3">
+      <Image
+        src={user.image || "/icons/cool_avatar.png"}
+        alt={displayName || t("common.user")}
+        width={56}
+        height={56}
+        className="size-14 rounded-full shrink-0 object-cover"
+      />
+      <div className="flex flex-col min-w-0 gap-0.5">
+        <p className="text-base font-semibold text-jet truncate">
+          {displayName || user.email}
+        </p>
+        {displayName && (
+          <p className="text-xs text-jet-700 truncate">{user.email}</p>
+        )}
       </div>
     </div>
   );

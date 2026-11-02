@@ -1,11 +1,11 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
 import { X } from "lucide-react";
-import OtpLoginForm from "./OtpLoginForm";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import AuthAlternatives from "./AuthAlternatives";
+import AuthHeader from "./AuthHeader";
+import OtpLoginForm from "./OtpLoginForm";
 
 interface Props {
   open: boolean;
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const AuthModal = ({ open, onClose }: Props) => {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleSuccess = () => {
@@ -34,95 +35,28 @@ const AuthModal = ({ open, onClose }: Props) => {
 
       {/* Card */}
       <div
-        className={`relative w-full sm:max-w-sm bg-mywhite sm:rounded-2xl rounded-t-2xl shadow-2xl px-6 pt-6 pb-8 space-y-5 transition-all duration-200 ${
+        className={`relative w-full sm:max-w-sm bg-mywhite sm:rounded-2xl rounded-t-2xl shadow-2xl px-6 pt-6 pb-8 space-y-5 transition-all duration-200 max-h-[100dvh] overflow-y-auto ${
           open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
         }`}
       >
         {/* Close */}
         <button
           onClick={onClose}
-          aria-label="Cerrar"
+          aria-label={t("common.close")}
           className="absolute top-4 right-4 text-jet-700 hover:text-jet transition-colors p-1.5 rounded-full hover:bg-gray-100"
         >
           <X className="size-4" />
         </button>
 
-        {/* Header */}
-        <div className="text-center space-y-1 pt-2">
-          <Image
-            src="/logo-lockup-3x.png"
-            width={560}
-            height={144}
-            className="mx-auto mb-3 h-8 w-auto"
-            alt="KKapp"
-          />
-          <h2 className="text-jet font-bold text-lg">Bienvenido</h2>
-          <p className="text-jet-700 text-sm">
-            Entrá a tu cuenta o creá una nueva
-          </p>
-        </div>
+        <AuthHeader className="text-center pt-2" logoClassName="mx-auto h-12 w-auto" />
 
-        {/* OTP Email form */}
-        <OtpLoginForm onSuccess={handleSuccess} />
-
-        {/* Divider */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-jet-800">o continuá con</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-
-        {/* Google */}
-        <button
-          type="button"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 rounded-xl shadow-sm transition-colors text-sm font-medium text-jet-500 cursor-pointer"
-        >
-          <GoogleIcon />
-          Continuar con Google
-        </button>
-
-        {/* Guest link */}
-        <p className="text-center text-xs text-jet-800">
-          <Link
-            href="/"
-            onClick={onClose}
-            className="hover:text-principal transition-colors"
-          >
-            Seguir como invitado →
-          </Link>
-        </p>
+        <OtpLoginForm
+          onSuccess={handleSuccess}
+          footer={<AuthAlternatives onGuest={onClose} />}
+        />
       </div>
     </div>
   );
 };
-
-const GoogleIcon = () => (
-  <svg className="w-4 h-4 shrink-0" viewBox="0 0 48 48" fill="none">
-    <g clipPath="url(#gclip)">
-      <path
-        d="M47.532 24.553C47.532 22.921 47.4 21.281 47.118 19.676H24.48v9.242h13.043c-.538 2.98-2.267 5.617-4.798 7.293v6.007h7.734c4.541-4.18 7.152-10.353 7.152-17.655Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M24.48 48.002c6.473 0 11.932-2.125 15.909-5.794l-7.734-6.007c-2.152 1.464-4.93 2.293-8.166 2.293-6.262 0-11.57-4.224-13.475-9.903H3.033v6.182C7.107 42.887 15.406 48.002 24.48 48.002Z"
-        fill="#34A853"
-      />
-      <path
-        d="M11.005 28.6C10 25.62 10 22.392 11.005 19.411v-6.182H3.033C-.371 20.011-.371 28.001 3.033 34.782L11.005 28.6Z"
-        fill="#FBBC04"
-      />
-      <path
-        d="M24.48 9.5c3.422-.047 6.729 1.24 9.207 3.604l6.852-6.853C36.2 2.171 30.44-.069 24.48.002c-9.075 0-17.373 5.115-21.448 13.228l7.973 6.182C12.9 13.724 18.218 9.5 24.48 9.5Z"
-        fill="#EA4335"
-      />
-    </g>
-    <defs>
-      <clipPath id="gclip">
-        <rect width="48" height="48" fill="white" />
-      </clipPath>
-    </defs>
-  </svg>
-);
 
 export default AuthModal;

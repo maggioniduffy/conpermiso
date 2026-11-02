@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
+import i18n from "@/lib/i18n";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("@/hooks", () => ({
@@ -19,6 +20,10 @@ const mockUseBackendUser = useBackendUser as ReturnType<typeof vi.fn>;
 const mockUseMyBaths = useMyBaths as ReturnType<typeof vi.fn>;
 
 describe("MyOwnList", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   it("renders skeleton cards while loading", () => {
     mockUseBackendUser.mockReturnValue({ user: null });
     mockUseMyBaths.mockReturnValue({ baths: [], loading: true, setBaths: vi.fn() });
@@ -33,7 +38,7 @@ describe("MyOwnList", () => {
     mockUseBackendUser.mockReturnValue({ user: { role: "user" } });
     mockUseMyBaths.mockReturnValue({ baths: [], loading: false, setBaths: vi.fn() });
     render(<MyOwnList />);
-    expect(screen.getByText(/Agregá algún local/i)).toBeInTheDocument();
+    expect(screen.getByText(/Agrega algún local para colaborar/i)).toBeInTheDocument();
   });
 
   it("renders an EditSpotCard for each bath", () => {

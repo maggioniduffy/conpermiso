@@ -1,74 +1,66 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { apiFetch } from "@/lib/apiFetch";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
   Clock,
-  XCircle,
-  Trash2,
-  Pencil,
-  MapPin,
   DollarSign,
-  Clock as ClockIcon,
-  Plus,
+  MapPin,
+  XCircle,
 } from "lucide-react";
-import { BathRequestStatus, Shift } from "@/utils/models";
-import ShiftVisualizer from "@/components/Spots/ShiftVisualizer";
-import Link from "next/link";
+import { apiFetch } from "@/lib/apiFetch";
+import { dateLocale } from "@/lib/i18n";
+import { apiErrorMessage } from "@/lib/i18n/api-errors";
+import { costLabel } from "@/lib/i18n/labels";
+import { isEditSuggestion, requestTitle } from "@/utils/edit-suggestion";
+import { BathRequest, Paginated, StatusFilter } from "@/utils/models";
 import ConfirmDialog from "../ConfirmDialog";
-import Pagination from "@/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminFilterTabs } from "./AdminFilterTabs";
+import { RequestKindBadge } from "./RequestKindBadge";
+import { SuggestionChanges } from "./SuggestionChanges";
 
-interface BathRequest {
-  _id: string;
-  name: string;
-  address: string;
-  description: string;
-  cost?: any;
-  shifts?: Shift[];
-  status: BathRequestStatus;
-  adminComment?: string;
-  createdAt: string;
-}
+const PAGE_SIZE = 10;
 
-interface Paginated {
-  data: BathRequest[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
+// El label sale de `requests.status.<STATUS>`.
+const STATUS: Record<
+  BathRequest["status"],
+  { bg: string; text: string; accent: string }
+> = {
+  PENDING: { bg: "#fef3c7", text: "#92400e", accent: "#f59e0b" },
+  APPROVED: { bg: "#dcfce7", text: "#14532d", accent: "#22c55e" },
+  REJECTED: { bg: "#fee2e2", text: "#991b1b", accent: "#ef4444" },
+};
 
-const PAGE_SIZE = 5;
-
-const statusConfig = {
-  PENDING: {
-    label: "Pendiente",
-    icon: Clock,
-    color: "text-yellow-600 bg-yellow-50 border border-yellow-200",
-  },
-  APPROVED: {
-    label: "Aprobada",
-    icon: CheckCircle2,
-    color: "text-green-600 bg-green-50 border border-green-200",
-  },
-  REJECTED: {
-    label: "Rechazada",
-    icon: XCircle,
-    color: "text-red-500 bg-red-50 border border-red-200",
-  },
+const STATUS_ICON = {
+  PENDING: Clock,
+  APPROVED: CheckCircle2,
+  REJECTED: XCircle,
 };
 
 export default function MyRequestsList() {
+  const { t, i18n } = useTranslation();
+  const router = useRouter();
   const [result, setResult] = useState<Paginated | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState<StatusFilter>("ALL");
+  const [expanded, setExpanded] = useState<string | null>(null);
 
-  const fetchPage = useCallback((p: number) => {
+  const fetchPage = useCallback((p: number, f: StatusFilter) => {
     setLoading(true);
-    apiFetch(`/bath-requests/me?page=${p}&limit=${PAGE_SIZE}`)
+    const statusParam = f !== "ALL" ? `&status=${f}` : "";
+    // kind=all: altas y sugerencias de edición juntas.
+    apiFetch(
+      `/bath-requests/me?page=${p}&limit=${PAGE_SIZE}${statusParam}&kind=all`,
+    )
       .then((r) => r.json())
       .then((data: Paginated) => {
         setResult(data);
@@ -78,167 +70,283 @@ export default function MyRequestsList() {
   }, []);
 
   useEffect(() => {
-    fetchPage(1);
-  }, [fetchPage]);
+    fetchPage(1, filter);
+  }, [filter, fetchPage]);
+
+  function handleFilterChange(f: StatusFilter) {
+    setFilter(f);
+    setExpanded(null);
+    setPage(1);
+  }
 
   async function handleCancel(id: string) {
-    await apiFetch(`/bath-requests/${id}`, { method: "DELETE" });
-    fetchPage(page);
+    try {
+      const res = await apiFetch(`/bath-requests/${id}`, { method: "DELETE" });
+      if (res && res.ok === false) {
+        const body = await res.json().catch(() => null);
+        toast.error(t("suggest.cancelErrorTitle"), {
+          description: apiErrorMessage(body, t, t("common.genericError")),
+        });
+        return;
+      }
+      setExpanded(null);
+      fetchPage(page, filter);
+    } catch {
+      toast.error(t("common.connectionErrorTitle"), {
+        description: t("common.connectionErrorBody"),
+      });
+    }
   }
 
   const requests = result?.data ?? [];
 
   return (
     <div className="min-h-screen bg-mywhite pt-10">
-      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
-        <h1 className="text-xl font-bold text-jet">
-          Mis solicitudes
-          {result && (
-            <span className="ml-2 text-sm font-normal text-jet-700">
-              ({result.total})
-            </span>
-          )}
-        </h1>
-
-        {loading && (
-          <>
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 p-5"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 flex flex-col gap-1.5">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-            ))}
-          </>
-        )}
-
-        {!loading && requests.length === 0 && (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <Clock className="size-10 text-gray-200" />
-            <p className="text-sm text-jet-700">No tenés solicitudes todavía</p>
+      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-3">
+        {/* Header */}
+        <div className="flex items-start gap-2 mb-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={t("common.back")}
+            className="mt-1 cursor-pointer text-jet"
+          >
+            <ChevronLeft className="size-[22px]" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-jet">{t("requests.title")}</h1>
+            {result && (
+              <p className="text-xs text-jet-700 mt-px">
+                {t("common.totalCount", { count: result.total })}
+              </p>
+            )}
           </div>
-        )}
+        </div>
 
-        {!loading && requests.map((req) => {
-          const { label, icon: Icon, color } = statusConfig[req.status];
+        <AdminFilterTabs filter={filter} onChange={handleFilterChange} />
 
-          return (
+        {loading &&
+          [1, 2, 3].map((i) => (
             <div
-              key={req._id}
+              key={i}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4 p-5"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-jet truncate">{req.name}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin className="size-3 text-jet-700 shrink-0" />
-                    <p className="text-xs text-jet-700 truncate">
-                      {req.address}
-                    </p>
-                  </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${color}`}
-                >
-                  <Icon className="size-3" />
-                  {label}
-                </span>
+                <Skeleton className="h-5 w-20 rounded-full" />
               </div>
-
-              <p className="text-sm text-jet-500 leading-relaxed">
-                {req.description}
-              </p>
-
-              {req.cost && (
-                <div className="flex items-center gap-2">
-                  <DollarSign className="size-4 text-principal shrink-0" />
-                  <span className="text-sm text-jet-500">{req.cost}</span>
-                </div>
-              )}
-
-              {req.shifts && req.shifts.length > 0 && (
-                <div className="bg-gray-50 rounded-xl p-3">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <ClockIcon className="size-3.5 text-principal" />
-                    <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-                      Horarios
-                    </span>
-                  </div>
-                  <div className="flex flex-col divide-y divide-gray-200">
-                    {req.shifts.map((shift, i) => (
-                      <ShiftVisualizer shift={shift} key={i} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {req.status === BathRequestStatus.REJECTED &&
-                req.adminComment && (
-                  <div className="bg-red-50 rounded-xl p-3 border border-red-100">
-                    <p className="text-xs font-semibold text-red-600 mb-0.5">
-                      Motivo de rechazo
-                    </p>
-                    <p className="text-sm text-red-500">{req.adminComment}</p>
-                  </div>
-                )}
-
-              {(req.status === BathRequestStatus.PENDING ||
-                req.status === BathRequestStatus.REJECTED) && (
-                <div className="flex gap-2 pt-1 border-t border-gray-100">
-                  <Link
-                    href={`/requests/edit/${req._id}`}
-                    className="flex items-center gap-1 text-xs font-medium text-principal hover:text-principal-400 transition-colors"
-                  >
-                    <Pencil className="size-3" />
-                    {req.status === BathRequestStatus.REJECTED
-                      ? "Editar y reenviar"
-                      : "Editar"}
-                  </Link>
-                  {req.status === BathRequestStatus.PENDING && (
-                    <ConfirmDialog
-                      trigger={
-                        <button className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 transition-colors ml-auto">
-                          <Trash2 className="size-3" />
-                          Cancelar solicitud
-                        </button>
-                      }
-                      title="¿Cancelar solicitud?"
-                      description="Se eliminará tu solicitud pendiente."
-                      confirmLabel="Cancelar solicitud"
-                      onConfirm={() => handleCancel(req._id)}
-                    />
-                  )}
-                </div>
-              )}
             </div>
-          );
-        })}
+          ))}
 
-        {result && (
-          <Pagination
-            page={result.page}
-            totalPages={result.totalPages}
-            onPageChange={fetchPage}
-          />
+        {!loading && requests.length === 0 && (
+          <p className="text-sm text-jet-700 text-center py-10">
+            {filter === "ALL"
+              ? t("requests.emptyAll")
+              : t("requests.emptyFiltered")}
+          </p>
         )}
 
-        <Link
-          href="/spot/create"
-          className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-dashed border-principal/30 text-principal hover:bg-principal/25 transition-colors text-sm font-medium"
-        >
-          <Plus className="size-4" />
-          Nueva Solicitud
-        </Link>
+        {!loading &&
+          requests.map((req) => {
+            const status = STATUS[req.status];
+            const StatusIcon = STATUS_ICON[req.status];
+            const isExpanded = expanded === req._id;
+            const isEdit = isEditSuggestion(req);
+            const Chevron = isExpanded ? ChevronUp : ChevronDown;
+
+            return (
+              <div
+                key={req._id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 border-l-4 overflow-hidden"
+                style={{ borderLeftColor: status.accent }}
+              >
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => setExpanded(isExpanded ? null : req._id)}
+                  className="flex w-full cursor-pointer items-center gap-2.5 p-3.5 text-left"
+                >
+                  <StatusIcon
+                    className="size-[18px] shrink-0"
+                    style={{ color: status.accent }}
+                  />
+                  <div className="flex flex-1 min-w-0 flex-col gap-0.5">
+                    {isEdit && <RequestKindBadge />}
+                    <p className="truncate text-sm font-semibold text-jet">
+                      {requestTitle(req) || t("suggest.bathDeleted")}
+                    </p>
+                    <p className="text-xs text-jet-700">
+                      {new Date(req.createdAt).toLocaleDateString(
+                        dateLocale(i18n.language),
+                        { day: "numeric", month: "short", year: "numeric" },
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span
+                      className="rounded-full px-[9px] py-[3px] text-[10px] font-semibold"
+                      style={{ backgroundColor: status.bg, color: status.text }}
+                    >
+                      {t(`requests.status.${req.status}`)}
+                    </span>
+                    <Chevron className="size-4 text-jet-700" />
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="flex flex-col gap-2 px-3.5 pb-3.5">
+                    <div className="h-px bg-gray-100 mb-0.5" />
+
+                    {isEdit ? (
+                      <>
+                        <SuggestionChanges req={req} />
+                        {req.comment && (
+                          <p className="text-sm text-jet-600 leading-relaxed">
+                            {req.comment}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {req.address && (
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="size-[11px] shrink-0 text-jet-600" />
+                            <span className="text-xs text-jet-600">
+                              {req.address}
+                            </span>
+                          </div>
+                        )}
+                        {req.cost !== undefined && req.cost !== null && (
+                          <div className="flex items-center gap-1.5">
+                            <DollarSign className="size-[11px] shrink-0 text-jet-600" />
+                            <span className="text-xs text-jet-600">
+                              {costLabel(req.cost, t)}
+                            </span>
+                          </div>
+                        )}
+                        {req.requiresCode && (
+                          <p className="text-xs text-jet-600">
+                            {req.accessCode
+                              ? t("requests.accessCode", { code: req.accessCode })
+                              : t("requests.accessCodeUnknown")}
+                          </p>
+                        )}
+                        {req.description && (
+                          <p className="text-sm text-jet-600 leading-relaxed">
+                            {req.description}
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {req.adminComment && (
+                      <div className="flex flex-col gap-[3px] rounded-[10px] bg-gray-50 p-2.5">
+                        <span className="text-xs font-semibold text-jet-700">
+                          {t("requests.teamComment")}
+                        </span>
+                        <span className="text-sm text-jet-600">
+                          {req.adminComment}
+                        </span>
+                      </div>
+                    )}
+
+                    <RequestActions
+                      req={req}
+                      isEdit={isEdit}
+                      onCancel={() => handleCancel(req._id)}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+        {result && result.totalPages > 1 && (
+          <div className="flex items-center justify-between mt-1">
+            <button
+              type="button"
+              onClick={() => fetchPage(result.page - 1, filter)}
+              disabled={result.page === 1}
+              className="rounded-[10px] bg-principal px-3.5 py-2 text-sm font-medium text-white cursor-pointer disabled:opacity-35 disabled:pointer-events-none"
+            >
+              {t("common.previousPage")}
+            </button>
+            <span className="text-sm text-jet-600">
+              {result.page} / {result.totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => fetchPage(result.page + 1, filter)}
+              disabled={result.page === result.totalPages}
+              className="rounded-[10px] bg-principal px-3.5 py-2 text-sm font-medium text-white cursor-pointer disabled:opacity-35 disabled:pointer-events-none"
+            >
+              {t("common.nextPage")}
+            </button>
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+// Las pendientes se editan o cancelan; las rechazadas (altas) se reenvían.
+function RequestActions({
+  req,
+  isEdit,
+  onCancel,
+}: {
+  req: BathRequest;
+  isEdit: boolean;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const pending = req.status === "PENDING";
+  const resendable = !isEdit && req.status === "REJECTED";
+  if (!pending && !resendable) return null;
+  // Una sugerencia de edición sin baño (borrado) ya no se puede editar.
+  if (isEdit && !req.bath) return null;
+
+  const editHref = isEdit
+    ? `/spot/edit/${req.bath!._id}?suggest=1`
+    : `/requests/edit/${req._id}`;
+  const editLabel = resendable
+    ? t("requests.editResend")
+    : isEdit
+      ? t("suggest.edit")
+      : t("requests.edit");
+  const cancelLabel = isEdit ? t("suggest.cancel") : t("requests.cancel");
+
+  return (
+    <div className="flex gap-2 mt-1">
+      <Link
+        href={editHref}
+        className="flex-1 rounded-[10px] border border-principal/30 py-2.5 text-center text-sm font-semibold text-principal hover:bg-principal/10 transition-colors"
+      >
+        {editLabel}
+      </Link>
+      {pending && (
+        <ConfirmDialog
+          trigger={
+            <button
+              type="button"
+              className="flex-1 cursor-pointer rounded-[10px] border border-red-200 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+            >
+              {cancelLabel}
+            </button>
+          }
+          title={isEdit ? t("suggest.cancelTitle") : t("requests.cancelTitle")}
+          description={
+            isEdit
+              ? t("suggest.cancelBody", { name: requestTitle(req) })
+              : t("requests.cancelBody")
+          }
+          confirmLabel={cancelLabel}
+          onConfirm={onCancel}
+        />
+      )}
     </div>
   );
 }

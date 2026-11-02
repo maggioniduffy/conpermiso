@@ -49,15 +49,14 @@ describe("ProfileCard", () => {
     expect(img).toHaveAttribute("src", "https://example.com/avatar.png");
   });
 
-  it("falls back to default image when user has no image", () => {
+  it("falls back to the default avatar when user has no image", () => {
     mockUseBackendUser.mockReturnValue({
       user: { name: "Ana", email: "ana@test.com", image: null },
       loading: false,
     });
-    render(<ProfileCard defaultImage="/icons/default_avatar.png" />);
+    render(<ProfileCard />);
     const img = screen.getByRole("img", { name: "Avatar" });
-    // Uses user?.image || passed image prop
-    expect(img).toHaveAttribute("src", "/icons/cool_avatar.png"); // default from component props
+    expect(img).toHaveAttribute("src", "/icons/cool_avatar.png");
   });
 
   it("renders a link to /my-list", () => {

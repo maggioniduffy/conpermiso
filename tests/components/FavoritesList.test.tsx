@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
+import i18n from "@/lib/i18n";
 import { render, screen, waitFor } from "@testing-library/react";
 import FavoritesList from "@/components/User/FavoritesList";
 
@@ -14,6 +15,10 @@ import { useFavorites } from "@/hooks";
 const mockUseFavorites = useFavorites as ReturnType<typeof vi.fn>;
 
 describe("FavoritesList", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   it("renders skeleton placeholders while loading", () => {
     mockUseFavorites.mockReturnValue({ favorites: [], loading: true });
     const { container } = render(<FavoritesList />);

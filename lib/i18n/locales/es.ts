@@ -20,6 +20,7 @@ const es = {
     cantOpenLink: "No se puede abrir este enlace: {{url}}",
     search: "Buscar...",
     searching: "Buscando...",
+    close: "Cerrar",
   },
   // Errores del backend por `code` (backend: common/errors/error-codes.ts).
   // Los genéricos (BAD_REQUEST, FORBIDDEN, NOT_FOUND, INTERNAL_ERROR) no
@@ -110,6 +111,14 @@ const es = {
       places: "LUGARES",
       addressPlaceholder: "Buscar dirección...",
     },
+    sheet: {
+      expand: "Expandir",
+      collapse: "Contraer",
+    },
+    unsupported:
+      "Tu navegador no soporta WebGL. Activá la aceleración por hardware o probá otro navegador.",
+    loading: "Cargando mapa...",
+    locationDenied: "Activá tu ubicación para ver los baños cercanos",
   },
   spot: {
     publicBadge: "PÚBLICO",
@@ -417,6 +426,11 @@ const es = {
     emptyAll: "Todavía no enviaste ninguna solicitud.",
     emptyFiltered: "No hay solicitudes en esta categoría.",
     teamComment: "Comentario del equipo",
+    edit: "Editar",
+    editResend: "Editar y reenviar",
+    cancel: "Cancelar solicitud",
+    cancelTitle: "¿Cancelar solicitud?",
+    cancelBody: "Se eliminará tu solicitud pendiente.",
     kinds: {
       all: "Todos",
       create: "Nuevos",
@@ -435,6 +449,40 @@ const es = {
       REJECTED: "Rechazadas",
       ALL: "Todas",
     },
+  },
+  authError: {
+    Configuration: {
+      title: "Error de conexión",
+      description:
+        "No se pudo completar el inicio de sesión. Esto suele pasar por una conexión lenta o inestable. Inténtalo de nuevo.",
+    },
+    AccessDenied: {
+      title: "Acceso denegado",
+      description: "No tienes permiso para ingresar con esa cuenta.",
+    },
+    Verification: {
+      title: "Enlace expirado",
+      description:
+        "El enlace de verificación expiró o ya fue usado. Pide uno nuevo.",
+    },
+    OAuthCallback: {
+      title: "Error al conectar con Google",
+      description:
+        "Hubo un problema al comunicarse con Google. Inténtalo de nuevo en unos segundos.",
+    },
+    Default: {
+      title: "Algo salió mal",
+      description:
+        "Ocurrió un error inesperado al iniciar sesión. Inténtalo de nuevo.",
+    },
+    retry: "Intentar de nuevo",
+    backHome: "Volver al inicio",
+  },
+  errorPage: {
+    title: "Algo salió mal",
+    description:
+      "Ocurrió un error inesperado. Puedes reintentar o volver al inicio.",
+    backHome: "Ir al inicio",
   },
   admin: {
     requests: {

@@ -7,10 +7,12 @@ import { Bath } from "@/utils/models";
 import { Skeleton } from "@/components/ui/skeleton";
 import Pagination from "@/components/Pagination";
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 5;
 
 const MyOwnList = () => {
+  const { t } = useTranslation();
   const { user } = useBackendUser();
   const { baths, loading, setBaths } = useMyBaths(user?.role);
   const isAdmin = user?.role === "admin";
@@ -56,9 +58,9 @@ const MyOwnList = () => {
 
   if (baths.length === 0)
     return (
-      <h3 className="text-center text-gray-600">
-        Agregá algún local para colaborar con todos los usuarios!
-      </h3>
+      <p className="text-center text-sm text-jet-700">
+        {t("profile.addedEmpty")}
+      </p>
     );
 
   return (
@@ -70,6 +72,8 @@ const MyOwnList = () => {
               name={bath.name}
               shifts={bath.shifts}
               description={bath.description}
+              address={bath.address}
+              access={bath.type}
               id={bath._id}
               images={bath.images}
               location={bath.location}

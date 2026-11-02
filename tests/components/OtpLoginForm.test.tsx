@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, beforeAll } from "vitest";
+import i18n from "@/lib/i18n";
 import OtpLoginForm from "@/components/Auth/OtpLoginForm";
 import { signIn } from "next-auth/react";
 import { apiFetch } from "@/lib/apiFetch";
@@ -9,6 +10,10 @@ vi.mock("@/lib/apiFetch", () => ({
 }));
 
 describe("OtpLoginForm Component", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -28,7 +33,7 @@ describe("OtpLoginForm Component", () => {
     fireEvent.submit(form);
 
     await waitFor(() => {
-      expect(screen.getByText("Ingresá un email válido.")).toBeInTheDocument();
+      expect(screen.getByText("Ingresa un email válido.")).toBeInTheDocument();
     });
   });
 
@@ -48,9 +53,9 @@ describe("OtpLoginForm Component", () => {
     await waitFor(() => {
       expect(apiFetch).toHaveBeenCalledWith("auth/otp/send", expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ email: "test@example.com" }),
+        body: JSON.stringify({ email: "test@example.com", language: "es" }),
       }));
-      expect(screen.getByText("Revisá tu email")).toBeInTheDocument();
+      expect(screen.getByText("Revisa tu email")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("123456")).toBeInTheDocument();
     });
   });
@@ -114,7 +119,7 @@ describe("OtpLoginForm Component", () => {
     fireEvent.submit(codeInput.closest("form")!);
 
     await waitFor(() => {
-      expect(screen.getByText("Código inválido o expirado.")).toBeInTheDocument();
+      expect(screen.getByText("Código inválido.")).toBeInTheDocument();
     });
   });
 

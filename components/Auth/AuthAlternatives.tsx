@@ -2,62 +2,47 @@
 
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import React from "react";
+import { useTranslation } from "react-i18next";
+import GoogleIcon from "./GoogleIcon";
 
-const AuthAlternatives = () => {
+interface Props {
+  /** Se llama al elegir "invitado" (el modal se cierra). */
+  onGuest?: () => void;
+}
+
+// Resto de la pantalla de ingreso, tal cual la app: separador, Google,
+// aviso de términos y "Continuar como invitado". Sin Apple en la web.
+const AuthAlternatives = ({ onGuest }: Props) => {
+  const { t } = useTranslation();
   return (
-    <>
-      <div className="relative">
-        <span className="block w-full h-px bg-gray-300"></span>
-        <p className="inline-block w-fit text-sm bg-mywhite px-2 absolute -top-2 inset-x-0 mx-auto text-gray-500">
-          O continuá con
-        </p>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2.5 my-1">
+        <div className="flex-1 h-px bg-gray-200" />
+        <span className="text-[13px] text-jet-700">{t("auth.or")}</span>
+        <div className="flex-1 h-px bg-gray-200" />
       </div>
-      <div className="space-y-4 text-sm font-medium">
-        <button
-          type="button"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="w-full bg-white flex hover:bg-gray-50 active:bg-gray-100 items-center justify-center gap-x-3 py-2.5 border border-gray-200 shadow-sm rounded-xl duration-150 text-gray-700 cursor-pointer"
-        >
-          <svg
-            className="w-5 h-5"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clipPath="url(#clip0_17_40)">
-              <path
-                d="M47.532 24.5528C47.532 22.9214 47.3997 21.2811 47.1175 19.6761H24.48V28.9181H37.4434C36.9055 31.8988 35.177 34.5356 32.6461 36.2111V42.2078H40.3801C44.9217 38.0278 47.532 31.8547 47.532 24.5528Z"
-                fill="#4285F4"
-              />
-              <path
-                d="M24.48 48.0016C30.9529 48.0016 36.4116 45.8764 40.3888 42.2078L32.6549 36.2111C30.5031 37.675 27.7252 38.5039 24.4888 38.5039C18.2275 38.5039 12.9187 34.2798 11.0139 28.6006H3.03296V34.7825C7.10718 42.8868 15.4056 48.0016 24.48 48.0016Z"
-                fill="#34A853"
-              />
-              <path
-                d="M11.0051 28.6006C9.99973 25.6199 9.99973 22.3922 11.0051 19.4115V13.2296H3.03298C-0.371021 20.0112 -0.371021 28.0009 3.03298 34.7825L11.0051 28.6006Z"
-                fill="#FBBC04"
-              />
-              <path
-                d="M24.48 9.49932C27.9016 9.44641 31.2086 10.7339 33.6866 13.0973L40.5387 6.24523C36.2 2.17101 30.4414 -0.068932 24.48 0.00161733C15.4055 0.00161733 7.10718 5.11644 3.03296 13.2296L11.005 19.4115C12.901 13.7235 18.2187 9.49932 24.48 9.49932Z"
-                fill="#EA4335"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0_17_40">
-                <rect width="48" height="48" fill="white" />
-              </clipPath>
-            </defs>
-          </svg>
-          Continuar con Google
-        </button>
-      </div>
-      <div className="text-center">
-        <Link href="/" className="text-xs text-jet-800 hover:text-principal transition-colors">
-          Seguir como invitado →
-        </Link>
-      </div>
-    </>
+
+      <button
+        type="button"
+        onClick={() => signIn("google", { callbackUrl: "/" })}
+        className="w-full flex items-center justify-center gap-2.5 py-3 border border-principal-900 bg-white hover:bg-gray-50 active:bg-gray-100 rounded-xl transition-colors text-[15px] font-semibold text-jet cursor-pointer"
+      >
+        <GoogleIcon />
+        {t("auth.continueWithGoogle")}
+      </button>
+
+      <p className="whitespace-pre-line text-center text-[11px] leading-4 text-jet-800 mt-2">
+        {t("auth.terms")}
+      </p>
+
+      <Link
+        href="/"
+        onClick={onGuest}
+        className="block w-full text-center py-3.5 border border-principal rounded-xl text-[15px] font-semibold text-principal hover:bg-principal/10 transition-colors"
+      >
+        {t("auth.continueAsGuest")}
+      </Link>
+    </div>
   );
 };
 

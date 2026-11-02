@@ -4,39 +4,24 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const ERROR_MESSAGES: Record<string, { title: string; description: string }> = {
-  Configuration: {
-    title: "Error de conexión",
-    description:
-      "No se pudo completar el inicio de sesión. Esto suele pasar por una conexión lenta o inestable. Intentá de nuevo.",
-  },
-  AccessDenied: {
-    title: "Acceso denegado",
-    description: "No tenés permiso para ingresar con esa cuenta.",
-  },
-  Verification: {
-    title: "Link expirado",
-    description:
-      "El link de verificación expiró o ya fue usado. Pedí uno nuevo.",
-  },
-  OAuthCallback: {
-    title: "Error al conectar con Google",
-    description:
-      "Hubo un problema al comunicarse con Google. Intentá de nuevo en unos segundos.",
-  },
-  Default: {
-    title: "Algo salió mal",
-    description:
-      "Ocurrió un error inesperado al iniciar sesión. Intentá de nuevo.",
-  },
-};
+// Los textos salen de `authError.<código>.{title,description}`.
+const ERROR_CODES = [
+  "Configuration",
+  "AccessDenied",
+  "Verification",
+  "OAuthCallback",
+  "Default",
+] as const;
 
 export default function AuthErrorContent() {
+  const { t } = useTranslation();
   const params = useSearchParams();
   const error = params.get("error") ?? "Default";
-  const { title, description } =
-    ERROR_MESSAGES[error] ?? ERROR_MESSAGES.Default;
+  const code = ERROR_CODES.find((c) => c === error) ?? "Default";
+  const title = t(`authError.${code}.title`);
+  const description = t(`authError.${code}.description`);
 
   return (
     <div className="min-h-screen bg-mywhite flex items-center justify-center px-4">
@@ -55,14 +40,14 @@ export default function AuthErrorContent() {
           className="flex items-center gap-2 w-full justify-center bg-principal text-white font-semibold text-sm py-3 rounded-xl hover:bg-principal-400 transition-all"
         >
           <RefreshCw className="size-4" />
-          Intentar de nuevo
+          {t("authError.retry")}
         </Link>
 
         <Link
           href="/"
           className="text-xs text-jet-700 hover:text-principal transition-colors"
         >
-          Volver al inicio
+          {t("authError.backHome")}
         </Link>
 
         {process.env.NODE_ENV === "development" && (

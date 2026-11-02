@@ -20,6 +20,7 @@ const en: Translation = {
     cantOpenLink: "Can't open this link: {{url}}",
     search: "Search...",
     searching: "Searching...",
+    close: "Close",
   },
   apiErrors: {
     OTP_INVALID: "Invalid or expired code.",
@@ -104,6 +105,14 @@ const en: Translation = {
       places: "PLACES",
       addressPlaceholder: "Search for an address...",
     },
+    sheet: {
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+    unsupported:
+      "Your browser doesn't support WebGL. Turn on hardware acceleration or try another browser.",
+    loading: "Loading map...",
+    locationDenied: "Turn on your location to see nearby restrooms",
   },
   spot: {
     publicBadge: "PUBLIC",
@@ -407,6 +416,11 @@ const en: Translation = {
     emptyAll: "You haven't sent any requests yet.",
     emptyFiltered: "No requests in this category.",
     teamComment: "Comment from the team",
+    edit: "Edit",
+    editResend: "Edit and resubmit",
+    cancel: "Cancel request",
+    cancelTitle: "Cancel request?",
+    cancelBody: "Your pending request will be deleted.",
     kinds: {
       all: "All",
       create: "New",
@@ -425,6 +439,39 @@ const en: Translation = {
       REJECTED: "Rejected",
       ALL: "All",
     },
+  },
+  authError: {
+    Configuration: {
+      title: "Connection error",
+      description:
+        "We couldn't complete the sign-in. This usually happens on a slow or unstable connection. Please try again.",
+    },
+    AccessDenied: {
+      title: "Access denied",
+      description: "You don't have permission to sign in with that account.",
+    },
+    Verification: {
+      title: "Link expired",
+      description:
+        "The verification link has expired or was already used. Request a new one.",
+    },
+    OAuthCallback: {
+      title: "Couldn't connect to Google",
+      description:
+        "There was a problem talking to Google. Please try again in a few seconds.",
+    },
+    Default: {
+      title: "Something went wrong",
+      description:
+        "An unexpected error happened while signing in. Please try again.",
+    },
+    retry: "Try again",
+    backHome: "Back to home",
+  },
+  errorPage: {
+    title: "Something went wrong",
+    description: "An unexpected error occurred. You can retry or go back home.",
+    backHome: "Go home",
   },
   admin: {
     requests: {

@@ -5,8 +5,10 @@ import React from "react";
 import SpotCard from "../Spots/SpotCard";
 import { Bookmark } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 const FavoritesList = () => {
+  const { t } = useTranslation();
   const { favorites, loading } = useFavorites();
 
   if (loading)
@@ -29,10 +31,8 @@ const FavoritesList = () => {
     <div className="flex flex-col gap-3">
       {favorites.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
-          <Bookmark className="size-8 text-gray-300" />
-          <p className="text-sm text-jet-700">
-            Agrega algún local que te guste para encontrarlo más rápido luego
-          </p>
+          <Bookmark className="size-7 text-jet-900" />
+          <p className="text-sm text-jet-700">{t("profile.savedEmpty")}</p>
         </div>
       ) : (
         favorites.map(({ name, images, _id }) => (
