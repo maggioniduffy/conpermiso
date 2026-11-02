@@ -156,10 +156,7 @@ export default function MyMap({
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-100">
         <p className="px-4 text-center text-sm text-gray-500">
-          {t("map.unsupported", {
-            defaultValue:
-              "Tu navegador no soporta WebGL. Activá la aceleración por hardware o probá otro navegador.",
-          })}
+          {t("map.unsupported")}
         </p>
       </div>
     );

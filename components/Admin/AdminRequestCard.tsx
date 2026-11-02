@@ -205,6 +205,7 @@ export function AdminRequestCard({
                   title={t("admin.requests.approveTitle")}
                   description={t("admin.requests.approveBody", { name })}
                   confirmLabel={t("admin.requests.approveConfirm")}
+                  variant="primary"
                   onConfirm={onApprove}
                 />
               </div>

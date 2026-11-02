@@ -3,7 +3,7 @@
 import { Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { GeoLocation, Shift } from "@/utils/models";
+import { BathAccess, GeoLocation, Shift } from "@/utils/models";
 import { BathImage } from "@/utils/models";
 import ConfirmDialog from "../ConfirmDialog";
 import { Trash2 } from "lucide-react";
@@ -16,6 +16,8 @@ interface Props {
   description: string;
   location: GeoLocation;
   shifts: Shift[];
+  address?: string;
+  access?: BathAccess;
   onDelete?: (id: string) => void;
 }
 
@@ -24,6 +26,8 @@ export default function EditSpotCard({
   images,
   id,
   description,
+  address,
+  access,
   onDelete,
 }: Props) {
   const { t } = useTranslation();
@@ -40,18 +44,34 @@ export default function EditSpotCard({
             className="object-cover w-full h-full"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-principal-200 to-principal-400" />
+          <Image
+            src="/logo-badge-lg@2x.png"
+            width={48}
+            height={48}
+            alt=""
+            className="object-contain w-full h-full p-1.5"
+          />
         )}
       </div>
 
       {/* info */}
       <div className="flex-1 min-w-0">
-        <Link
-          href={`/spot/${id}`}
-          className="text-sm font-semibold text-jet hover:text-principal transition-colors truncate block"
-        >
-          {name}
-        </Link>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Link
+            href={`/spot/${id}`}
+            className="text-sm font-semibold text-jet hover:text-principal transition-colors truncate block min-w-0"
+          >
+            {name}
+          </Link>
+          {access === BathAccess.PUBLIC && (
+            <span className="shrink-0 rounded-full bg-principal-900 px-1.5 py-0.5 text-[9px] font-bold text-principal">
+              {t("spot.publicBadge")}
+            </span>
+          )}
+        </div>
+        {address ? (
+          <p className="text-xs text-jet-700 truncate mt-0.5">{address}</p>
+        ) : null}
         <p className="text-xs text-jet-700 truncate mt-0.5">{description}</p>
       </div>
 

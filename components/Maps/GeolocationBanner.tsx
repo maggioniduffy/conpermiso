@@ -3,8 +3,10 @@
 
 import { useEffect, useState } from "react";
 import { MapPin, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function GeolocationBanner() {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -43,9 +45,9 @@ export default function GeolocationBanner() {
           <MapPin className="size-6 text-principal" />
         </div>
         <div>
-          <p className="font-semibold text-jet text-sm">Activá tu ubicación</p>
+          <p className="font-semibold text-jet text-sm">{t("map.geoBanner.title")}</p>
           <p className="text-xs text-jet-700 mt-0.5">
-            Para encontrar baños cerca tuyo necesitamos saber dónde estás.
+            {t("map.geoBanner.body")}
           </p>
         </div>
       </div>
@@ -55,13 +57,13 @@ export default function GeolocationBanner() {
           onClick={() => setShow(false)}
           className="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-jet-600 hover:bg-gray-50 transition-all"
         >
-          Ahora no
+          {t("map.geoBanner.notNow")}
         </button>
         <button
           onClick={handleAllow}
           className="flex-1 py-2 rounded-xl bg-principal text-white text-sm font-medium hover:bg-principal-400 transition-all hover:scale-[1.02]"
         >
-          Permitir
+          {t("map.geoBanner.allow")}
         </button>
       </div>
     </div>

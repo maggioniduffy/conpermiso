@@ -9,7 +9,7 @@ import type { BathFilter, CostFilter } from "@/utils/bath-filters";
 
 function MapPlaceholder() {
   const { t } = useTranslation();
-  const label = t("map.loading", { defaultValue: "Cargando mapa..." });
+  const label = t("map.loading");
   return (
     <div className="w-full h-full relative overflow-hidden">
       <img
@@ -63,9 +63,7 @@ export default function MyMapContainer({
     <div className="bg-mywhite h-full w-full z-80">
       {denied && (
         <p className="text-xs text-center text-jet-700 py-2 absolute top-16 left-1/2 -translate-x-1/2 z-[10] bg-white/80 px-3 rounded-full">
-          {t("map.locationDenied", {
-            defaultValue: "Activá tu ubicación para ver los baños cercanos",
-          })}
+          {t("map.locationDenied")}
         </p>
       )}
       <Map

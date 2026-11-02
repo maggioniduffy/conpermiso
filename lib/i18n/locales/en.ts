@@ -113,9 +113,21 @@ const en: Translation = {
       "Your browser doesn't support WebGL. Turn on hardware acceleration or try another browser.",
     loading: "Loading map...",
     locationDenied: "Turn on your location to see nearby restrooms",
+    geoBanner: {
+      title: "Turn on your location",
+      body: "To find restrooms near you, we need to know where you are.",
+      notNow: "Not now",
+      allow: "Allow",
+    },
   },
   spot: {
     publicBadge: "PUBLIC",
+    deletedTitle: "Bathroom deleted",
+    deletedBody: "The bathroom was deleted successfully.",
+    favorite: {
+      add: "Add to favorites",
+      remove: "Remove from favorites",
+    },
     openUpper: "OPEN",
     closedUpper: "CLOSED",
     open: "Open",
@@ -474,6 +486,7 @@ const en: Translation = {
     backHome: "Go home",
   },
   admin: {
+    errorTitle: "Admin panel error",
     requests: {
       title: "Requests",
       emptyPending: "No pending requests 🎉",

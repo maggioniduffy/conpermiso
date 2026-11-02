@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 vi.mock("@/hooks", () => ({
@@ -13,6 +13,12 @@ vi.mock("next/image", () => ({
 
 import SpotCard from "@/components/Spots/SpotCard";
 import { useFavorites } from "@/hooks";
+
+import i18n from "@/lib/i18n";
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 const mockUseFavorites = useFavorites as ReturnType<typeof vi.fn>;
 

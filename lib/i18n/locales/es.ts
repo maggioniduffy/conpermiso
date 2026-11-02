@@ -119,9 +119,21 @@ const es = {
       "Tu navegador no soporta WebGL. Activá la aceleración por hardware o probá otro navegador.",
     loading: "Cargando mapa...",
     locationDenied: "Activá tu ubicación para ver los baños cercanos",
+    geoBanner: {
+      title: "Activá tu ubicación",
+      body: "Para encontrar baños cerca tuyo necesitamos saber dónde estás.",
+      notNow: "Ahora no",
+      allow: "Permitir",
+    },
   },
   spot: {
     publicBadge: "PÚBLICO",
+    deletedTitle: "Baño eliminado",
+    deletedBody: "El baño fue eliminado correctamente.",
+    favorite: {
+      add: "Agregar a favoritos",
+      remove: "Quitar de favoritos",
+    },
     openUpper: "ABIERTO",
     closedUpper: "CERRADO",
     open: "Abierto",
@@ -485,6 +497,7 @@ const es = {
     backHome: "Ir al inicio",
   },
   admin: {
+    errorTitle: "Error en el panel de admin",
     requests: {
       title: "Solicitudes",
       emptyPending: "No hay solicitudes pendientes 🎉",

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
@@ -9,6 +9,12 @@ vi.mock("@/hooks", () => ({
 import FavoriteButton from "@/components/Spots/FavoriteButton";
 import { apiFetch } from "@/lib/apiFetch";
 import { useBackendUser } from "@/hooks";
+
+import i18n from "@/lib/i18n";
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 const mockApiFetch = apiFetch as ReturnType<typeof vi.fn>;
 const mockUseBackendUser = useBackendUser as ReturnType<typeof vi.fn>;

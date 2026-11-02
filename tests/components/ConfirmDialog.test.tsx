@@ -1,6 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import i18n from "@/lib/i18n";
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 describe("ConfirmDialog", () => {
   it("renders the trigger element", () => {
@@ -86,5 +91,21 @@ describe("ConfirmDialog", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Abrir" }));
     expect(await screen.findByRole("button", { name: "Cancelar" })).toBeInTheDocument();
+  });
+
+  it("uses the danger (red) style by default and principal for variant=primary", async () => {
+    const { unmount } = render(
+      <ConfirmDialog trigger={<button>Abrir</button>} onConfirm={vi.fn()} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Abrir" }));
+    expect((await screen.findByRole("button", { name: "Confirmar" })).className).toContain("bg-red-500");
+    unmount();
+    render(
+      <ConfirmDialog trigger={<button>Abrir</button>} variant="primary" onConfirm={vi.fn()} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Abrir" }));
+    const btn = await screen.findByRole("button", { name: "Confirmar" });
+    expect(btn.className).toContain("bg-principal");
+    expect(btn.className).not.toContain("bg-red-500");
   });
 });

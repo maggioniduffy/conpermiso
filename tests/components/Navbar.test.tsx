@@ -137,7 +137,7 @@ describe("Navbar", () => {
     render(<Navbar />);
     const avatar = screen.getByAltText("Account");
     fireEvent.click(avatar.closest("button")!);
-    expect(screen.getByText(/Bienvenido/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("tu@email.com")).toBeInTheDocument();
   });
 
   it("shows sign out button when authenticated user clicks avatar", () => {

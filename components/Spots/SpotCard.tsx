@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useFavorites } from "@/hooks";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   title?: string;
@@ -17,6 +18,7 @@ const SpotCard = ({
   image = "/biglogo_blue.png",
   id,
 }: Props) => {
+  const { t } = useTranslation();
   const { removeFavorite } = useFavorites();
 
   return (
@@ -44,7 +46,7 @@ const SpotCard = ({
       <button
         onClick={() => removeFavorite(id)}
         className="shrink-0 p-1.5 rounded-xl hover:bg-red-50 text-jet-700 hover:text-red-500 transition-all"
-        title="Quitar de favoritos"
+        title={t("spot.favorite.remove")}
       >
         <X className="size-4" />
       </button>

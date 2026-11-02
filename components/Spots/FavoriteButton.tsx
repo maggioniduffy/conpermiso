@@ -1,6 +1,7 @@
 "use client";
 
 import { Bookmark } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/apiFetch";
 import { useBackendUser } from "@/hooks";
@@ -19,6 +20,7 @@ export default function FavoriteButton({
 }: Props) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
   const { user } = useBackendUser();
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export default function FavoriteButton({
     <button
       onClick={toggle}
       className={btnClass}
-      title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+      title={isFavorite ? t("spot.favorite.remove") : t("spot.favorite.add")}
     >
       <Bookmark
         className={`${sizeClass} transition-colors ${

@@ -9,6 +9,7 @@ vi.mock("next/image", () => ({
 
 import EditSpotCard from "@/components/Spots/EditSpotCard";
 import i18n from "@/lib/i18n";
+import { BathAccess } from "@/utils/models";
 
 beforeAll(async () => {
   await i18n.changeLanguage("es");
@@ -46,10 +47,23 @@ describe("EditSpotCard", () => {
     expect(editLink).toHaveAttribute("href", "/spot/edit/b1");
   });
 
-  it("renders gradient placeholder when no image", () => {
+  it("renders the logo badge fallback when no image", () => {
     const { container } = render(<EditSpotCard {...defaultProps} />);
-    const gradient = container.querySelector(".bg-gradient-to-br");
-    expect(gradient).toBeInTheDocument();
+    expect(container.querySelector('img[src="/logo-badge-lg@2x.png"]')).toBeInTheDocument();
+  });
+
+  it("renders the address line when provided", () => {
+    render(<EditSpotCard {...defaultProps} address="Av. Siempreviva 742" />);
+    expect(screen.getByText("Av. Siempreviva 742")).toBeInTheDocument();
+  });
+
+  it("shows the PÚBLICO pill only for public spots", () => {
+    const { rerender } = render(
+      <EditSpotCard {...defaultProps} access={BathAccess.PUBLIC} />,
+    );
+    expect(screen.getByText("PÚBLICO")).toBeInTheDocument();
+    rerender(<EditSpotCard {...defaultProps} access={BathAccess.PRIVATE} />);
+    expect(screen.queryByText("PÚBLICO")).not.toBeInTheDocument();
   });
 
   it("renders image when images are provided", () => {

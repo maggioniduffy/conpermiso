@@ -14,7 +14,7 @@ export default function AdminError({
   return (
     <ErrorView
       reset={reset}
-      title={t("admin.errorTitle", { defaultValue: "Error en el panel de admin" })}
+      title={t("admin.errorTitle")}
       description={t("errorPage.description")}
       backHref="/"
       backLabel={t("errorPage.backHome")}

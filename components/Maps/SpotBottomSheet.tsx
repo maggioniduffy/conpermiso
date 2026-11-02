@@ -79,8 +79,8 @@ export default function SpotBottomSheet({ bath, openRequest, onClose }: Props) {
 
   const visible = !!bath;
   const expandLabel = expanded
-    ? t("map.sheet.collapse", { defaultValue: "Reducir" })
-    : t("map.sheet.expand", { defaultValue: "Expandir" });
+    ? t("map.sheet.collapse")
+    : t("map.sheet.expand");
 
   return (
     <div

@@ -30,10 +30,8 @@ export default function DeleteSpotButton({ bathId, bathName }: Props) {
         });
         return;
       }
-      toast.success(t("spot.deletedTitle", { defaultValue: "Baño eliminado" }), {
-        description: t("spot.deletedBody", {
-          defaultValue: "El baño fue eliminado correctamente.",
-        }),
+      toast.success(t("spot.deletedTitle"), {
+        description: t("spot.deletedBody"),
       });
       router.push("/");
       router.refresh();
