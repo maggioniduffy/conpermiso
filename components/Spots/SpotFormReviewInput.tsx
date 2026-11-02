@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Textarea } from "../ui/textarea";
 import { SectionCard } from "./SectionCard";
 
@@ -11,10 +12,11 @@ interface Props {
 }
 
 export function SpotFormReviewInput({ rating, onRatingChange, comment, onCommentChange }: Props) {
+  const { t } = useTranslation();
   const [hover, setHover] = useState(0);
 
   return (
-    <SectionCard icon={<Star className="size-4" />} label="Tu reseña (opcional)">
+    <SectionCard label={t("spotForm.review.label")}>
       <div className="flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((i) => (
           <button
@@ -37,7 +39,7 @@ export function SpotFormReviewInput({ rating, onRatingChange, comment, onComment
         <Textarea
           value={comment}
           onChange={(e) => onCommentChange(e.target.value)}
-          placeholder="Comentario (opcional)..."
+          placeholder={t("spotForm.review.commentPlaceholder")}
           className="bg-mywhite border border-principal/30 rounded-lg resize-none text-sm"
           rows={2}
           maxLength={300}

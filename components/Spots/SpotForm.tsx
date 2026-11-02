@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Type, AlignLeft } from "lucide-react";
-import { Input } from "../ui/input";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Info, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
-import { Bath } from "@/utils/models";
+import { Bath, BathRequest } from "@/utils/models";
 import { useSpotForm } from "@/hooks/use-spot-form";
 import { SectionCard } from "./SectionCard";
 import { SpotFormCostSection, CostType } from "./SpotFormCostSection";
@@ -14,14 +14,22 @@ import { SpotFormScheduleSection } from "./SpotFormScheduleSection";
 import { SpotFormLocationSection } from "./SpotFormLocationSection";
 import { SpotFormImagesSection } from "./SpotFormImagesSection";
 import { SpotFormReviewInput } from "./SpotFormReviewInput";
+import { AccessCodeInputs } from "./AccessCodeInputs";
 
-const Required = () => <span className="text-red-500 ml-0.5">*</span>;
+const inputClass =
+  "bg-mywhite border border-principal/30 rounded-[10px] py-2.5 px-3.5 text-base text-jet placeholder:text-jet-800 outline-none focus-visible:ring-2 focus-visible:ring-principal/40 w-full";
 
 interface Props {
-  mode?: "admin-create" | "request";
+  /** "suggest" = "Sugerir edición" de un usuario (POST /bath-requests/edits). */
+  mode?: "admin-create" | "request" | "suggest";
   title?: string;
+  /** Valores a precargar (el baño, o el baño con su sugerencia pendiente encima). */
   initialData?: Bath;
   requestId?: string;
+  /** Sólo en modo "suggest": el baño real, contra el que se calcula qué cambió. */
+  suggestBase?: Bath;
+  /** Sólo en modo "suggest": la sugerencia pendiente del usuario, si ya tiene una. */
+  pendingSuggestion?: BathRequest | null;
 }
 
 export default function SpotForm({
@@ -29,29 +37,36 @@ export default function SpotForm({
   title,
   initialData,
   requestId,
+  suggestBase,
+  pendingSuggestion,
 }: Props) {
+  const { t } = useTranslation();
+  const router = useRouter();
   const isEdit = !!initialData;
+  const isSuggestion = mode === "suggest";
   const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
 
-  const remainingImages = (initialData?.images ?? []).filter(
+  const remainingImages = (suggestBase?.images ?? initialData?.images ?? []).filter(
     (img) => !removedImages.has(img.url),
   );
 
   const {
-    costType,
     setCostType,
+    costType,
     access,
     setAccess,
     setShifts,
     location,
     address,
     setImageFiles,
+    accessCode,
+    setAccessCode,
     isPending,
     handleLocationChange,
     handleSubmit,
-  } = useSpotForm(initialData, mode, requestId, remainingImages);
+  } = useSpotForm(initialData, mode, requestId, remainingImages, suggestBase);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,58 +79,81 @@ export default function SpotForm({
     await handleSubmit(formData);
   };
 
-  return (
-    <form onSubmit={onSubmit} className="w-full md:w-2xl flex flex-col gap-4">
-      <div className="flex items-baseline justify-between px-1">
-        <h1 className="text-jet text-2xl font-bold text-center md:text-left">
-          {title ?? (isEdit ? "Editar Spot" : "Nuevo Spot")}
-        </h1>
-        <p className="text-xs text-jet-700">
-          <Required /> campos requeridos
-        </p>
-      </div>
+  const heading =
+    title ??
+    (isSuggestion
+      ? t("suggest.title")
+      : isEdit
+        ? t("spotForm.editTitle")
+        : t("spotForm.newTitle"));
 
-      <SectionCard
-        icon={<Type className="size-4" />}
-        label={<>Nombre <Required /></>}
-      >
-        <Input
+  const submitLabel = isSuggestion
+    ? pendingSuggestion
+      ? t("suggest.update")
+      : t("suggest.submit")
+    : mode === "request"
+      ? requestId
+        ? t("spotForm.saveChanges")
+        : t("spotForm.submitRequest")
+      : isEdit
+        ? t("spotForm.saveChanges")
+        : t("spotForm.submitCreate");
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="w-full md:w-2xl flex flex-col gap-3"
+    >
+      {isEdit ? (
+        <div className="flex items-center justify-between mb-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={t("common.back")}
+            className="size-9 flex items-center justify-center rounded-full text-jet cursor-pointer hover:bg-principal/10"
+          >
+            <ChevronLeft className="size-[22px]" />
+          </button>
+          <h1 className="text-jet text-2xl font-bold text-center">{heading}</h1>
+          <span className="size-9" aria-hidden />
+        </div>
+      ) : (
+        <div className="flex items-baseline justify-between mb-1">
+          <h1 className="text-jet text-2xl font-bold">{heading}</h1>
+          <p className="text-xs text-jet-700">{t("spotForm.requiredNote")}</p>
+        </div>
+      )}
+
+      {isSuggestion && (
+        <div className="flex items-start gap-2 rounded-xl border border-principal/20 bg-white p-3">
+          <Info className="size-3.5 text-principal shrink-0 mt-0.5" />
+          <p className="text-xs leading-relaxed text-jet-600">
+            {pendingSuggestion ? t("suggest.updatingPending") : t("suggest.intro")}
+          </p>
+        </div>
+      )}
+
+      <SectionCard label={t("spotForm.nameLabel")}>
+        <input
           name="name"
-          className="bg-mywhite border border-principal/30 rounded-lg"
-          placeholder="Nombre del baño"
-          required
-          minLength={3}
+          className={inputClass}
+          placeholder={t("spotForm.namePlaceholder")}
+          maxLength={100}
           defaultValue={initialData?.name}
         />
       </SectionCard>
 
-      <SectionCard
-        icon={<AlignLeft className="size-4" />}
-        label={<>Descripción <Required /></>}
-      >
+      <SectionCard label={t("spotForm.descriptionLabel")}>
         <Textarea
           name="description"
-          className="bg-mywhite border border-principal/30 rounded-lg resize-none"
-          placeholder="Descripción del baño"
+          className={`${inputClass} resize-none min-h-20`}
+          placeholder={t("spotForm.descriptionPlaceholder")}
           rows={3}
-          required
-          minLength={10}
+          maxLength={500}
           defaultValue={initialData?.description}
         />
       </SectionCard>
-
-      <SpotFormCostSection
-        costType={costType as CostType}
-        setCostType={(v) => setCostType(v)}
-        initialCost={typeof initialData?.cost === "number" ? initialData.cost : undefined}
-      />
-
-      <SpotFormAccessSection access={access} setAccess={(v) => setAccess(v)} />
-
-      <SpotFormScheduleSection
-        onChange={setShifts}
-        initialShifts={initialData?.shifts}
-      />
 
       <SpotFormLocationSection
         onChange={handleLocationChange}
@@ -132,12 +170,49 @@ export default function SpotForm({
         }
       />
 
-      <SpotFormImagesSection
-        isEdit={isEdit}
-        remainingImages={remainingImages}
-        onRemoveImage={(url) => setRemovedImages((prev) => new Set(prev).add(url))}
-        onFilesChange={setImageFiles}
+      <SpotFormCostSection
+        costType={costType as CostType}
+        setCostType={(v) => setCostType(v)}
+        initialCost={
+          typeof initialData?.cost === "number" ? initialData.cost : undefined
+        }
       />
+
+      <SpotFormAccessSection access={access} setAccess={(v) => setAccess(v)} />
+
+      {/* El código se actualiza directo desde el detalle, no por sugerencia */}
+      {!isSuggestion && (
+        <SectionCard label={t("spotForm.accessCode.label")}>
+          <AccessCodeInputs value={accessCode} onChange={setAccessCode} />
+        </SectionCard>
+      )}
+
+      <SpotFormScheduleSection
+        onChange={setShifts}
+        initialShifts={initialData?.shifts}
+      />
+
+      {isSuggestion ? (
+        <SectionCard label={t("suggest.commentLabel")}>
+          <Textarea
+            name="comment"
+            className={`${inputClass} resize-none min-h-20`}
+            placeholder={t("suggest.commentPlaceholder")}
+            rows={3}
+            maxLength={300}
+            defaultValue={pendingSuggestion?.comment ?? ""}
+          />
+        </SectionCard>
+      ) : (
+        <SpotFormImagesSection
+          isEdit={isEdit}
+          remainingImages={remainingImages}
+          onRemoveImage={(url) =>
+            setRemovedImages((prev) => new Set(prev).add(url))
+          }
+          onFilesChange={setImageFiles}
+        />
+      )}
 
       {!isEdit && (
         <SpotFormReviewInput
@@ -148,18 +223,25 @@ export default function SpotForm({
         />
       )}
 
-      <Button
+      <button
         type="submit"
-        className="w-full bg-principal text-white hover:bg-principal-400 hover:scale-[1.02] transition-all rounded-xl py-5 font-semibold text-base flex items-center gap-2"
+        className="mt-2 flex items-center justify-center rounded-[14px] bg-principal py-4 text-base font-semibold text-white transition-all hover:bg-principal-400 disabled:opacity-50 cursor-pointer"
         disabled={isPending || !location}
       >
-        {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear baño"}
-        <Send className="size-4" />
-      </Button>
+        {isPending ? <Loader2 className="size-5 animate-spin" /> : submitLabel}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="rounded-[14px] border-[1.5px] border-principal py-4 text-base font-semibold text-principal transition-all hover:bg-principal/5 cursor-pointer"
+      >
+        {t("common.cancel")}
+      </button>
 
       {!location && (
-        <p className="text-xs text-center text-red-400 -mt-2">
-          Falta seleccionar la ubicación en el mapa
+        <p className="text-xs text-center text-[#ef4444] -mt-1">
+          {t("spotForm.missingLocation")}
         </p>
       )}
     </form>

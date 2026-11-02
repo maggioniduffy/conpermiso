@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 vi.mock("next/image", () => ({
@@ -8,6 +8,11 @@ vi.mock("next/image", () => ({
 }));
 
 import EditSpotCard from "@/components/Spots/EditSpotCard";
+import i18n from "@/lib/i18n";
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 const defaultProps = {
   id: "b1",

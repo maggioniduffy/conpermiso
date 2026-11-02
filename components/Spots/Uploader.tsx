@@ -3,6 +3,7 @@
 import { AlertCircleIcon, ImageUpIcon, XIcon } from "lucide-react";
 import { useFileUpload } from "@/hooks";
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onChange?: (files: File[]) => void;
@@ -10,8 +11,8 @@ interface Props {
 }
 
 export default function Uploader({ onChange, maxFiles = 5 }: Props) {
-  const maxSizeMB = 5;
-  const maxSize = maxSizeMB * 1024 * 1024;
+  const { t } = useTranslation();
+  const maxSize = 5 * 1024 * 1024;
 
   const [
     { files, isDragging, errors },
@@ -85,11 +86,8 @@ export default function Uploader({ onChange, maxFiles = 5 }: Props) {
             </div>
             <p className="mb-1.5 text-sm font-medium">
               {isMaxReached
-                ? "Máximo alcanzado"
-                : "Arrastrá imágenes o hacé click"}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Máx {maxFiles} imágenes · {maxSizeMB}MB c/u
+                ? t("spotForm.images.limitReached", { max: maxFiles })
+                : t("spotForm.images.add", { count: files.length, max: maxFiles })}
             </p>
           </div>
         </div>
@@ -127,7 +125,7 @@ export default function Uploader({ onChange, maxFiles = 5 }: Props) {
           <AlertCircleIcon className="size-3" />
           <span>
             {errors[0] ||
-              `Máximo ${maxFiles} imágenes permitidas (${files.length}/${maxFiles})`}
+              t("spotForm.images.limitBody", { max: maxFiles })}
           </span>
         </div>
       )}

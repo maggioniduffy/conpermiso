@@ -1,3 +1,5 @@
+"use client";
+
 import { Edit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,6 +7,7 @@ import { GeoLocation, Shift } from "@/utils/models";
 import { BathImage } from "@/utils/models";
 import ConfirmDialog from "../ConfirmDialog";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   name: string;
@@ -23,6 +26,7 @@ export default function EditSpotCard({
   description,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 p-4 hover:shadow-md transition-shadow">
       {/* imagen */}
@@ -56,7 +60,7 @@ export default function EditSpotCard({
         <Link
           href={`/spot/edit/${id}`}
           className="p-2 rounded-xl hover:bg-principal/10 text-jet-700 hover:text-principal transition-all"
-          title="Editar"
+          title={t("spot.edit")}
         >
           <Edit className="size-4" />
         </Link>
@@ -67,9 +71,9 @@ export default function EditSpotCard({
                 <Trash2 className="size-4" />
               </button>
             }
-            title="¿Eliminar baño?"
-            description="Se eliminará permanentemente. Esta acción no se puede deshacer."
-            confirmLabel="Eliminar"
+            title={t("spot.deleteTitle")}
+            description={t("spot.deleteBody", { name })}
+            confirmLabel={t("common.delete")}
             onConfirm={() => onDelete(id)}
           />
         )}

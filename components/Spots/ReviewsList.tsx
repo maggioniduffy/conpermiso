@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/apiFetch";
-import { Star, MoreVertical, Flag, UserX } from "lucide-react";
+import { Star, MoreVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { apiErrorMessage } from "@/lib/i18n/api-errors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBackendUser } from "@/hooks";
 import { toast } from "sonner";
-import ReportDialog from "./ReportDialog";
+import ReportDialog, { REPORT_REASONS } from "./ReportDialog";
+
+export { REPORT_REASONS };
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +41,7 @@ interface Props {
 }
 
 export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<BathStats>({
     avgRating: 0,
@@ -82,7 +87,6 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
   async function handleBlockUser() {
     if (!userToBlock) return;
     const targetUserId = userToBlock.id;
-    const targetUserName = userToBlock.name;
 
     try {
       const res = await apiFetch("/users/block", {
@@ -92,9 +96,8 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        const msg = body?.message || "No se pudo ocultar al usuario.";
-        toast.error("Error al ocultar usuario", {
-          description: Array.isArray(msg) ? msg.join(" · ") : msg,
+        toast.error(t("common.error"), {
+          description: apiErrorMessage(body, t, t("reviews.block.failed")),
         });
         return;
       }
@@ -102,12 +105,12 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
       // Remover inmediatamente del estado local del cliente
       setReviews((prev) => prev.filter((r) => r.user?._id !== targetUserId));
 
-      toast.success("Usuario ocultado", {
-        description: `Se removieron los comentarios de ${targetUserName}.`,
+      toast.success(t("reviews.block.doneTitle"), {
+        description: t("reviews.block.doneBody"),
       });
     } catch {
-      toast.error("Error de conexión", {
-        description: "No se pudo conectar con el servidor.",
+      toast.error(t("common.error"), {
+        description: t("reviews.block.failed"),
       });
     } finally {
       setUserToBlock(null);
@@ -143,7 +146,7 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
       <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-4">
         {reviews.length === 0 ? (
           <p className="text-xs text-center text-jet-700 py-2">
-            Todavía no hay valoraciones
+            {t("reviews.empty")}
           </p>
         ) : (
           <>
@@ -159,15 +162,14 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                       key={s}
                       className={`size-4 ${
                         s <= Math.round(stats.avgRating)
-                          ? "fill-principal text-principal"
+                          ? "fill-yellow-400 text-yellow-400"
                           : "text-gray-200 fill-gray-200"
                       }`}
                     />
                   ))}
                 </div>
                 <p className="text-xs text-jet-700">
-                  {stats.reviewsCount}{" "}
-                  {stats.reviewsCount === 1 ? "valoración" : "valoraciones"}
+                  {t("reviews.count", { count: stats.reviewsCount })}
                 </p>
               </div>
             </div>
@@ -179,7 +181,7 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                   currentUser &&
                   review.user?._id &&
                   review.user._id === currentUser._id;
-                const authorName = review.user?.name || "Usuario anónimo";
+                const authorName = review.user?.name || t("common.user");
                 const isMenuOpen = activeMenuId === review._id;
 
                 return (
@@ -196,7 +198,7 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                               key={s}
                               className={`size-3 ${
                                 s <= review.rating
-                                  ? "fill-principal text-principal"
+                                  ? "fill-yellow-400 text-yellow-400"
                                   : "text-gray-200 fill-gray-200"
                               }`}
                             />
@@ -204,14 +206,15 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                         </div>
                       </div>
 
-                      {/* Menú de opciones / moderación */}
+                      {/* Menú de opciones / moderación (como la app: sólo con sesión y en comentarios ajenos) */}
+                      {currentUser && !isAuthor && (
                       <div className="relative">
                         <button
                           onClick={() =>
                             setActiveMenuId(isMenuOpen ? null : review._id)
                           }
                           className="p-1.5 rounded-lg text-gray-400 hover:text-jet hover:bg-gray-100 transition-all cursor-pointer"
-                          title="Opciones de comentario"
+                          title={t("reviews.options.title")}
                         >
                           <MoreVertical className="size-4" />
                         </button>
@@ -228,11 +231,10 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                               }}
                               className="flex items-center gap-2.5 px-3 py-2 text-xs text-jet font-medium hover:bg-amber-50 hover:text-amber-700 transition-colors w-full text-left cursor-pointer"
                             >
-                              <Flag className="size-3.5 text-amber-500 shrink-0" />
-                              Reportar comentario
+                              {t("reviews.options.report")}
                             </button>
 
-                            {review.user?._id && !isAuthor && (
+                            {review.user?._id && (
                               <button
                                 onClick={() => {
                                   setActiveMenuId(null);
@@ -243,13 +245,13 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
                                 }}
                                 className="flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 font-medium hover:bg-red-50 transition-colors w-full text-left cursor-pointer"
                               >
-                                <UserX className="size-3.5 text-red-500 shrink-0" />
-                                Ocultar este usuario
+                                {t("reviews.options.hide")}
                               </button>
                             )}
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
 
                     {review.comment && (
@@ -284,21 +286,23 @@ export default function ReviewsList({ bathId, refreshKey = 0 }: Props) {
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-jet font-semibold">
-              ¿Ocultar usuario?
+              {t("reviews.block.title")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-jet-700">
-              Se removerán inmediatamente los comentarios de &quot;{userToBlock?.name}&quot; de tu vista.
+              {t("reviews.block.body", {
+                name: userToBlock?.name || t("common.thisUser"),
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-0">
             <AlertDialogCancel onClick={() => setUserToBlock(null)}>
-              Cancelar
+              {t("common.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBlockUser}
               className="bg-red-500 hover:bg-red-600 text-white cursor-pointer"
             >
-              Ocultar usuario
+              {t("reviews.block.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

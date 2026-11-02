@@ -1,19 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
 import { apiFetch } from "@/lib/apiFetch";
 import ReviewsList from "@/components/Spots/ReviewsList";
+import i18n from "@/lib/i18n";
 
 const mockApiFetch = apiFetch as ReturnType<typeof vi.fn>;
 
 function mockResponses(reviews: unknown[], bath: unknown) {
   mockApiFetch
-    .mockResolvedValueOnce({ json: () => Promise.resolve(reviews) })
-    .mockResolvedValueOnce({ json: () => Promise.resolve(bath) });
+    .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(reviews) })
+    .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(bath) });
 }
 
 describe("ReviewsList", () => {
+  beforeAll(async () => { await i18n.changeLanguage("es"); });
   beforeEach(() => { mockApiFetch.mockReset(); });
 
   it("renders skeleton while loading (before first response)", () => {
@@ -52,7 +54,7 @@ describe("ReviewsList", () => {
   });
 
   it("refetches when refreshKey changes", async () => {
-    mockApiFetch.mockResolvedValue({ json: () => Promise.resolve([]) });
+    mockApiFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
     const { rerender } = render(<ReviewsList bathId="b1" refreshKey={0} />);
     await waitFor(() => expect(mockApiFetch).toHaveBeenCalledTimes(2));
 

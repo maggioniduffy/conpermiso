@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Flag, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -11,8 +14,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { apiFetch } from "@/lib/apiFetch";
-import { toast } from "sonner";
-import { Flag, Loader2 } from "lucide-react";
+import { apiErrorMessage } from "@/lib/i18n/api-errors";
+
+/**
+ * Razón que se guarda en el backend. El backend recibe y guarda el texto en
+ * español: es un dato, no copy, así que no se traduce al enviarlo.
+ */
+export const REPORT_REASONS = {
+  spam: "Spam / Publicidad",
+  inappropriate: "Contenido Inapropiado",
+  offensive: "Lenguaje Ofensivo / Acoso",
+} as const;
+
+type ReasonKey = keyof typeof REPORT_REASONS;
+const REASON_KEYS: ReasonKey[] = ["spam", "inappropriate", "offensive"];
 
 interface ReportDialogProps {
   commentId: string | null;
@@ -20,128 +35,76 @@ interface ReportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const PRESET_REASONS = [
-  "Contenido inapropiado o lenguaje ofensivo",
-  "Spam, publicidad o engaño",
-  "Acoso o discriminación",
-  "Otro motivo",
-];
-
+// Igual que la app: elegir un motivo lo envía (POST /reviews/:id/report).
 export default function ReportDialog({
   commentId,
   open,
   onOpenChange,
 }: ReportDialogProps) {
-  const [reason, setReason] = useState(PRESET_REASONS[0]);
-  const [customReason, setCustomReason] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const { t } = useTranslation();
+  const [pending, setPending] = useState<ReasonKey | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function send(key: ReasonKey) {
     if (!commentId) return;
-
-    const finalReason =
-      reason === "Otro motivo" && customReason.trim()
-        ? customReason.trim()
-        : reason;
-
-    if (!finalReason) {
-      toast.error("Por favor seleccioná o escribí un motivo.");
-      return;
-    }
-
-    setIsPending(true);
+    setPending(key);
     try {
-      const res = await apiFetch(`/comments/${commentId}/report`, {
+      const res = await apiFetch(`/reviews/${commentId}/report`, {
         method: "POST",
-        body: JSON.stringify({ reason: finalReason }),
+        body: JSON.stringify({ reason: REPORT_REASONS[key] }),
       });
-
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        const msg = data?.message || "Error al enviar el reporte.";
-        throw new Error(Array.isArray(msg) ? msg.join(" · ") : msg);
+        const err = await res.json().catch(() => null);
+        toast.error(t("common.error"), {
+          description: apiErrorMessage(err, t, t("reviews.report.sendFailed")),
+        });
+        return;
       }
-
-      toast.success("Reporte enviado", {
-        description: "Gracias por ayudarnos a mantener la comunidad segura.",
+      toast.success(t("reviews.report.sentTitle"), {
+        description: t("reviews.report.sentBody"),
       });
       onOpenChange(false);
-      setCustomReason("");
-      setReason(PRESET_REASONS[0]);
-    } catch (error: any) {
-      toast.error("Error al reportar", {
-        description: error.message || "No se pudo enviar el reporte.",
+    } catch {
+      toast.error(t("common.error"), {
+        description: t("reviews.report.sendFailed"),
       });
     } finally {
-      setIsPending(false);
+      setPending(null);
     }
   }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md">
-        <form onSubmit={handleSubmit}>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-jet font-semibold">
-              <Flag className="size-5 text-amber-500 shrink-0" />
-              Reportar comentario
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-jet-700">
-              Seleccioná el motivo por el cual considerás que este comentario es inapropiado.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2 text-jet font-semibold">
+            <Flag className="size-5 text-amber-500 shrink-0" />
+            {t("reviews.report.title")}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-jet-700">
+            {t("reviews.report.body")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-          <div className="py-4 flex flex-col gap-2">
-            {PRESET_REASONS.map((r) => (
-              <label
-                key={r}
-                className={`flex items-center gap-3 p-3 rounded-xl border text-sm cursor-pointer transition-all ${
-                  reason === r
-                    ? "border-principal bg-principal/5 font-medium text-principal"
-                    : "border-gray-200 hover:border-gray-300 text-jet"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="reportReason"
-                  value={r}
-                  checked={reason === r}
-                  onChange={() => setReason(r)}
-                  className="accent-principal size-4 cursor-pointer"
-                />
-                {r}
-              </label>
-            ))}
-
-            {reason === "Otro motivo" && (
-              <textarea
-                value={customReason}
-                onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Escribí los detalles del motivo..."
-                className="w-full p-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-principal/20 focus:border-principal mt-1 min-h-[80px]"
-              />
-            )}
-          </div>
-
-          <AlertDialogFooter className="gap-2 sm:gap-0">
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+        <div className="py-2 flex flex-col gap-2">
+          {REASON_KEYS.map((key) => (
             <button
-              type="submit"
-              disabled={isPending}
-              className="px-4 py-2 rounded-xl bg-principal text-white font-medium text-sm hover:bg-principal-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              key={key}
+              type="button"
+              disabled={pending !== null}
+              onClick={() => send(key)}
+              className="flex items-center justify-between gap-3 p-3 rounded-xl border border-gray-200 text-sm text-jet text-left transition-all hover:border-principal hover:bg-principal/5 disabled:opacity-50 cursor-pointer"
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                "Enviar reporte"
-              )}
+              {t(`reviews.report.${key}`)}
+              {pending === key && <Loader2 className="size-4 animate-spin" />}
             </button>
-          </AlertDialogFooter>
-        </form>
+          ))}
+        </div>
+
+        <AlertDialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogCancel disabled={pending !== null}>
+            {t("common.cancel")}
+          </AlertDialogCancel>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

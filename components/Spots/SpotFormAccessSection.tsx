@@ -1,12 +1,14 @@
-import { Building2 } from "lucide-react";
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BathAccess } from "@/utils/models";
 import { SectionCard } from "./SectionCard";
 
 const toggleClass = `
-  px-4 bg-mywhite py-2 rounded-lg border text-sm text-jet transition-all border-principal/30
-  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:shadow-sm data-[state=on]:font-semibold
-  whitespace-normal text-center
+  px-3.5 bg-mywhite py-2 rounded-[10px] border text-sm text-jet transition-all border-principal/30
+  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:font-semibold
+  whitespace-normal text-center cursor-pointer
 `;
 
 interface Props {
@@ -14,9 +16,13 @@ interface Props {
   setAccess: (v: BathAccess) => void;
 }
 
+// El valor guardado sigue siendo "Publico"/"Privado"; "Privado" se muestra
+// como "Comercio" (igual que la app).
 export function SpotFormAccessSection({ access, setAccess }: Props) {
+  const { t } = useTranslation();
+
   return (
-    <SectionCard icon={<Building2 className="size-4" />} label="Tipo de baño">
+    <SectionCard label={t("spotForm.accessLabel")}>
       <ToggleGroup
         type="single"
         value={access}
@@ -24,10 +30,10 @@ export function SpotFormAccessSection({ access, setAccess }: Props) {
         className="flex gap-2 flex-wrap w-full"
       >
         <ToggleGroupItem value={BathAccess.PUBLIC} className={toggleClass}>
-          Público
+          {t("spot.access.public")}
         </ToggleGroupItem>
         <ToggleGroupItem value={BathAccess.PRIVATE} className={toggleClass}>
-          Privado
+          {t("spot.access.private")}
         </ToggleGroupItem>
       </ToggleGroup>
     </SectionCard>

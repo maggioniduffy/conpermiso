@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from "vitest";
+import { renderHook, act } from "@testing-library/react";
 import { toast } from "sonner";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
@@ -14,12 +14,17 @@ vi.mock("next/navigation", () => ({
 
 import { useSpotForm } from "@/hooks/use-spot-form";
 import { apiFetch } from "@/lib/apiFetch";
-import { Bath } from "@/utils/models";
+import { Bath, BathAccess } from "@/utils/models";
+import i18n from "@/lib/i18n";
 
 const mockApiFetch = apiFetch as ReturnType<typeof vi.fn>;
 
 // Always mock global.fetch so inferTimezone never makes real network calls
 const mockFetch = vi.fn();
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 beforeEach(() => {
   mockApiFetch.mockReset();
@@ -112,7 +117,7 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
+      "Completa el formulario",
       expect.objectContaining({ description: "El nombre es requerido." }),
     );
   });
@@ -124,7 +129,7 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
+      "Completa el formulario",
       expect.objectContaining({ description: "El nombre debe tener al menos 3 caracteres." }),
     );
   });
@@ -136,7 +141,7 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
+      "Completa el formulario",
       expect.objectContaining({ description: "La descripción es requerida." }),
     );
   });
@@ -148,7 +153,7 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
+      "Completa el formulario",
       expect.objectContaining({ description: "La descripción debe tener al menos 10 caracteres." }),
     );
   });
@@ -160,8 +165,8 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
-      expect.objectContaining({ description: "Seleccioná una ubicación en el mapa." }),
+      "Completa el formulario",
+      expect.objectContaining({ description: "Selecciona una ubicación en el mapa." }),
     );
   });
 
@@ -175,8 +180,8 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
-      expect.objectContaining({ description: "La dirección es requerida. Usá el buscador del mapa." }),
+      "Completa el formulario",
+      expect.objectContaining({ description: "La dirección es requerida. Selecciona un punto en el mapa." }),
     );
   });
 
@@ -191,8 +196,8 @@ describe("useSpotForm – validation", () => {
     await act(async () => { ok = await result.current.handleSubmit(fd); });
     expect(ok).toBe(false);
     expect(toast.error).toHaveBeenCalledWith(
-      "Completá el formulario",
-      expect.objectContaining({ description: "Ingresá un precio válido mayor a 0." }),
+      "Completa el formulario",
+      expect.objectContaining({ description: "Ingresa un precio válido mayor a 0." }),
     );
   });
 });
@@ -318,5 +323,145 @@ describe("useSpotForm – handleSubmit success paths", () => {
     await act(async () => { await result.current.handleSubmit(fd); });
 
     expect(result.current.isPending).toBe(false);
+  });
+});
+
+describe("useSpotForm – access code", () => {
+  async function setupWithLocation(result: { current: ReturnType<typeof useSpotForm> }) {
+    await act(async () => {
+      await result.current.handleLocationChange({ lat: -34.6, lng: -58.4, address: "Corrientes 1234" });
+    });
+  }
+
+  it("sends requiresCode=false and an empty accessCode by default", async () => {
+    const { result } = renderHook(() => useSpotForm(undefined, "admin-create"));
+    await setupWithLocation(result);
+    mockApiFetch.mockResolvedValue({ ok: true });
+    await act(async () => { await result.current.handleSubmit(makeFormData(validFields)); });
+
+    const body = mockApiFetch.mock.calls[0][1].body as FormData;
+    expect(body.get("requiresCode")).toBe("false");
+    expect(body.get("accessCode")).toBe("");
+  });
+
+  it("sends the trimmed code when requiresCode is on", async () => {
+    const { result } = renderHook(() => useSpotForm(undefined, "request"));
+    await setupWithLocation(result);
+    act(() => { result.current.setAccessCode({ requiresCode: true, accessCode: " 1234 " }); });
+    mockApiFetch.mockResolvedValue({ ok: true });
+    await act(async () => { await result.current.handleSubmit(makeFormData(validFields)); });
+
+    const body = mockApiFetch.mock.calls[0][1].body as FormData;
+    expect(body.get("requiresCode")).toBe("true");
+    expect(body.get("accessCode")).toBe("1234");
+  });
+
+  it("rejects a code longer than the max length", async () => {
+    const { result } = renderHook(() => useSpotForm(undefined, "admin-create"));
+    await setupWithLocation(result);
+    act(() => { result.current.setAccessCode({ requiresCode: true, accessCode: "x".repeat(33) }); });
+    let ok: boolean | undefined;
+    await act(async () => { ok = await result.current.handleSubmit(makeFormData(validFields)); });
+    expect(ok).toBe(false);
+    expect(mockApiFetch).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith(
+      "Completa el formulario",
+      expect.objectContaining({ description: "El código no puede tener más de 32 caracteres." }),
+    );
+  });
+
+  it("PATCHes /baths/:id for an admin edit", async () => {
+    const bath = existingBath();
+    const { result } = renderHook(() => useSpotForm(bath, "admin-create"));
+    mockApiFetch.mockResolvedValue({ ok: true });
+    await act(async () => { await result.current.handleSubmit(makeFormData(validFields)); });
+    expect(mockApiFetch).toHaveBeenCalledWith("/baths/b1", expect.objectContaining({ method: "PATCH" }));
+  });
+});
+
+function existingBath(): Bath {
+  return {
+    _id: "b1",
+    name: "Baño Plaza",
+    description: "Un baño muy limpio y accesible",
+    images: [],
+    cost: "Sin cargo",
+    shifts: [],
+    location: { type: "Point", coordinates: [-58.4, -34.6] },
+    address: "Corrientes 1234",
+    reviews: [],
+    createdBy: "u1",
+    createdAt: "",
+    updatedAt: "",
+    avgRating: 0,
+    reviewsCount: 0,
+    isOpenNow: false,
+    type: BathAccess.PUBLIC,
+    timezone: "America/Argentina/Buenos_Aires",
+  };
+}
+
+describe("useSpotForm – suggest mode", () => {
+  it("POSTs only the changed fields to /bath-requests/edits", async () => {
+    const bath = existingBath();
+    const { result } = renderHook(() => useSpotForm(bath, "suggest", undefined, undefined, bath));
+    act(() => { result.current.setAccess(BathAccess.PRIVATE); });
+    mockApiFetch.mockResolvedValue({ ok: true });
+
+    const fd = makeFormData({ name: "Baño Plaza Central", description: bath.description, comment: " cambió el nombre " });
+    let ok: boolean | undefined;
+    await act(async () => { ok = await result.current.handleSubmit(fd); });
+
+    expect(ok).toBe(true);
+    expect(mockApiFetch).toHaveBeenCalledTimes(1);
+    const [url, init] = mockApiFetch.mock.calls[0];
+    expect(url).toBe("/bath-requests/edits");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body)).toEqual({
+      bathId: "b1",
+      changes: { name: "Baño Plaza Central", type: BathAccess.PRIVATE },
+      comment: "cambió el nombre",
+    });
+    expect(toast.success).toHaveBeenCalledWith("Sugerencia enviada", expect.any(Object));
+    expect(mockPush).toHaveBeenCalledWith("/spot/b1");
+  });
+
+  it("shows the 'no changes' message and sends nothing when the diff is empty", async () => {
+    const bath = existingBath();
+    const { result } = renderHook(() => useSpotForm(bath, "suggest", undefined, undefined, bath));
+    let ok: boolean | undefined;
+    await act(async () => { ok = await result.current.handleSubmit(makeFormData(validFields)); });
+
+    expect(ok).toBe(false);
+    expect(mockApiFetch).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith(
+      "Completa el formulario",
+      expect.objectContaining({ description: "No cambiaste ningún dato del baño." }),
+    );
+  });
+
+  it("includes the new timezone when the pin moved", async () => {
+    const bath = existingBath();
+    const { result } = renderHook(() => useSpotForm(bath, "suggest", undefined, undefined, bath));
+    mockFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve({ timezone: "Europe/Madrid" }) });
+    await act(async () => {
+      await result.current.handleLocationChange({ lat: 40.4, lng: -3.7, address: "Gran Vía 1" });
+    });
+    mockApiFetch.mockResolvedValue({ ok: true });
+    await act(async () => { await result.current.handleSubmit(makeFormData(validFields)); });
+
+    const sent = JSON.parse(mockApiFetch.mock.calls[0][1].body);
+    expect(Object.keys(sent.changes).sort()).toEqual(["address", "location", "timezone"]);
+    expect(sent.changes.timezone).toBe("Europe/Madrid");
+  });
+
+  it("does not send the access code in a suggestion", async () => {
+    const bath = existingBath();
+    const { result } = renderHook(() => useSpotForm(bath, "suggest", undefined, undefined, bath));
+    act(() => { result.current.setAccessCode({ requiresCode: true, accessCode: "9999" }); });
+    mockApiFetch.mockResolvedValue({ ok: true });
+    await act(async () => { await result.current.handleSubmit(makeFormData({ ...validFields, name: "Otro nombre" })); });
+    const sent = JSON.parse(mockApiFetch.mock.calls[0][1].body);
+    expect(sent.changes).toEqual({ name: "Otro nombre" });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("next/image", () => ({
@@ -11,12 +11,6 @@ vi.mock("@/components/Spots/FavoriteButton", () => ({
   ),
 }));
 
-vi.mock("@/components/Spots/OpenStatus", () => ({
-  default: ({ shifts }: { shifts: any[] }) => (
-    <span data-testid="open-status">{shifts.length > 0 ? "Abierto" : "Cerrado"}</span>
-  ),
-}));
-
 vi.mock("@/components/Spots/ShiftVisualizer", () => ({
   default: ({ shift }: { shift: any }) => (
     <div data-testid="shift-visualizer">{shift.allDay ? "24hs" : "horario"}</div>
@@ -24,9 +18,16 @@ vi.mock("@/components/Spots/ShiftVisualizer", () => ({
 }));
 
 import SpotModal from "@/components/Spots/SpotModal";
-import { Shift } from "@/utils/models";
+import i18n from "@/lib/i18n";
+import { Shift, BathAccess } from "@/utils/models";
+
+const EVERY_DAY_ALL_DAY: Shift[] = [{ days: [1, 2, 3, 4, 5, 6, 7], allDay: true }];
 
 describe("SpotModal", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   it("renders the spot title", () => {
     render(<SpotModal title="Baño del Parque" />);
     expect(screen.getByText("Baño del Parque")).toBeInTheDocument();
@@ -72,9 +73,37 @@ describe("SpotModal", () => {
     expect(screen.queryByTestId("favorite-btn")).not.toBeInTheDocument();
   });
 
-  it("renders OpenStatus component", () => {
+  it("shows the ABIERTO badge when a shift covers now", () => {
+    render(<SpotModal shifts={EVERY_DAY_ALL_DAY} />);
+    expect(screen.getByText("ABIERTO")).toBeInTheDocument();
+  });
+
+  it("shows the CERRADO badge when no shift covers now", () => {
+    render(<SpotModal shifts={[{ days: [], allDay: true }]} />);
+    expect(screen.getByText("CERRADO")).toBeInTheDocument();
+  });
+
+  it("shows no open/closed badge without shifts", () => {
     render(<SpotModal shifts={[]} />);
-    expect(screen.getByTestId("open-status")).toBeInTheDocument();
+    expect(screen.queryByText("ABIERTO")).not.toBeInTheDocument();
+    expect(screen.queryByText("CERRADO")).not.toBeInTheDocument();
+  });
+
+  it("shows the PÚBLICO and CÓDIGO badges", () => {
+    render(<SpotModal access={BathAccess.PUBLIC} requiresCode />);
+    expect(screen.getByText("PÚBLICO")).toBeInTheDocument();
+    expect(screen.getByText("CÓDIGO")).toBeInTheDocument();
+  });
+
+  it("does not show the CÓDIGO badge when no code is required", () => {
+    render(<SpotModal access={BathAccess.PUBLIC} />);
+    expect(screen.queryByText("CÓDIGO")).not.toBeInTheDocument();
+  });
+
+  it("renders the review summary with the localized count", () => {
+    render(<SpotModal avgRating={4.5} reviewsCount={3} />);
+    expect(screen.getByText("4.5")).toBeInTheDocument();
+    expect(screen.getByText("(3 reseñas)")).toBeInTheDocument();
   });
 
   it("renders ShiftVisualizer for each shift", () => {
@@ -91,14 +120,14 @@ describe("SpotModal", () => {
     expect(screen.queryByText("Horarios")).not.toBeInTheDocument();
   });
 
-  it("renders a 'Ver detalle' link to the spot page when id is provided", () => {
+  it("renders a 'VER MÁS' link to the spot page when id is provided", () => {
     render(<SpotModal id="b1" />);
-    const link = screen.getByRole("link", { name: /Ver detalle/i });
+    const link = screen.getByRole("link", { name: /VER MÁS/i });
     expect(link).toHaveAttribute("href", "/spot/b1");
   });
 
-  it("does not render 'Ver detalle' link when id is not provided", () => {
+  it("does not render the 'VER MÁS' link when id is not provided", () => {
     render(<SpotModal />);
-    expect(screen.queryByRole("link", { name: /Ver detalle/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /VER MÁS/i })).not.toBeInTheDocument();
   });
 });

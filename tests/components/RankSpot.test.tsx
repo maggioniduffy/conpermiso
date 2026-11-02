@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
@@ -20,6 +20,7 @@ vi.mock("@/components/ui/slider", () => ({
   ),
 }));
 
+import i18n from "@/lib/i18n";
 import RankSpot from "@/components/Spots/RankSpot";
 import { apiFetch } from "@/lib/apiFetch";
 import { useBackendUser } from "@/hooks";
@@ -28,6 +29,7 @@ const mockApiFetch = apiFetch as ReturnType<typeof vi.fn>;
 const mockUseBackendUser = useBackendUser as ReturnType<typeof vi.fn>;
 
 describe("RankSpot", () => {
+  beforeAll(async () => { await i18n.changeLanguage("es"); });
   beforeEach(() => {
     mockApiFetch.mockReset();
   });
@@ -51,7 +53,7 @@ describe("RankSpot", () => {
     mockUseBackendUser.mockReturnValue({ user: { _id: "u1" } });
     render(<RankSpot bathId="b1" alreadyReviewed={false} />);
     expect(screen.getByRole("button", { name: /Enviar valoración/i })).toBeInTheDocument();
-    expect(screen.getByRole("slider", { name: "Valoración" })).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: "¿Fuiste? Valora tu experiencia" })).toBeInTheDocument();
   });
 
   it("renders emoji labels", () => {
@@ -100,7 +102,7 @@ describe("RankSpot", () => {
     expect(screen.getByText("Ya valoraste este baño")).toBeInTheDocument();
   });
 
-  it("shows 'Enviando...' while the request is in flight", async () => {
+  it("shows a spinner and disables the button while the request is in flight", async () => {
     mockUseBackendUser.mockReturnValue({ user: { _id: "u1" } });
     let resolveCall!: (v: any) => void;
     mockApiFetch.mockReturnValue(new Promise((res) => { resolveCall = res; }));
@@ -108,14 +110,15 @@ describe("RankSpot", () => {
     render(<RankSpot bathId="b1" alreadyReviewed={false} />);
     fireEvent.click(screen.getByRole("button", { name: /Enviar valoración/i }));
 
-    expect(await screen.findByText("Enviando...")).toBeInTheDocument();
+    expect(await screen.findByLabelText("loading")).toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeDisabled();
     resolveCall({ ok: true, status: 200 });
   });
 
   it("allows typing in the optional comment textarea", () => {
     mockUseBackendUser.mockReturnValue({ user: { _id: "u1" } });
     render(<RankSpot bathId="b1" alreadyReviewed={false} />);
-    const textarea = screen.getByPlaceholderText(/Contanos tu experiencia/i);
+    const textarea = screen.getByPlaceholderText(/Cuéntanos tu experiencia/i);
     fireEvent.change(textarea, { target: { value: "Muy limpio!" } });
     expect(textarea).toHaveValue("Muy limpio!");
   });

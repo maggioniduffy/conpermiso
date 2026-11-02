@@ -7,6 +7,7 @@ import { Day, Shift } from "@/utils/models";
 import { Checkbox } from "@/components/ui/checkbox";
 import { days, daysMap, daysNames, reverseDaysMap } from "@/utils/constants";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTranslation } from "react-i18next";
 
 const initial: Shift = {
   days: [],
@@ -106,6 +107,7 @@ function crossesMidnight(from?: { hour?: string }, to?: { hour?: string }) {
 }
 
 const ShiftsInput = ({ onChange, initialValue }: Props) => {
+  const { t } = useTranslation();
   const [shifts, setShifts] = useState<Shift[]>(initialValue ?? [initial]);
 
   useEffect(() => {
@@ -148,7 +150,7 @@ const ShiftsInput = ({ onChange, initialValue }: Props) => {
             {/* header con días y botón eliminar */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-jet-700">
-                Días
+                {t("spotForm.schedule.days")}
               </span>
               {shifts.length > 1 && (
                 <button
@@ -192,7 +194,7 @@ const ShiftsInput = ({ onChange, initialValue }: Props) => {
                 className="rounded-md border-principal data-[state=checked]:bg-principal data-[state=checked]:text-white"
               />
               <span className="text-sm text-jet font-medium">
-                Abierto 24 hs
+                {t("spotForm.schedule.open24")}
               </span>
             </label>
 
@@ -201,12 +203,12 @@ const ShiftsInput = ({ onChange, initialValue }: Props) => {
               <div className="flex flex-col gap-2">
                 <div className="flex gap-6 flex-wrap">
                   <TimeInput
-                    label="Abre"
+                    label={t("spotForm.schedule.opens")}
                     value={shift.from}
                     onChange={(val) => updateShift(index, { from: val })}
                   />
                   <TimeInput
-                    label="Cierra"
+                    label={t("spotForm.schedule.closes")}
                     value={shift.to}
                     onChange={(val) => updateShift(index, { to: val })}
                   />
@@ -216,7 +218,7 @@ const ShiftsInput = ({ onChange, initialValue }: Props) => {
                 {overnight && (
                   <div className="flex items-center gap-1.5 text-xs text-principal bg-principal/10 px-3 py-1.5 rounded-lg w-fit">
                     <Moon className="size-3" />
-                    <span>Cierra pasada la medianoche del día siguiente</span>
+                    <span>{t("spotForm.schedule.overnight")}</span>
                   </div>
                 )}
               </div>
@@ -241,7 +243,7 @@ const ShiftsInput = ({ onChange, initialValue }: Props) => {
         }
         className="w-fit flex gap-2 items-center text-principal border-principal border-2 hover:bg-principal/5 hover:scale-105 rounded-xl"
       >
-        <PlusCircle className="size-4" /> Agregar horario
+        <PlusCircle className="size-4" /> {t("spotForm.schedule.addShift")}
       </Button>
     </div>
   );

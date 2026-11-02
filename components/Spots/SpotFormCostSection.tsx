@@ -1,14 +1,24 @@
-import { DollarSign } from "lucide-react";
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Input } from "../ui/input";
 import { SectionCard } from "./SectionCard";
 
+// Los valores son los que espera el backend: no se muestran, se traducen.
 export type CostType = "Sin cargo" | "Con consumicion" | "Precio";
 
+const COST_OPTIONS: CostType[] = ["Sin cargo", "Con consumicion", "Precio"];
+
+const COST_LABEL_KEYS = {
+  "Sin cargo": "spot.costValues.free",
+  "Con consumicion": "spot.costValues.withPurchase",
+  Precio: "spot.costValues.price",
+} as const satisfies Record<CostType, string>;
+
 const toggleClass = `
-  px-4 bg-mywhite py-2 rounded-lg border text-sm text-jet transition-all border-principal/30
-  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:shadow-sm data-[state=on]:font-semibold
-  whitespace-normal text-center
+  px-3.5 bg-mywhite py-2 rounded-[10px] border text-sm text-jet transition-all border-principal/30
+  data-[state=on]:bg-principal data-[state=on]:text-white data-[state=on]:border-principal data-[state=on]:font-semibold
+  whitespace-normal text-center cursor-pointer
 `;
 
 interface Props {
@@ -18,28 +28,29 @@ interface Props {
 }
 
 export function SpotFormCostSection({ costType, setCostType, initialCost }: Props) {
+  const { t } = useTranslation();
+
   return (
-    <SectionCard icon={<DollarSign className="size-4" />} label="Costo">
+    <SectionCard label={t("spotForm.costLabel")}>
       <ToggleGroup
         type="single"
         value={costType}
         onValueChange={(v) => v && setCostType(v as CostType)}
         className="flex gap-2 flex-wrap w-full"
       >
-        {(["Sin cargo", "Con consumicion", "Precio"] as CostType[]).map((label) => (
-          <ToggleGroupItem key={label} value={label} className={toggleClass}>
-            {label}
+        {COST_OPTIONS.map((option) => (
+          <ToggleGroupItem key={option} value={option} className={toggleClass}>
+            {t(COST_LABEL_KEYS[option])}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
       {costType === "Precio" && (
-        <Input
+        <input
           type="number"
           name="cost"
-          className="bg-mywhite border border-principal/30 rounded-lg w-40"
-          placeholder="$ Precio"
-          min={1}
-          required
+          inputMode="decimal"
+          className="bg-mywhite border border-principal/30 rounded-[10px] py-2.5 px-3.5 text-base text-jet placeholder:text-jet-800 w-36 outline-none focus-visible:ring-2 focus-visible:ring-principal/40"
+          placeholder={t("spotForm.pricePlaceholder")}
           defaultValue={initialCost}
         />
       )}

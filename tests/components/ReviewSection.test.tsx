@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
@@ -30,6 +30,7 @@ vi.mock("@/components/Spots/RankSpot", () => ({
   ),
 }));
 
+import i18n from "@/lib/i18n";
 import ReviewSection from "@/components/Spots/ReviewSection";
 import { apiFetch } from "@/lib/apiFetch";
 import { useBackendUser } from "@/hooks";
@@ -42,6 +43,7 @@ const REVIEWS = [{ _id: "rev1", user: { _id: "u1" } }];
 const NO_REVIEWS: any[] = [];
 
 describe("ReviewSection", () => {
+  beforeAll(async () => { await i18n.changeLanguage("es"); });
   beforeEach(() => {
     mockApiFetch.mockReset();
     // Default: return empty reviews so effects don't hang

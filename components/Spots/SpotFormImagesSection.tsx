@@ -1,4 +1,5 @@
-import { Image as ImageIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Uploader from "./Uploader";
 import { BathImage } from "@/utils/models";
 import { SectionCard } from "./SectionCard";
@@ -16,8 +17,13 @@ export function SpotFormImagesSection({
   onRemoveImage,
   onFilesChange,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
-    <SectionCard icon={<ImageIcon className="size-4" />} label="Imágenes">
+    <SectionCard label={t("spotForm.images.label")}>
+      {isEdit && remainingImages.length > 0 && (
+        <p className="text-xs text-jet-700">{t("spotForm.images.current")}</p>
+      )}
       {isEdit && remainingImages.length > 0 && (
         <div className="grid grid-cols-3 gap-2 mb-2">
           {remainingImages.map((img) => (
@@ -25,6 +31,7 @@ export function SpotFormImagesSection({
               <img src={img.url} alt={img.alt ?? ""} className="w-full h-full object-cover" />
               <button
                 type="button"
+                aria-label={t("common.delete")}
                 onClick={() => onRemoveImage(img.url)}
                 className="absolute top-1 right-1 size-6 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
               >

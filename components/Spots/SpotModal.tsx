@@ -1,6 +1,8 @@
 "use client";
 
 import { Cost, Shift, BathAccess, BathSource } from "@/utils/models";
+import { useTranslation } from "react-i18next";
+import { costLabel } from "@/lib/i18n/labels";
 import ShiftVisualizer from "./ShiftVisualizer";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,6 +35,7 @@ interface Props {
   reviewsCount?: number;
   source?: BathSource;
   isVerified?: boolean;
+  requiresCode?: boolean;
 }
 
 const SpotModal = ({
@@ -50,7 +53,9 @@ const SpotModal = ({
   reviewsCount,
   source,
   isVerified,
+  requiresCode,
 }: Props) => {
+  const { t } = useTranslation();
   const isOpen =
     shifts.length > 0 ? isOpenWithTimezone(shifts, timezone ?? "UTC") : null;
 
@@ -75,12 +80,17 @@ const SpotModal = ({
               <span
                 className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/50 text-white/80"}`}
               >
-                {isOpen ? "ABIERTO" : "CERRADO"}
+                {isOpen ? t("spot.openUpper") : t("spot.closedUpper")}
               </span>
             )}
             {access === BathAccess.PUBLIC && (
               <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
-                PÚBLICO
+                {t("spot.publicBadge")}
+              </span>
+            )}
+            {requiresCode && (
+              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
+                {t("spot.codeBadge")}
               </span>
             )}
           </div>
@@ -103,12 +113,17 @@ const SpotModal = ({
               <span
                 className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide shadow-md ${isOpen ? "bg-green-500 text-white" : "bg-black/30 text-white/80"}`}
               >
-                {isOpen ? "ABIERTO" : "CERRADO"}
+                {isOpen ? t("spot.openUpper") : t("spot.closedUpper")}
               </span>
             )}
             {access === BathAccess.PUBLIC && (
               <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
-                PÚBLICO
+                {t("spot.publicBadge")}
+              </span>
+            )}
+            {requiresCode && (
+              <span className="bg-white text-principal text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none ring-1 ring-principal shadow-md">
+                {t("spot.codeBadge")}
               </span>
             )}
           </div>
@@ -122,18 +137,19 @@ const SpotModal = ({
       )}
 
       <div className="flex flex-col gap-2 p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <DollarSign className="size-3 text-jet-600" />
-            <span className="text-xs text-jet-600">{cost ?? "Sin cargo"}</span>
-          </div>
-          <span className="text-jet-700 text-xs">·</span>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <MapPin className="size-3 text-jet-600 shrink-0" />
-            <span className="text-xs text-jet-600 truncate">
-              {trimAddress(address)}
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          {/* Sin cost no mostramos nada: no sabemos el precio (en OSM significa pago de monto desconocido). */}
+          {cost != null && (
+            <>
+              <DollarSign className="size-3 text-jet-600 shrink-0" />
+              <span className="text-xs text-jet-600">{costLabel(cost, t)}</span>
+              <span className="text-jet-700 text-xs">·</span>
+            </>
+          )}
+          <MapPin className="size-3 text-jet-600 shrink-0" />
+          <span className="text-xs text-jet-600 truncate">
+            {trimAddress(address)}
+          </span>
         </div>
         <p className="text-sm text-jet-600 leading-relaxed line-clamp-3">
           {description}
@@ -143,8 +159,7 @@ const SpotModal = ({
           <div className="flex items-start gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
             <Info className="size-3 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-[11px] text-amber-800 leading-snug">
-              Este dato proviene de una fuente pública (OpenStreetMap) y puede
-              estar incompleto o desactualizado.
+              {t("spot.osmDisclaimer")}
             </p>
           </div>
         )}
@@ -160,28 +175,10 @@ const SpotModal = ({
               {avgRating?.toFixed(1)}
             </span>
             <span className="text-xs text-jet-700">
-              ({reviewsCount} {reviewsCount === 1 ? "reseña" : "reseñas"})
+              {t("spot.reviewCount", { count: reviewsCount })}
             </span>
           </div>
         )}
-
-        <div className="flex items-center gap-2">
-          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-            <MapPin className="size-3.5 text-principal" />
-          </div>
-          <p className="text-sm text-jet-500 leading-snug">
-            {trimAddress(address)}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
-            <DollarSign className="size-3.5 text-principal" />
-          </div>
-          <span className="text-sm font-medium text-jet-500">
-            {cost ?? "Sin cargo"}
-          </span>
-        </div>
 
         {shifts && shifts.length > 0 && (
           <div className="flex flex-col gap-1.5">
@@ -189,11 +186,11 @@ const SpotModal = ({
               <div className="bg-principal/10 p-1.5 rounded-lg shrink-0">
                 <Clock className="size-3.5 text-principal" />
               </div>
-              <span className="text-sm font-semibold text-jet">Horarios</span>
+              <span className="text-sm font-semibold text-jet">{t("spot.hours")}</span>
             </div>
             <div className="pl-8 flex flex-col">
-              {shifts.map((shift) => (
-                <ShiftVisualizer shift={shift} key={shift.days.toString()} />
+              {shifts.map((shift, i) => (
+                <ShiftVisualizer shift={shift} key={i} />
               ))}
             </div>
           </div>
@@ -208,7 +205,7 @@ const SpotModal = ({
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-principal text-principal font-semibold text-sm hover:bg-principal/5 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <ExternalLink className="size-4" />
-              Abrir en Google Maps
+              {t("spot.openInMaps")}
             </Link>
           )}
           {id && (
@@ -216,7 +213,7 @@ const SpotModal = ({
               href={`/spot/${id}`}
               className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-principal !text-white font-semibold text-sm hover:bg-principal-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              VER MÁS
+              {t("spot.seeMore")}
               <ArrowRight className="size-4 opacity-70" />
             </Link>
           )}

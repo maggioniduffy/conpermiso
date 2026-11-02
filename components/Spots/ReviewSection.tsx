@@ -6,8 +6,10 @@ import ReviewsList from "./ReviewsList";
 import { apiFetch } from "@/lib/apiFetch";
 import { useBackendUser } from "@/hooks";
 import ConfirmDialog from "../ConfirmDialog";
+import { useTranslation } from "react-i18next";
 
 export default function ReviewSection({ bathId }: { bathId: string }) {
+  const { t } = useTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [userReviewId, setUserReviewId] = useState<string | null>(null);
@@ -60,12 +62,12 @@ export default function ReviewSection({ bathId }: { bathId: string }) {
             <ConfirmDialog
               trigger={
                 <button className="text-xs text-red-500 hover:text-red-600 transition-colors self-start">
-                  Eliminar mi valoración
+                  {t("reviews.deleteMine")}
                 </button>
               }
-              title="¿Eliminar valoración?"
-              description="Tu valoración será eliminada permanentemente."
-              confirmLabel="Eliminar"
+              title={t("reviews.deleteTitle")}
+              description={t("reviews.deleteBody")}
+              confirmLabel={t("common.delete")}
               onConfirm={handleDeleteReview}
             />
           )}

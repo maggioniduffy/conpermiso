@@ -1,12 +1,17 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ShiftsInput from "@/components/Spots/ShiftsInput";
 import { Shift } from "@/utils/models";
+import i18n from "@/lib/i18n";
+
+beforeAll(async () => {
+  await i18n.changeLanguage("es");
+});
 
 describe("ShiftsInput", () => {
   it("renders a shift block by default", () => {
     render(<ShiftsInput onChange={vi.fn()} />);
-    expect(screen.getByText("Días")).toBeInTheDocument();
+    expect(screen.getByText("DÍAS")).toBeInTheDocument();
   });
 
   it("calls onChange on mount with initial shift state", () => {
@@ -23,7 +28,7 @@ describe("ShiftsInput", () => {
     ];
     render(<ShiftsInput onChange={onChange} initialValue={initialValue} />);
     // 2 shift blocks
-    expect(screen.getAllByText("Días")).toHaveLength(2);
+    expect(screen.getAllByText("DÍAS")).toHaveLength(2);
   });
 
   it("adds a new shift when 'Agregar horario' is clicked", () => {
@@ -31,7 +36,7 @@ describe("ShiftsInput", () => {
     render(<ShiftsInput onChange={onChange} />);
     fireEvent.click(screen.getByRole("button", { name: /Agregar horario/i }));
     // Now there should be 2 shift blocks
-    expect(screen.getAllByText("Días")).toHaveLength(2);
+    expect(screen.getAllByText("DÍAS")).toHaveLength(2);
   });
 
   it("shows time inputs when shift is not allDay", () => {
@@ -77,7 +82,7 @@ describe("ShiftsInput", () => {
     const onChange = vi.fn();
     render(<ShiftsInput onChange={onChange} />);
     fireEvent.click(screen.getByRole("button", { name: /Agregar horario/i }));
-    expect(screen.getAllByText("Días")).toHaveLength(2);
+    expect(screen.getAllByText("DÍAS")).toHaveLength(2);
 
     // Find remove buttons (svg trash icons inside buttons)
     const allButtons = screen.getAllByRole("button");
@@ -86,6 +91,6 @@ describe("ShiftsInput", () => {
     );
     // Click first remove button
     fireEvent.click(removeButtons[0]);
-    expect(screen.getAllByText("Días")).toHaveLength(1);
+    expect(screen.getAllByText("DÍAS")).toHaveLength(1);
   });
 });
