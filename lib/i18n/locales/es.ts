@@ -55,6 +55,13 @@ const es = {
     UNAUTHORIZED: "Tu sesión expiró. Inicia sesión de nuevo.",
     TOO_MANY_REQUESTS: "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
   },
+  appBanner: {
+    title: "KKapp",
+    subtitle: "Mejor experiencia en la app",
+    open: "Abrir en la app",
+    dismiss: "Seguir en el navegador",
+    a11y: "Abrir KKapp en la app",
+  },
   language: {
     label: "Idioma",
     a11y: "Cambiar idioma a {{language}}",

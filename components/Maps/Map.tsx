@@ -232,7 +232,13 @@ export default function MyMap({
       <CurrentLocationMarker location={location} />
 
       {/* Pila abajo a la derecha: brújula → recentrar → agregar */}
-      <div className="absolute bottom-6 right-[15px] z-10 flex flex-col items-center gap-3">
+      <div
+        className="absolute right-[15px] z-10 flex flex-col items-center gap-3"
+        style={{
+          bottom:
+            "calc(1.5rem + var(--app-banner-h, 0px) + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <ResetOrientationButton mapRef={mapRef} bearing={bearing} />
         <RecenterButton
           location={location}

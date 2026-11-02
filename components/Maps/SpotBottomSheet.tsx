@@ -133,7 +133,10 @@ export default function SpotBottomSheet({ bath, openRequest, onClose }: Props) {
             )}
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          className="min-h-0 flex-1 overflow-y-auto"
+          style={{ paddingBottom: "var(--app-banner-h, 0px)" }}
+        >
           {content && <SpotSheetBody content={content} onNavigate={onClose} />}
         </div>
       </div>

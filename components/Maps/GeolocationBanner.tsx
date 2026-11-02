@@ -32,7 +32,9 @@ export default function GeolocationBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[1000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex flex-col gap-3 animate-in slide-in-from-bottom-4 duration-300">
+    <div
+      style={{ bottom: "calc(6rem + var(--app-banner-h, 0px))" }}
+      className="fixed left-1/2 -translate-x-1/2 z-[1000] w-[90vw] max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex flex-col gap-3 animate-in slide-in-from-bottom-4 duration-300">
       <button
         onClick={() => setShow(false)}
         className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"

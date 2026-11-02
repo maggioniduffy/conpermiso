@@ -54,7 +54,8 @@ export default function MapFiltersSheet({
         role="dialog"
         aria-modal="true"
         aria-label={t("map.filters.title")}
-        className={`absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-3xl bg-white px-5 pb-6 pt-2 shadow-2xl transition-transform duration-300 ${
+        style={{ paddingBottom: "calc(1.5rem + var(--app-banner-h, 0px))" }}
+        className={`absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-3xl bg-white px-5 pt-2 shadow-2xl transition-transform duration-300 ${
           open ? "translate-y-0" : "translate-y-full"
         }`}
       >

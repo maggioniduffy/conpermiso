@@ -42,5 +42,12 @@ export default function RecenterButton({
   );
 
   if (!positioned) return button;
-  return <div className="absolute bottom-[150px] right-5 z-10">{button}</div>;
+  return (
+    <div
+      className="absolute right-5 z-10"
+      style={{ bottom: "calc(150px + var(--app-banner-h, 0px))" }}
+    >
+      {button}
+    </div>
+  );
 }

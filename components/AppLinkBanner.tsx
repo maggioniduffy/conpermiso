@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
@@ -32,7 +33,9 @@ function isDismissed(): boolean {
 
 export function AppLinkBanner() {
   const pathname = usePathname();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Solo Android: en iOS/desktop no hay app nativa por ahora.
@@ -47,6 +50,29 @@ export function AppLinkBanner() {
       setVisible(true);
     }
   }, []);
+
+  // Publica la altura real del banner para que otros elementos fijos
+  // (botones flotantes, bottom sheets) se desplacen por encima.
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = ref.current;
+    if (!visible || !el) {
+      root.style.setProperty("--app-banner-h", "0px");
+      return;
+    }
+    const update = () =>
+      root.style.setProperty("--app-banner-h", `${el.offsetHeight}px`);
+    update();
+    let observer: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(update);
+      observer.observe(el);
+    }
+    return () => {
+      observer?.disconnect();
+      root.style.setProperty("--app-banner-h", "0px");
+    };
+  }, [visible]);
 
   if (!visible) return null;
 
@@ -66,8 +92,9 @@ export function AppLinkBanner() {
 
   return (
     <div
+      ref={ref}
       role="dialog"
-      aria-label="Abrir KKapp en la app"
+      aria-label={t("appBanner.a11y")}
       className="fixed bottom-0 inset-x-0 z-50 flex items-center gap-3 bg-mywhite-100 text-mywhite px-4 py-3 shadow-[0_-2px_10px_rgba(0,0,0,0.25)]"
     >
       <Image
@@ -78,23 +105,23 @@ export function AppLinkBanner() {
         className="rounded-lg shrink-0"
       />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate">KKapp</p>
+        <p className="text-sm font-semibold truncate">{t("appBanner.title")}</p>
         <p className="text-xs text-mywhite-400 truncate">
-          Mejor experiencia en la app
+          {t("appBanner.subtitle")}
         </p>
       </div>
       <a
         href={intentUrl}
         className="shrink-0 rounded-full bg-principal px-4 py-2 text-sm font-semibold text-white"
       >
-        Abrir en la app
+        {t("appBanner.open")}
       </a>
       <button
         type="button"
         onClick={dismiss}
         className="shrink-0 text-xs text-mywhite-400 underline underline-offset-2"
       >
-        Seguir en el navegador
+        {t("appBanner.dismiss")}
       </button>
     </div>
   );

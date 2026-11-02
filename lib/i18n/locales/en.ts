@@ -49,6 +49,13 @@ const en: Translation = {
     UNAUTHORIZED: "Your session expired. Please sign in again.",
     TOO_MANY_REQUESTS: "Too many attempts. Wait a moment and try again.",
   },
+  appBanner: {
+    title: "KKapp",
+    subtitle: "A better experience in the app",
+    open: "Open in app",
+    dismiss: "Stay in browser",
+    a11y: "Open KKapp in the app",
+  },
   language: {
     label: "Language",
     a11y: "Switch language to {{language}}",
