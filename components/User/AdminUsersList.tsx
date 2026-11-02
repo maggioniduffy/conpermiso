@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 import { useBackendUser } from "@/hooks";
+import { useTranslation } from "react-i18next";
 
 interface AppUser {
   _id: string;
@@ -43,6 +44,7 @@ interface PendingRoleChange {
 const PAGE_SIZE = 10;
 
 export default function AdminUsersList() {
+  const { t } = useTranslation();
   const { user: currentAdmin } = useBackendUser();
   const [result, setResult] = useState<Paginated | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,8 +58,8 @@ export default function AdminUsersList() {
 
   // debounce search
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const fetchPage = useCallback((p: number, q: string) => {
@@ -79,6 +81,7 @@ export default function AdminUsersList() {
   async function handleRoleChange() {
     if (!pendingChange) return;
     const { user, newRole } = pendingChange;
+    const name = user.name ?? user.email;
     setPendingChange(null);
     setProcessing(user._id);
 
@@ -90,17 +93,18 @@ export default function AdminUsersList() {
       fetchPage(page, debouncedSearch);
       toast.success(
         newRole === "admin"
-          ? `${user.name ?? user.email} ahora es admin`
-          : `${user.name ?? user.email} volvió a ser usuario`,
+          ? t("admin.users.promoted", { name })
+          : t("admin.users.demoted", { name }),
       );
     } catch {
-      toast.error("No se pudo actualizar el rol.");
+      toast.error(t("admin.users.roleError"));
     } finally {
       setProcessing(null);
     }
   }
 
   const users = result?.data ?? [];
+  const pendingName = pendingChange?.user.name ?? pendingChange?.user.email;
 
   return (
     <>
@@ -112,17 +116,17 @@ export default function AdminUsersList() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {pendingChange?.newRole === "admin"
-                ? "¿Hacer admin a este usuario?"
-                : "¿Quitar rol de admin?"}
+                ? t("admin.users.promoteTitle")
+                : t("admin.users.demoteTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {pendingChange?.newRole === "admin"
-                ? `${pendingChange?.user.name ?? pendingChange?.user.email} tendrá acceso completo al panel de administración.`
-                : `${pendingChange?.user.name ?? pendingChange?.user.email} perderá el acceso al panel de administración.`}
+                ? t("admin.users.promoteBody", { name: pendingName })
+                : t("admin.users.demoteBody", { name: pendingName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRoleChange}
               className={
@@ -132,8 +136,8 @@ export default function AdminUsersList() {
               }
             >
               {pendingChange?.newRole === "admin"
-                ? "Sí, hacer admin"
-                : "Sí, quitar admin"}
+                ? t("admin.users.promoteConfirm")
+                : t("admin.users.demoteConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -142,10 +146,10 @@ export default function AdminUsersList() {
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
         <div className="flex items-baseline justify-between">
           <h1 className="text-xl font-bold text-jet">
-            Usuarios
+            {t("admin.users.title")}
             {result && (
               <span className="ml-2 text-sm font-normal text-jet-700">
-                ({result.total})
+                {t("admin.users.registered", { count: result.total })}
               </span>
             )}
           </h1>
@@ -155,7 +159,7 @@ export default function AdminUsersList() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-jet-700" />
           <Input
-            placeholder="Buscar por nombre o email..."
+            placeholder={t("admin.users.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 rounded-xl border-principal/30 bg-white"
@@ -164,7 +168,7 @@ export default function AdminUsersList() {
 
         {!loading && users.length === 0 && (
           <p className="text-sm text-jet-700 text-center py-8">
-            No se encontraron usuarios.
+            {t("admin.users.empty")}
           </p>
         )}
 
@@ -202,10 +206,10 @@ export default function AdminUsersList() {
               {/* info */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-jet truncate">
-                  {u.name ?? "Sin nombre"}
+                  {u.name ?? t("admin.users.noName")}
                   {isCurrentAdmin && (
                     <span className="ml-2 text-[10px] text-jet-700 font-normal">
-                      (vos)
+                      {t("admin.users.you")}
                     </span>
                   )}
                 </p>
@@ -214,7 +218,9 @@ export default function AdminUsersList() {
 
               {/* rol badge + selector */}
               {isCurrentAdmin ? (
-                <span className="text-xs text-jet-700 shrink-0">Tu cuenta</span>
+                <span className="text-xs text-jet-700 shrink-0">
+                  {t("admin.users.yourAccount")}
+                </span>
               ) : (
                 <div className="relative shrink-0">
                   <select
@@ -232,8 +238,8 @@ export default function AdminUsersList() {
                         : "bg-gray-50 text-jet-700 border-gray-200"
                     }`}
                   >
-                    <option value="user">Usuario</option>
-                    <option value="admin">Admin</option>
+                    <option value="user">{t("admin.users.roleUser")}</option>
+                    <option value="admin">{t("admin.users.roleAdmin")}</option>
                   </select>
                   <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 size-3 text-jet-700 pointer-events-none" />
                 </div>

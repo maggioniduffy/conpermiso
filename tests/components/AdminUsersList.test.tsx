@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
+import i18n from "@/lib/i18n";
 
 vi.mock("@/lib/apiFetch", () => ({ apiFetch: vi.fn() }));
 vi.mock("@/hooks", () => ({
@@ -22,13 +23,17 @@ const ADMIN_USER = { _id: "a1", name: "Admin", email: "admin@test.com", role: "a
 const REGULAR_USER = { _id: "u1", name: "User One", email: "u1@test.com", role: "user" as const, createdAt: "" };
 const REGULAR_USER_2 = { _id: "u2", name: "User Two", email: "u2@test.com", role: "user" as const, createdAt: "" };
 
-function mockPage(users: any[], total = users.length, totalPages = 1) {
+function mockPage(users: unknown[], total = users.length, totalPages = 1) {
   return Promise.resolve({
     json: () => Promise.resolve({ data: users, total, page: 1, totalPages }),
   });
 }
 
 describe("AdminUsersList", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("es");
+  });
+
   beforeEach(() => {
     mockApiFetch.mockReset();
     mockUseBackendUser.mockReturnValue({ user: ADMIN_USER });
@@ -43,7 +48,7 @@ describe("AdminUsersList", () => {
   it("shows total user count", async () => {
     mockApiFetch.mockReturnValue(mockPage([REGULAR_USER], 42));
     render(<AdminUsersList />);
-    await waitFor(() => expect(screen.getByText("(42)")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/42 registrados/)).toBeInTheDocument());
   });
 
   it("renders a user card for each user", async () => {
@@ -83,7 +88,7 @@ describe("AdminUsersList", () => {
     render(<AdminUsersList />);
     const select = await screen.findByRole("combobox");
     fireEvent.change(select, { target: { value: "admin" } });
-    expect(await screen.findByText(/¿Hacer admin a este usuario\?/i)).toBeInTheDocument();
+    expect(await screen.findByText(/¿Hacer admin\?/i)).toBeInTheDocument();
   });
 
   it("calls PATCH to update role on confirm", async () => {
@@ -144,7 +149,7 @@ describe("AdminUsersList", () => {
     const select = await screen.findByRole("combobox");
     fireEvent.change(select, { target: { value: "admin" } });
 
-    await screen.findByText(/¿Hacer admin a este usuario\?/i);
+    await screen.findByText(/¿Hacer admin\?/i);
     const callsBefore = mockApiFetch.mock.calls.length;
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));

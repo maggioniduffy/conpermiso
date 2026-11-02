@@ -5,7 +5,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default async function AdminRequestsPage() {
   const session = await auth();
-  const role = (session?.user as any)?.role;
+  const role = (session?.user as { role?: string } | undefined)?.role;
   if (role !== "admin") redirect("/");
   return (
     <ErrorBoundary>
