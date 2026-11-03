@@ -103,7 +103,7 @@
 .stages button[aria-pressed="true"]{color:#fff}
 .stage-range{width:100%;accent-color:var(--deep);height:32px;cursor:pointer}
 .duo{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:24px;align-items:center}
-.duo-pic{grid-column:1 / span 6;background:var(--soft);border-radius:28px;height:clamp(520px,52vw,760px);overflow:hidden;display:flex;justify-content:center;padding-top:clamp(40px,4vw,64px)}
+.duo-pic{grid-column:1 / span 6;background:var(--soft);border-radius:28px;height:clamp(520px,52vw,760px);overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding-top:clamp(40px,4vw,64px)}
 .duo-pic img{width:min(340px,80%);height:auto;border-radius:32px 32px 0 0;display:block}
 .duo-text{grid-column:8 / span 5;display:flex;flex-direction:column;gap:28px}
 .duo-text p{font-size:18px;line-height:1.6}
@@ -139,6 +139,7 @@
 .phone.mid{width:150px}.phone.b,.phone.c{margin-left:-14px}
 .phone::after{transform:translateZ(-8px)}
 .grid12,.duo,.foot-top{display:flex;flex-direction:column;gap:32px}
+.grid12>*{align-self:stretch}
 .duo{align-items:stretch}.duo-pic{height:480px}
 .q{font-size:11vw}
 .split{display:flex;flex-direction:column-reverse}
