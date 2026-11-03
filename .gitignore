@@ -55,3 +55,5 @@ playwright-report/*
 playwright-report
 
 kkapp.zip
+# design tooling scratch
+/.taste-skill/
